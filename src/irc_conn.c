@@ -35,6 +35,8 @@
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
+#define DEFAULT_WRITE_QUEUE_SIZE (8)
+
 static socket_ret_t socket_connect_fn( socket_t * const s,
 									   void * user_data )
 {
@@ -346,7 +348,7 @@ void irc_conn_initialize( irc_conn_t * const conn,
 	socket_initialize( &(conn->socket), SOCKET_TCP, &sock_ops, conn->el, conn );
 
 	/* initialize the write msg array */
-	array_initialize( &(conn->wmsgs), NULL );
+	array_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL );
 
 	/* initialize read buffer pointers */
 	conn->startp = conn->scanp = conn->inp = conn->buf;

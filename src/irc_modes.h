@@ -17,6 +17,8 @@
 #ifndef __IRC_MODES_H__
 #define __IRC_MODES_H__
 
+#include <stdint.h>
+
 typedef enum irc_umode_e
 {
 	/*  mode  */	/* parameter, if any */

@@ -1,4 +1,8 @@
 syntax: glob
+.*.swp
+src/circ
+src/include
+src/lib
 src/*.o
 src/*.a
 test/*.o
