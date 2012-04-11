@@ -1,0 +1,584 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ADMIN	src/irc_commands.h	/^    ADMIN,$/;"	e	enum:irc_command_e
+ANYCMD	src/irc_commands.h	/^	ANYCMD = -2,$/;"	e	enum:irc_command_e
+AWAY	src/irc_commands.h	/^    AWAY,$/;"	e	enum:irc_command_e
+BUILDDIRS	Makefile	/^BUILDDIRS = $(DIRS:%=build-%)$/;"	m
+CFLAGS	src/Makefile	/^CFLAGS=-O3 -gstabs+ -I$(CUTIL_ROOT)\/include$/;"	m
+CFLAGS	test/Makefile	/^CFLAGS=-O3 -gstabs+ -I$(CIRC_ROOT)\/include -I$(CUTIL_ROOT)\/include$/;"	m
+CHANNEL_MODES_HASH	src/irc_session.h	48;"	d
+CHANNEL_MODES_KEY	src/irc_session.h	47;"	d
+CHANNEL_MODES_PARAM_HASH	src/irc_session.h	50;"	d
+CHANNEL_MODES_PARAM_KEY	src/irc_session.h	49;"	d
+CIRC_ROOT	test/Makefile	/^CIRC_ROOT=..\/src$/;"	m
+CLEANDIRS	Makefile	/^CLEANDIRS = $(DIRS:%=clean-%)$/;"	m
+CMD_BASE	src/irc_commands.h	36;"	d
+CONNECT	src/irc_commands.h	/^    CONNECT,$/;"	e	enum:irc_command_e
+CUTIL_ROOT	src/Makefile	/^CUTIL_ROOT=\/usr\/local$/;"	m
+CUTIL_ROOT	test/Makefile	/^CUTIL_ROOT=\/usr\/local$/;"	m
+DEBUG_ON	src/irc_msg.c	27;"	d	file:
+DEBUG_ON	src/irc_session.c	28;"	d	file:
+DIE	src/irc_commands.h	/^    DIE,$/;"	e	enum:irc_command_e
+DIRS	Makefile	/^DIRS = src test$/;"	m
+ERROR	src/irc_commands.h	/^    ERROR,$/;"	e	enum:irc_command_e
+ERR_ALREADYREGISTERED	src/irc_commands.h	/^    ERR_ALREADYREGISTERED   = 462,$/;"	e	enum:irc_command_e
+ERR_BADCHANMASK	src/irc_commands.h	/^    ERR_BADCHANMASK         = 476,$/;"	e	enum:irc_command_e
+ERR_BADCHANNELKEY	src/irc_commands.h	/^    ERR_BADCHANNELKEY       = 475,$/;"	e	enum:irc_command_e
+ERR_BADMASK	src/irc_commands.h	/^    ERR_BADMASK             = 415,$/;"	e	enum:irc_command_e
+ERR_BANLISTFULL	src/irc_commands.h	/^    ERR_BANLISTFULL         = 478,$/;"	e	enum:irc_command_e
+ERR_BANNEDFROMCHAN	src/irc_commands.h	/^    ERR_BANNEDFROMCHAN      = 474,$/;"	e	enum:irc_command_e
+ERR_CANNOTSENDTOCHAN	src/irc_commands.h	/^    ERR_CANNOTSENDTOCHAN    = 404,$/;"	e	enum:irc_command_e
+ERR_CANTKILLSERVER	src/irc_commands.h	/^    ERR_CANTKILLSERVER      = 483,$/;"	e	enum:irc_command_e
+ERR_CHANNELISFULL	src/irc_commands.h	/^    ERR_CHANNELISFULL       = 471,$/;"	e	enum:irc_command_e
+ERR_CHANOPRIVSNEEDED	src/irc_commands.h	/^    ERR_CHANOPRIVSNEEDED    = 482,$/;"	e	enum:irc_command_e
+ERR_ERRONEUSNCKNAME	src/irc_commands.h	/^    ERR_ERRONEUSNCKNAME     = 432,$/;"	e	enum:irc_command_e
+ERR_FILEERROR	src/irc_commands.h	/^    ERR_FILEERROR           = 424,$/;"	e	enum:irc_command_e
+ERR_INVITEONLYCHAN	src/irc_commands.h	/^    ERR_INVITEONLYCHAN      = 473,$/;"	e	enum:irc_command_e
+ERR_KEYSET	src/irc_commands.h	/^    ERR_KEYSET              = 467,$/;"	e	enum:irc_command_e
+ERR_NEEDMOREPARAMS	src/irc_commands.h	/^    ERR_NEEDMOREPARAMS      = 461,$/;"	e	enum:irc_command_e
+ERR_NICKCOLLISION	src/irc_commands.h	/^    ERR_NICKCOLLISION       = 436,$/;"	e	enum:irc_command_e
+ERR_NICKNAMEINUSE	src/irc_commands.h	/^    ERR_NICKNAMEINUSE       = 433,$/;"	e	enum:irc_command_e
+ERR_NOADMININFO	src/irc_commands.h	/^    ERR_NOADMININFO         = 423,$/;"	e	enum:irc_command_e
+ERR_NOCHANMODES	src/irc_commands.h	/^    ERR_NOCHANMODES         = 477,$/;"	e	enum:irc_command_e
+ERR_NOLOGIN	src/irc_commands.h	/^    ERR_NOLOGIN             = 444,$/;"	e	enum:irc_command_e
+ERR_NOMOTD	src/irc_commands.h	/^    ERR_NOMOTD              = 422,$/;"	e	enum:irc_command_e
+ERR_NONICKNAMEGIVEN	src/irc_commands.h	/^    ERR_NONICKNAMEGIVEN     = 431,$/;"	e	enum:irc_command_e
+ERR_NOOPERHOST	src/irc_commands.h	/^    ERR_NOOPERHOST          = 491,$/;"	e	enum:irc_command_e
+ERR_NOORIGIN	src/irc_commands.h	/^    ERR_NOORIGIN            = 409,$/;"	e	enum:irc_command_e
+ERR_NOPERMFORHOST	src/irc_commands.h	/^    ERR_NOPERMFORHOST       = 463,$/;"	e	enum:irc_command_e
+ERR_NORECEIPIENT	src/irc_commands.h	/^    ERR_NORECEIPIENT        = 411,$/;"	e	enum:irc_command_e
+ERR_NORIVILEGES	src/irc_commands.h	/^    ERR_NORIVILEGES         = 481,$/;"	e	enum:irc_command_e
+ERR_NOSERVICEHOST	src/irc_commands.h	/^    ERR_NOSERVICEHOST       = 492, \/* reserved *\/$/;"	e	enum:irc_command_e
+ERR_NOSUCHCHANNEL	src/irc_commands.h	/^    ERR_NOSUCHCHANNEL       = 403,$/;"	e	enum:irc_command_e
+ERR_NOSUCHNCK	src/irc_commands.h	/^    ERR_NOSUCHNCK           = 401,$/;"	e	enum:irc_command_e
+ERR_NOSUCKSERVER	src/irc_commands.h	/^    ERR_NOSUCKSERVER        = 402,$/;"	e	enum:irc_command_e
+ERR_NOTEXTTOSEND	src/irc_commands.h	/^    ERR_NOTEXTTOSEND        = 412,$/;"	e	enum:irc_command_e
+ERR_NOTONCHANNEL	src/irc_commands.h	/^    ERR_NOTONCHANNEL        = 442,$/;"	e	enum:irc_command_e
+ERR_NOTOPLEVEL	src/irc_commands.h	/^    ERR_NOTOPLEVEL          = 413,$/;"	e	enum:irc_command_e
+ERR_NOTREGISTERED	src/irc_commands.h	/^    ERR_NOTREGISTERED       = 451,$/;"	e	enum:irc_command_e
+ERR_PASSWDMISMATCH	src/irc_commands.h	/^    ERR_PASSWDMISMATCH      = 464,$/;"	e	enum:irc_command_e
+ERR_RESTRICTED	src/irc_commands.h	/^    ERR_RESTRICTED          = 484,$/;"	e	enum:irc_command_e
+ERR_SUMMONDISABLED	src/irc_commands.h	/^    ERR_SUMMONDISABLED      = 445,$/;"	e	enum:irc_command_e
+ERR_TOOMANYCHANNELS	src/irc_commands.h	/^    ERR_TOOMANYCHANNELS     = 405,$/;"	e	enum:irc_command_e
+ERR_TOOMANYTARGETS	src/irc_commands.h	/^    ERR_TOOMANYTARGETS      = 407,$/;"	e	enum:irc_command_e
+ERR_UMODEUNKNOWNFLAG	src/irc_commands.h	/^    ERR_UMODEUNKNOWNFLAG    = 501,$/;"	e	enum:irc_command_e
+ERR_UNAVAILRESOURCE	src/irc_commands.h	/^    ERR_UNAVAILRESOURCE     = 437,$/;"	e	enum:irc_command_e
+ERR_UNIQOPPRIVSNEEDED	src/irc_commands.h	/^    ERR_UNIQOPPRIVSNEEDED   = 485,$/;"	e	enum:irc_command_e
+ERR_UNKNOWNCOMMAND	src/irc_commands.h	/^    ERR_UNKNOWNCOMMAND      = 421,$/;"	e	enum:irc_command_e
+ERR_UNKNOWNMODE	src/irc_commands.h	/^    ERR_UNKNOWNMODE         = 472,$/;"	e	enum:irc_command_e
+ERR_USERNOTINCHANNEL	src/irc_commands.h	/^    ERR_USERNOTINCHANNEL    = 441,$/;"	e	enum:irc_command_e
+ERR_USERONCHANNEL	src/irc_commands.h	/^    ERR_USERONCHANNEL       = 443,$/;"	e	enum:irc_command_e
+ERR_USERSDISABLED	src/irc_commands.h	/^    ERR_USERSDISABLED       = 446,$/;"	e	enum:irc_command_e
+ERR_USERSDONTMATCH	src/irc_commands.h	/^    ERR_USERSDONTMATCH      = 502$/;"	e	enum:irc_command_e
+ERR_WASNOSUCHNICK	src/irc_commands.h	/^    ERR_WASNOSUCHNICK       = 406,$/;"	e	enum:irc_command_e
+ERR_WILDTOPLEVEL	src/irc_commands.h	/^    ERR_WILDTOPLEVEL        = 414,$/;"	e	enum:irc_command_e
+ERR_YOUREBANNEDCREEP	src/irc_commands.h	/^    ERR_YOUREBANNEDCREEP    = 465,$/;"	e	enum:irc_command_e
+ERR_YOUWILLBEBANNED	src/irc_commands.h	/^    ERR_YOUWILLBEBANNED     = 466,$/;"	e	enum:irc_command_e
+FIRST_COMMAND	src/irc_commands.h	/^    FIRST_COMMAND = PASS,$/;"	e	enum:irc_command_e
+FNV_PRIME	src/irc_session.c	38;"	d	file:
+HDR	src/Makefile	/^HDR=irc_channel.h irc_commands.h irc_conn.h irc_modes.h irc_msg.h irc_session.h$/;"	m
+HOST_NAME_HASH	src/irc_session.h	42;"	d
+HOST_NAME_KEY	src/irc_session.h	41;"	d
+INFO	src/irc_commands.h	/^    INFO,$/;"	e	enum:irc_command_e
+INSTALL	Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
+INSTALL	src/Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
+INSTALLDIRS	Makefile	/^INSTALLDIRS = $(DIRS:%=install-%)$/;"	m
+INSTALL_DATA	Makefile	/^INSTALL_DATA=$(INSTALL) -m 644$/;"	m
+INSTALL_DATA	src/Makefile	/^INSTALL_DATA=$(INSTALL) -m 644$/;"	m
+INSTALL_PROGRAM	Makefile	/^INSTALL_PROGRAM=$(INSTALL)$/;"	m
+INSTALL_PROGRAM	src/Makefile	/^INSTALL_PROGRAM=$(INSTALL)$/;"	m
+INVITE	src/irc_commands.h	/^    INVITE,$/;"	e	enum:irc_command_e
+IRC_BADPARAM	src/irc_commands.h	/^    IRC_BADPARAM        = -2,$/;"	e	enum:irc_ret_e
+IRC_BAD_MESSAGE	src/irc_commands.h	/^    IRC_BAD_MESSAGE     = -4,$/;"	e	enum:irc_ret_e
+IRC_BAD_STATE	src/irc_commands.h	/^    IRC_BAD_STATE       = -5$/;"	e	enum:irc_ret_e
+IRC_CMODE_A	src/irc_modes.h	/^	IRC_CMODE_A,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_BANG	src/irc_modes.h	/^	IRC_CMODE_BANG,	\/* nick to mark as a channel service *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_C	src/irc_modes.h	/^	IRC_CMODE_C,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_COUNT	src/irc_modes.h	/^	IRC_CMODE_COUNT = IRC_CMODE_LAST - IRC_CMODE_FIRST$/;"	e	enum:irc_cmode_e
+IRC_CMODE_D	src/irc_modes.h	/^	IRC_CMODE_D,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_FIRST	src/irc_modes.h	/^	IRC_CMODE_FIRST = IRC_CMODE_a,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_G	src/irc_modes.h	/^	IRC_CMODE_G,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_H	src/irc_modes.h	/^	IRC_CMODE_H,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_I	src/irc_modes.h	/^	IRC_CMODE_I,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_J	src/irc_modes.h	/^	IRC_CMODE_J,	\/* <frequency>,<limit> users may join once per every 'frequency' seconds with an initial burst and limit of 'limit' users *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_K	src/irc_modes.h	/^	IRC_CMODE_K,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_L	src/irc_modes.h	/^	IRC_CMODE_L,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_LAST	src/irc_modes.h	/^	IRC_CMODE_LAST,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_M	src/irc_modes.h	/^	IRC_CMODE_M,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_N	src/irc_modes.h	/^	IRC_CMODE_N,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_O	src/irc_modes.h	/^	IRC_CMODE_O,	\/* nick to grant channel owner status *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_Q	src/irc_modes.h	/^	IRC_CMODE_Q,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_R	src/irc_modes.h	/^	IRC_CMODE_R,	\/* <n!u@h> mask to serve as hint for re-op when chan is op-less *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_S	src/irc_modes.h	/^	IRC_CMODE_S,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_V	src/irc_modes.h	/^	IRC_CMODE_V,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_a	src/irc_modes.h	/^	IRC_CMODE_a,	\/* nick that can't be kicked\/deopped *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_b	src/irc_modes.h	/^	IRC_CMODE_b,	\/* <n!u@h> banned nick mask *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_c	src/irc_modes.h	/^	IRC_CMODE_c,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_d	src/irc_modes.h	/^	IRC_CMODE_d,	\/* real name to ban *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_e	src/irc_modes.h	/^	IRC_CMODE_e,	\/* <n!u@h> banned nick exception mask *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_f	src/irc_modes.h	/^	IRC_CMODE_f,	\/* <lines>:<second> lines per second flood limit *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_h	src/irc_modes.h	/^	IRC_CMODE_h,	\/* nick to grant half-op status *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_i	src/irc_modes.h	/^	IRC_CMODE_i,	\/* <n!u@h> nick mask to allow past invite only restriction *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_j	src/irc_modes.h	/^	IRC_CMODE_j,	\/* n:t n users may join in each period of t seconds *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_k	src/irc_modes.h	/^	IRC_CMODE_k,	\/* channel password that must be given with JOIN *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_l	src/irc_modes.h	/^	IRC_CMODE_l,	\/* <int> upper limit on number of channel members *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_m	src/irc_modes.h	/^	IRC_CMODE_m,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_n	src/irc_modes.h	/^	IRC_CMODE_n,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_o	src/irc_modes.h	/^	IRC_CMODE_o,	\/* nick to grant chan op status *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_p	src/irc_modes.h	/^	IRC_CMODE_p,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_q	src/irc_modes.h	/^	IRC_CMODE_q,	\/* nick to grant channel owner status *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_r	src/irc_modes.h	/^	IRC_CMODE_r,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_s	src/irc_modes.h	/^	IRC_CMODE_s,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_t	src/irc_modes.h	/^	IRC_CMODE_t,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_u	src/irc_modes.h	/^	IRC_CMODE_u,$/;"	e	enum:irc_cmode_e
+IRC_CMODE_v	src/irc_modes.h	/^	IRC_CMODE_v,	\/* nick to give voice to in moderated channels (+m) *\/$/;"	e	enum:irc_cmode_e
+IRC_CMODE_z	src/irc_modes.h	/^	IRC_CMODE_z,$/;"	e	enum:irc_cmode_e
+IRC_CONTINUE	src/irc_commands.h	/^    IRC_CONTINUE		= 3,$/;"	e	enum:irc_ret_e
+IRC_ERR	src/irc_commands.h	/^    IRC_ERR             = -1,$/;"	e	enum:irc_ret_e
+IRC_MSG_MOREDATA	src/irc_commands.h	/^    IRC_MSG_MOREDATA    = 2,$/;"	e	enum:irc_ret_e
+IRC_MSG_SIZE	src/irc_msg.h	20;"	d
+IRC_NUM_PARAMS	src/irc_msg.h	21;"	d
+IRC_OK	src/irc_commands.h	/^    IRC_OK              = 1,$/;"	e	enum:irc_ret_e
+IRC_PARAM_LEN	src/irc_session.h	23;"	d
+IRC_READ_BUF	src/irc_conn.h	23;"	d
+IRC_SESSION_ACTIVE	src/irc_session.h	/^	IRC_SESSION_ACTIVE,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_CONNECTED	src/irc_session.h	/^	IRC_SESSION_CONNECTED,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_DISCONNECTED	src/irc_session.h	/^	IRC_SESSION_DISCONNECTED,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_NICK	src/irc_session.h	/^	IRC_SESSION_NICK,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_PASS	src/irc_session.h	/^	IRC_SESSION_PASS,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_PENDING_DISCONNECT	src/irc_session.h	/^	IRC_SESSION_PENDING_DISCONNECT$/;"	e	enum:irc_session_state_e
+IRC_SESSION_QUIT	src/irc_session.h	/^	IRC_SESSION_QUIT,$/;"	e	enum:irc_session_state_e
+IRC_SESSION_USER	src/irc_session.h	/^	IRC_SESSION_USER,$/;"	e	enum:irc_session_state_e
+IRC_SMODE_A	src/irc_modes.h	/^	IRC_SMODE_A,$/;"	e	enum:irc_smode_e
+IRC_SMODE_COUNT	src/irc_modes.h	/^	IRC_SMODE_COUNT = IRC_SMODE_LAST - IRC_SMODE_FIRST$/;"	e	enum:irc_smode_e
+IRC_SMODE_D	src/irc_modes.h	/^	IRC_SMODE_D,$/;"	e	enum:irc_smode_e
+IRC_SMODE_F	src/irc_modes.h	/^	IRC_SMODE_F,$/;"	e	enum:irc_smode_e
+IRC_SMODE_FIRST	src/irc_modes.h	/^	IRC_SMODE_FIRST = IRC_SMODE_a,$/;"	e	enum:irc_smode_e
+IRC_SMODE_H	src/irc_modes.h	/^	IRC_SMODE_H,$/;"	e	enum:irc_smode_e
+IRC_SMODE_L	src/irc_modes.h	/^	IRC_SMODE_L,	\/* language code *\/$/;"	e	enum:irc_smode_e
+IRC_SMODE_LAST	src/irc_modes.h	/^	IRC_SMODE_LAST,$/;"	e	enum:irc_smode_e
+IRC_SMODE_M	src/irc_modes.h	/^	IRC_SMODE_M,$/;"	e	enum:irc_smode_e
+IRC_SMODE_T	src/irc_modes.h	/^	IRC_SMODE_T,$/;"	e	enum:irc_smode_e
+IRC_SMODE_a	src/irc_modes.h	/^	IRC_SMODE_a,$/;"	e	enum:irc_smode_e
+IRC_SMODE_h	src/irc_modes.h	/^	IRC_SMODE_h,$/;"	e	enum:irc_smode_e
+IRC_SMODE_l	src/irc_modes.h	/^	IRC_SMODE_l,$/;"	e	enum:irc_smode_e
+IRC_SMODE_n	src/irc_modes.h	/^	IRC_SMODE_n,$/;"	e	enum:irc_smode_e
+IRC_SMODE_s	src/irc_modes.h	/^	IRC_SMODE_s,$/;"	e	enum:irc_smode_e
+IRC_SOCKET_ERROR	src/irc_commands.h	/^    IRC_SOCKET_ERROR    = -3,$/;"	e	enum:irc_ret_e
+IRC_UMODE_A	src/irc_modes.h	/^	IRC_UMODE_A,$/;"	e	enum:irc_umode_e
+IRC_UMODE_B	src/irc_modes.h	/^	IRC_UMODE_B,$/;"	e	enum:irc_umode_e
+IRC_UMODE_C	src/irc_modes.h	/^	IRC_UMODE_C,$/;"	e	enum:irc_umode_e
+IRC_UMODE_COUNT	src/irc_modes.h	/^	IRC_UMODE_COUNT = IRC_UMODE_LAST - IRC_UMODE_FIRST$/;"	e	enum:irc_umode_e
+IRC_UMODE_FIRST	src/irc_modes.h	/^	IRC_UMODE_FIRST = IRC_UMODE_a,$/;"	e	enum:irc_umode_e
+IRC_UMODE_G	src/irc_modes.h	/^	IRC_UMODE_G,$/;"	e	enum:irc_umode_e
+IRC_UMODE_H	src/irc_modes.h	/^	IRC_UMODE_H,$/;"	e	enum:irc_umode_e
+IRC_UMODE_I	src/irc_modes.h	/^	IRC_UMODE_I,$/;"	e	enum:irc_umode_e
+IRC_UMODE_LAST	src/irc_modes.h	/^	IRC_UMODE_LAST,$/;"	e	enum:irc_umode_e
+IRC_UMODE_N	src/irc_modes.h	/^	IRC_UMODE_N,$/;"	e	enum:irc_umode_e
+IRC_UMODE_O	src/irc_modes.h	/^	IRC_UMODE_O,$/;"	e	enum:irc_umode_e
+IRC_UMODE_R	src/irc_modes.h	/^	IRC_UMODE_R,$/;"	e	enum:irc_umode_e
+IRC_UMODE_S	src/irc_modes.h	/^	IRC_UMODE_S,$/;"	e	enum:irc_umode_e
+IRC_UMODE_T	src/irc_modes.h	/^	IRC_UMODE_T,$/;"	e	enum:irc_umode_e
+IRC_UMODE_V	src/irc_modes.h	/^	IRC_UMODE_V,$/;"	e	enum:irc_umode_e
+IRC_UMODE_W	src/irc_modes.h	/^	IRC_UMODE_W,$/;"	e	enum:irc_umode_e
+IRC_UMODE_a	src/irc_modes.h	/^	IRC_UMODE_a,$/;"	e	enum:irc_umode_e
+IRC_UMODE_b	src/irc_modes.h	/^	IRC_UMODE_b,$/;"	e	enum:irc_umode_e
+IRC_UMODE_c	src/irc_modes.h	/^	IRC_UMODE_c,$/;"	e	enum:irc_umode_e
+IRC_UMODE_d	src/irc_modes.h	/^	IRC_UMODE_d,	\/* prefix character to receive chan msg *\/$/;"	e	enum:irc_umode_e
+IRC_UMODE_f	src/irc_modes.h	/^	IRC_UMODE_f,$/;"	e	enum:irc_umode_e
+IRC_UMODE_g	src/irc_modes.h	/^	IRC_UMODE_g,$/;"	e	enum:irc_umode_e
+IRC_UMODE_h	src/irc_modes.h	/^	IRC_UMODE_h,	\/* unsigned 16-bit int denotes 'rank' *\/$/;"	e	enum:irc_umode_e
+IRC_UMODE_i	src/irc_modes.h	/^	IRC_UMODE_i,$/;"	e	enum:irc_umode_e
+IRC_UMODE_k	src/irc_modes.h	/^	IRC_UMODE_k,$/;"	e	enum:irc_umode_e
+IRC_UMODE_l	src/irc_modes.h	/^	IRC_UMODE_l,$/;"	e	enum:irc_umode_e
+IRC_UMODE_m	src/irc_modes.h	/^	IRC_UMODE_m,$/;"	e	enum:irc_umode_e
+IRC_UMODE_n	src/irc_modes.h	/^	IRC_UMODE_n,$/;"	e	enum:irc_umode_e
+IRC_UMODE_o	src/irc_modes.h	/^	IRC_UMODE_o,$/;"	e	enum:irc_umode_e
+IRC_UMODE_p	src/irc_modes.h	/^	IRC_UMODE_p,$/;"	e	enum:irc_umode_e
+IRC_UMODE_q	src/irc_modes.h	/^	IRC_UMODE_q,$/;"	e	enum:irc_umode_e
+IRC_UMODE_r	src/irc_modes.h	/^	IRC_UMODE_r,$/;"	e	enum:irc_umode_e
+IRC_UMODE_s	src/irc_modes.h	/^	IRC_UMODE_s,	\/* list of letters corresponding to server notices to receive *\/$/;"	e	enum:irc_umode_e
+IRC_UMODE_t	src/irc_modes.h	/^	IRC_UMODE_t,$/;"	e	enum:irc_umode_e
+IRC_UMODE_u	src/irc_modes.h	/^	IRC_UMODE_u,$/;"	e	enum:irc_umode_e
+IRC_UMODE_v	src/irc_modes.h	/^	IRC_UMODE_v,$/;"	e	enum:irc_umode_e
+IRC_UMODE_w	src/irc_modes.h	/^	IRC_UMODE_w,$/;"	e	enum:irc_umode_e
+IRC_UMODE_x	src/irc_modes.h	/^	IRC_UMODE_x,$/;"	e	enum:irc_umode_e
+IRC_UMODE_y	src/irc_modes.h	/^	IRC_UMODE_y,$/;"	e	enum:irc_umode_e
+IRC_UMODE_z	src/irc_modes.h	/^	IRC_UMODE_z,$/;"	e	enum:irc_umode_e
+ISON	src/irc_commands.h	/^    ISON,$/;"	e	enum:irc_command_e
+IS_CMODE	src/irc_modes.h	159;"	d
+IS_COMMAND	src/irc_commands.h	317;"	d
+IS_ERROR	src/irc_commands.h	315;"	d
+IS_REPLY	src/irc_commands.h	316;"	d
+IS_RESERVED	src/irc_commands.h	318;"	d
+IS_SMODE	src/irc_modes.h	176;"	d
+IS_UMODE	src/irc_modes.h	141;"	d
+IS_VALID_COMMAND	src/irc_commands.h	342;"	d
+JOIN	src/irc_commands.h	/^    JOIN,$/;"	e	enum:irc_command_e
+KICK	src/irc_commands.h	/^    KICK,$/;"	e	enum:irc_command_e
+KILL	src/irc_commands.h	/^    KILL,$/;"	e	enum:irc_command_e
+LAST_COMMAND	src/irc_commands.h	/^    LAST_COMMAND,$/;"	e	enum:irc_command_e
+LDFLAGS	test/Makefile	/^LDFLAGS=-gstabs+ -L$(CIRC_ROOT)\/lib -L$(CUTIL_ROOT)\/lib$/;"	m
+LIBS	test/Makefile	/^LIBS=-lcirc -lcutil -lcunit -lexpat$/;"	m
+LINKS	src/irc_commands.h	/^    LINKS,$/;"	e	enum:irc_command_e
+LIST	src/irc_commands.h	/^    LIST,$/;"	e	enum:irc_command_e
+LUSERS	src/irc_commands.h	/^    LUSERS,$/;"	e	enum:irc_command_e
+MODE	src/irc_commands.h	/^    MODE,$/;"	e	enum:irc_command_e
+MOTD	src/irc_commands.h	/^    MOTD,$/;"	e	enum:irc_command_e
+NAME	src/Makefile	/^NAME=circ$/;"	m
+NAMES	src/irc_commands.h	/^    NAMES,$/;"	e	enum:irc_command_e
+NICK	src/irc_commands.h	/^    NICK,$/;"	e	enum:irc_command_e
+NICKSERV_PASS_HASH	src/irc_session.h	38;"	d
+NICKSERV_PASS_KEY	src/irc_session.h	37;"	d
+NICK_NAME_HASH	src/irc_session.h	30;"	d
+NICK_NAME_KEY	src/irc_session.h	29;"	d
+NOCMD	src/irc_commands.h	/^    NOCMD = -1,$/;"	e	enum:irc_command_e
+NOTICE	src/irc_commands.h	/^    NOTICE,$/;"	e	enum:irc_command_e
+NUM_COMMANDS	src/irc_commands.h	/^    NUM_COMMANDS = LAST_COMMAND - FIRST_COMMAND,$/;"	e	enum:irc_command_e
+OBJ	src/Makefile	/^OBJ=$(SRC:.c=.o)$/;"	m
+OBJ	test/Makefile	/^OBJ=$(SRC:.c=.o)$/;"	m
+OPER	src/irc_commands.h	/^    OPER,$/;"	e	enum:irc_command_e
+OUT	src/Makefile	/^OUT=lib$(NAME).a$/;"	m
+OUT	test/Makefile	/^OUT=test_all$/;"	m
+PART	src/irc_commands.h	/^    PART,$/;"	e	enum:irc_command_e
+PASS	src/irc_commands.h	/^    PASS = CMD_BASE,$/;"	e	enum:irc_command_e
+PING	src/irc_commands.h	/^    PING,$/;"	e	enum:irc_command_e
+PONG	src/irc_commands.h	/^    PONG,$/;"	e	enum:irc_command_e
+PREFIX	src/Makefile	/^PREFIX=\/usr\/local$/;"	m
+PRIVMSG	src/irc_commands.h	/^    PRIVMSG,$/;"	e	enum:irc_command_e
+QUIT	src/irc_commands.h	/^    QUIT,$/;"	e	enum:irc_command_e
+QUIT_MSG_HASH	src/irc_session.h	40;"	d
+QUIT_MSG_KEY	src/irc_session.h	39;"	d
+REAL_NAME_HASH	src/irc_session.h	34;"	d
+REAL_NAME_KEY	src/irc_session.h	33;"	d
+REHASH	src/irc_commands.h	/^    REHASH,$/;"	e	enum:irc_command_e
+RESTART	src/irc_commands.h	/^    RESTART,$/;"	e	enum:irc_command_e
+RPL_ADMINEMAIL	src/irc_commands.h	/^    RPL_ADMINEMAIL          = 259,$/;"	e	enum:irc_command_e
+RPL_ADMINLOC1	src/irc_commands.h	/^    RPL_ADMINLOC1           = 257,$/;"	e	enum:irc_command_e
+RPL_ADMINLOC2	src/irc_commands.h	/^    RPL_ADMINLOC2           = 258,$/;"	e	enum:irc_command_e
+RPL_ADMINME	src/irc_commands.h	/^    RPL_ADMINME             = 256,$/;"	e	enum:irc_command_e
+RPL_ATTEMPTINGJUNC	src/irc_commands.h	/^	RPL_ATTEMPTINGJUNC		= 50,  \/* aircd *\/$/;"	e	enum:irc_command_e
+RPL_ATTEMPTINGREROUTE	src/irc_commands.h	/^	RPL_ATTEMPTINGREROUTE   = 51,  \/* aircd *\/$/;"	e	enum:irc_command_e
+RPL_AWAY	src/irc_commands.h	/^    RPL_AWAY                = 301,$/;"	e	enum:irc_command_e
+RPL_BANLIST	src/irc_commands.h	/^    RPL_BANLIST             = 367,$/;"	e	enum:irc_command_e
+RPL_BOUNCE	src/irc_commands.h	/^    RPL_BOUNCE              = 5,   \/* RFC2812 *\/$/;"	e	enum:irc_command_e
+RPL_BOUNCE_2	src/irc_commands.h	/^    RPL_BOUNCE_2			= 10,$/;"	e	enum:irc_command_e
+RPL_CHANNELCREATEDON	src/irc_commands.h	/^    RPL_CHANNELCREATEDON    = 329,$/;"	e	enum:irc_command_e
+RPL_CHANNELMODEIS	src/irc_commands.h	/^    RPL_CHANNELMODEIS       = 324,$/;"	e	enum:irc_command_e
+RPL_CLOSEEND	src/irc_commands.h	/^    RPL_CLOSEEND            = 363, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_CLOSING	src/irc_commands.h	/^    RPL_CLOSING             = 362, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_CREATED	src/irc_commands.h	/^    RPL_CREATED             = 3,$/;"	e	enum:irc_command_e
+RPL_ENDOFBANLIST	src/irc_commands.h	/^    RPL_ENDOFBANLIST        = 368,$/;"	e	enum:irc_command_e
+RPL_ENDOFEXCEPTLIST	src/irc_commands.h	/^    RPL_ENDOFEXCEPTLIST     = 349,$/;"	e	enum:irc_command_e
+RPL_ENDOFINFO	src/irc_commands.h	/^    RPL_ENDOFINFO           = 374,$/;"	e	enum:irc_command_e
+RPL_ENDOFINVITELIST	src/irc_commands.h	/^    RPL_ENDOFINVITELIST     = 347,$/;"	e	enum:irc_command_e
+RPL_ENDOFLINKS	src/irc_commands.h	/^    RPL_ENDOFLINKS          = 365,$/;"	e	enum:irc_command_e
+RPL_ENDOFMOTD	src/irc_commands.h	/^    RPL_ENDOFMOTD           = 376,$/;"	e	enum:irc_command_e
+RPL_ENDOFNAMES	src/irc_commands.h	/^    RPL_ENDOFNAMES          = 366,$/;"	e	enum:irc_command_e
+RPL_ENDOFSERVICES	src/irc_commands.h	/^    RPL_ENDOFSERVICES       = 232, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_ENDOFSTATS	src/irc_commands.h	/^    RPL_ENDOFSTATS          = 219,$/;"	e	enum:irc_command_e
+RPL_ENDOFUSERS	src/irc_commands.h	/^    RPL_ENDOFUSERS          = 394,$/;"	e	enum:irc_command_e
+RPL_ENDOFWHO	src/irc_commands.h	/^    RPL_ENDOFWHO            = 315,$/;"	e	enum:irc_command_e
+RPL_ENDOFWHOIS	src/irc_commands.h	/^    RPL_ENDOFWHOIS          = 318,$/;"	e	enum:irc_command_e
+RPL_ENDOFWHOWAS	src/irc_commands.h	/^    RPL_ENDOFWHOWAS         = 369,$/;"	e	enum:irc_command_e
+RPL_END_NETSTAT	src/irc_commands.h	/^    RPL_END_NETSTAT			= 269,$/;"	e	enum:irc_command_e
+RPL_EXCEPTLIST	src/irc_commands.h	/^    RPL_EXCEPTLIST          = 348,$/;"	e	enum:irc_command_e
+RPL_GLOBALUSERS	src/irc_commands.h	/^    RPL_GLOBALUSERS			= 266,$/;"	e	enum:irc_command_e
+RPL_INFO	src/irc_commands.h	/^    RPL_INFO                = 371,$/;"	e	enum:irc_command_e
+RPL_INFOSTART	src/irc_commands.h	/^    RPL_INFOSTART           = 373, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_INVITELIST	src/irc_commands.h	/^    RPL_INVITELIST          = 346,$/;"	e	enum:irc_command_e
+RPL_INVITING	src/irc_commands.h	/^    RPL_INVITING            = 341,$/;"	e	enum:irc_command_e
+RPL_ISON	src/irc_commands.h	/^    RPL_ISON                = 303,$/;"	e	enum:irc_command_e
+RPL_ISUPPORT	src/irc_commands.h	/^    RPL_ISUPPORT			= 5,$/;"	e	enum:irc_command_e
+RPL_KILLDONE	src/irc_commands.h	/^    RPL_KILLDONE            = 361, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_LINKS	src/irc_commands.h	/^    RPL_LINKS               = 364,$/;"	e	enum:irc_command_e
+RPL_LIST	src/irc_commands.h	/^    RPL_LIST                = 322,$/;"	e	enum:irc_command_e
+RPL_LISTEND	src/irc_commands.h	/^    RPL_LISTEND             = 323,$/;"	e	enum:irc_command_e
+RPL_LISTSTART	src/irc_commands.h	/^    RPL_LISTSTART           = 321,$/;"	e	enum:irc_command_e
+RPL_LOCALUSERS	src/irc_commands.h	/^    RPL_LOCALUSERS			= 265,$/;"	e	enum:irc_command_e
+RPL_LUSERCHANNELS	src/irc_commands.h	/^    RPL_LUSERCHANNELS       = 254,$/;"	e	enum:irc_command_e
+RPL_LUSERCLIENT	src/irc_commands.h	/^    RPL_LUSERCLIENT         = 251,$/;"	e	enum:irc_command_e
+RPL_LUSERME	src/irc_commands.h	/^    RPL_LUSERME             = 255,$/;"	e	enum:irc_command_e
+RPL_LUSEROP	src/irc_commands.h	/^    RPL_LUSEROP             = 252,$/;"	e	enum:irc_command_e
+RPL_LUSERUNKNOWN	src/irc_commands.h	/^    RPL_LUSERUNKNOWN        = 253,$/;"	e	enum:irc_command_e
+RPL_MAP	src/irc_commands.h	/^    RPL_MAP					= 6,   \/* Unreal *\/$/;"	e	enum:irc_command_e
+RPL_MAPEND	src/irc_commands.h	/^    RPL_MAPEND				= 7,   \/* Unreal *\/$/;"	e	enum:irc_command_e
+RPL_MAPEND_2	src/irc_commands.h	/^	RPL_MAPEND_2			= 17,  \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_MAPMORE	src/irc_commands.h	/^	RPL_MAPMORE				= 16,  \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_MAP_2	src/irc_commands.h	/^	RPL_MAP_2				= 15,  \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_MOTD	src/irc_commands.h	/^    RPL_MOTD                = 372,$/;"	e	enum:irc_command_e
+RPL_MOTDSTART	src/irc_commands.h	/^    RPL_MOTDSTART           = 375,$/;"	e	enum:irc_command_e
+RPL_MYINFO	src/irc_commands.h	/^    RPL_MYINFO              = 4,$/;"	e	enum:irc_command_e
+RPL_MYPORTIS	src/irc_commands.h	/^    RPL_MYPORTIS            = 384, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_NAMREPLY	src/irc_commands.h	/^    RPL_NAMREPLY            = 353,$/;"	e	enum:irc_command_e
+RPL_NETSTAT	src/irc_commands.h	/^    RPL_NETSTAT				= 268,$/;"	e	enum:irc_command_e
+RPL_NONE	src/irc_commands.h	/^    RPL_NONE                = 300, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_NOTOPIC	src/irc_commands.h	/^    RPL_NOTOPIC             = 331,$/;"	e	enum:irc_command_e
+RPL_NOUSERS	src/irc_commands.h	/^    RPL_NOUSERS             = 395,$/;"	e	enum:irc_command_e
+RPL_NOWAWAY	src/irc_commands.h	/^    RPL_NOWAWAY             = 306,$/;"	e	enum:irc_command_e
+RPL_REHASHING	src/irc_commands.h	/^    RPL_REHASHING           = 382,$/;"	e	enum:irc_command_e
+RPL_SAVENICK	src/irc_commands.h	/^	RPL_SAVENICK			= 43,  \/* IRCnet *\/$/;"	e	enum:irc_command_e
+RPL_SERVICE	src/irc_commands.h	/^    RPL_SERVICE             = 233, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_SERVICEINFO	src/irc_commands.h	/^    RPL_SERVICEINFO         = 231, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_SERVLIST	src/irc_commands.h	/^    RPL_SERVLIST            = 234,$/;"	e	enum:irc_command_e
+RPL_SERVLISTEND	src/irc_commands.h	/^    RPL_SERVLISTEND         = 235,$/;"	e	enum:irc_command_e
+RPL_SNOMASK	src/irc_commands.h	/^    RPL_SNOMASK				= 8,   \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_START_NETSTAT	src/irc_commands.h	/^    RPL_START_NETSTAT		= 267,$/;"	e	enum:irc_command_e
+RPL_STATMEM	src/irc_commands.h	/^	RPL_STATMEM				= 10,  \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_STATMENTOT	src/irc_commands.h	/^    RPL_STATMENTOT			= 9,   \/* ircu *\/$/;"	e	enum:irc_command_e
+RPL_STATSBLINE	src/irc_commands.h	/^    RPL_STATSBLINE          = 247, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSCLINE	src/irc_commands.h	/^    RPL_STATSCLINE          = 213, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSCOMMANDS	src/irc_commands.h	/^    RPL_STATSCOMMANDS       = 212,$/;"	e	enum:irc_command_e
+RPL_STATSDLINE	src/irc_commands.h	/^    RPL_STATSDLINE          = 250, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSHLINE	src/irc_commands.h	/^    RPL_STATSHLINE          = 244, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSILINE	src/irc_commands.h	/^    RPL_STATSILINE          = 215, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSKLINE	src/irc_commands.h	/^    RPL_STATSKLINE          = 216, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSLINKINFO	src/irc_commands.h	/^    RPL_STATSLINKINFO       = 211,$/;"	e	enum:irc_command_e
+RPL_STATSLLINE	src/irc_commands.h	/^    RPL_STATSLLINE          = 241, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSNLINE	src/irc_commands.h	/^    RPL_STATSNLINE          = 214, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSOLINE	src/irc_commands.h	/^    RPL_STATSOLINE          = 243,$/;"	e	enum:irc_command_e
+RPL_STATSPING	src/irc_commands.h	/^    RPL_STATSPING           = 246, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSQLINE	src/irc_commands.h	/^    RPL_STATSQLINE          = 217, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSUPTIME	src/irc_commands.h	/^    RPL_STATSUPTIME         = 242,$/;"	e	enum:irc_command_e
+RPL_STATSVLINE	src/irc_commands.h	/^    RPL_STATSVLINE          = 240, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_STATSYLINE	src/irc_commands.h	/^    RPL_STATSYLINE          = 218, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_SUMMONING	src/irc_commands.h	/^    RPL_SUMMONING           = 342,$/;"	e	enum:irc_command_e
+RPL_TIME	src/irc_commands.h	/^    RPL_TIME                = 391,$/;"	e	enum:irc_command_e
+RPL_TOPIC	src/irc_commands.h	/^    RPL_TOPIC               = 332,$/;"	e	enum:irc_command_e
+RPL_TRACECLASS	src/irc_commands.h	/^    RPL_TRACECLASS          = 209,$/;"	e	enum:irc_command_e
+RPL_TRACECONNECTING	src/irc_commands.h	/^    RPL_TRACECONNECTING     = 201,$/;"	e	enum:irc_command_e
+RPL_TRACEEND	src/irc_commands.h	/^    RPL_TRACEEND            = 262,$/;"	e	enum:irc_command_e
+RPL_TRACEHANDSHAKE	src/irc_commands.h	/^    RPL_TRACEHANDSHAKE      = 202,$/;"	e	enum:irc_command_e
+RPL_TRACELINK	src/irc_commands.h	/^    RPL_TRACELINK           = 200,$/;"	e	enum:irc_command_e
+RPL_TRACELOG	src/irc_commands.h	/^    RPL_TRACELOG            = 261,$/;"	e	enum:irc_command_e
+RPL_TRACENEWTYPE	src/irc_commands.h	/^    RPL_TRACENEWTYPE        = 208,$/;"	e	enum:irc_command_e
+RPL_TRACEOPERATOR	src/irc_commands.h	/^    RPL_TRACEOPERATOR       = 204,$/;"	e	enum:irc_command_e
+RPL_TRACERECONNECT	src/irc_commands.h	/^    RPL_TRACERECONNECT      = 210,$/;"	e	enum:irc_command_e
+RPL_TRACESERVER	src/irc_commands.h	/^    RPL_TRACESERVER         = 206,$/;"	e	enum:irc_command_e
+RPL_TRACEUNKNOWN	src/irc_commands.h	/^    RPL_TRACEUNKNOWN        = 203,$/;"	e	enum:irc_command_e
+RPL_TRACEUSER	src/irc_commands.h	/^    RPL_TRACEUSER           = 205,$/;"	e	enum:irc_command_e
+RPL_TRYAGAIN	src/irc_commands.h	/^    RPL_TRYAGAIN            = 263,$/;"	e	enum:irc_command_e
+RPL_UMODEIS	src/irc_commands.h	/^    RPL_UMODEIS             = 221,$/;"	e	enum:irc_command_e
+RPL_UNAWAY	src/irc_commands.h	/^    RPL_UNAWAY              = 305,$/;"	e	enum:irc_command_e
+RPL_UNIQOPIS	src/irc_commands.h	/^    RPL_UNIQOPIS            = 325,$/;"	e	enum:irc_command_e
+RPL_USERHOST	src/irc_commands.h	/^    RPL_USERHOST            = 302,$/;"	e	enum:irc_command_e
+RPL_USERS	src/irc_commands.h	/^    RPL_USERS               = 393,$/;"	e	enum:irc_command_e
+RPL_USERSSTART	src/irc_commands.h	/^    RPL_USERSSTART          = 392,$/;"	e	enum:irc_command_e
+RPL_VERSION	src/irc_commands.h	/^    RPL_VERSION             = 351,$/;"	e	enum:irc_command_e
+RPL_WELCOME	src/irc_commands.h	/^    RPL_WELCOME             = 1,$/;"	e	enum:irc_command_e
+RPL_WHOISCHANNELS	src/irc_commands.h	/^    RPL_WHOISCHANNELS       = 319,$/;"	e	enum:irc_command_e
+RPL_WHOISCHANOP	src/irc_commands.h	/^    RPL_WHOISCHANOP         = 316, \/* reserved *\/$/;"	e	enum:irc_command_e
+RPL_WHOISIDLE	src/irc_commands.h	/^    RPL_WHOISIDLE           = 317,$/;"	e	enum:irc_command_e
+RPL_WHOISOPERATOR	src/irc_commands.h	/^    RPL_WHOISOPERATOR       = 313,$/;"	e	enum:irc_command_e
+RPL_WHOISSERVER	src/irc_commands.h	/^    RPL_WHOISSERVER         = 312,$/;"	e	enum:irc_command_e
+RPL_WHOISUSER	src/irc_commands.h	/^    RPL_WHOISUSER           = 311,$/;"	e	enum:irc_command_e
+RPL_WHOREPLY	src/irc_commands.h	/^    RPL_WHOREPLY            = 352,$/;"	e	enum:irc_command_e
+RPL_WHOWASUSER	src/irc_commands.h	/^    RPL_WHOWASUSER          = 314,$/;"	e	enum:irc_command_e
+RPL_YOURCOOKIE	src/irc_commands.h	/^	RPL_YOURCOOKIE			= 14,  \/* Hybrid? *\/$/;"	e	enum:irc_command_e
+RPL_YOUREOPER	src/irc_commands.h	/^    RPL_YOUREOPER           = 381,$/;"	e	enum:irc_command_e
+RPL_YOURESERVICE	src/irc_commands.h	/^    RPL_YOURESERVICE        = 383,$/;"	e	enum:irc_command_e
+RPL_YOURHOST	src/irc_commands.h	/^    RPL_YOURHOST            = 2,$/;"	e	enum:irc_command_e
+RPL_YOURID	src/irc_commands.h	/^	RPL_YOURID				= 42,  \/* IRCnet *\/$/;"	e	enum:irc_command_e
+SERVER_HOST_HASH	src/irc_session.h	28;"	d
+SERVER_HOST_KEY	src/irc_session.h	27;"	d
+SERVER_MODES_HASH	src/irc_session.h	52;"	d
+SERVER_MODES_KEY	src/irc_session.h	51;"	d
+SERVER_MODES_PARAM_HASH	src/irc_session.h	54;"	d
+SERVER_MODES_PARAM_KEY	src/irc_session.h	53;"	d
+SERVER_PASS_HASH	src/irc_session.h	36;"	d
+SERVER_PASS_KEY	src/irc_session.h	35;"	d
+SERVER_PORT_HASH	src/irc_session.h	26;"	d
+SERVER_PORT_KEY	src/irc_session.h	25;"	d
+SERVER_VERSION_HASH	src/irc_session.h	56;"	d
+SERVER_VERSION_KEY	src/irc_session.h	55;"	d
+SERVICE	src/irc_commands.h	/^    SERVICE,$/;"	e	enum:irc_command_e
+SERVLIST	src/irc_commands.h	/^    SERVLIST,$/;"	e	enum:irc_command_e
+SHELL	Makefile	/^SHELL=\/bin\/sh$/;"	m
+SHELL	src/Makefile	/^SHELL=\/bin\/sh$/;"	m
+SHELL	test/Makefile	/^SHELL=\/bin\/sh$/;"	m
+SQUERY	src/irc_commands.h	/^    SQUERY,$/;"	e	enum:irc_command_e
+SQUIT	src/irc_commands.h	/^    SQUIT,$/;"	e	enum:irc_command_e
+SRC	src/Makefile	/^SRC=irc_commands.c irc_conn.c irc_modes.c irc_msg.c irc_session.c$/;"	m
+SRC	test/Makefile	/^SRC=test_all.c$/;"	m
+STATS	src/irc_commands.h	/^    STATS,$/;"	e	enum:irc_command_e
+SUMMON	src/irc_commands.h	/^    SUMMON,$/;"	e	enum:irc_command_e
+TESTDIRS	Makefile	/^TESTDIRS = $(DIRS:%=test-%)$/;"	m
+TIME	src/irc_commands.h	/^    TIME,$/;"	e	enum:irc_command_e
+TOPIC	src/irc_commands.h	/^    TOPIC,$/;"	e	enum:irc_command_e
+TRACE	src/irc_commands.h	/^    TRACE,$/;"	e	enum:irc_command_e
+UNINSTALLDIRS	Makefile	/^UNINSTALLDIRS = $(DIRS:%=uninstall-%)$/;"	m
+USER	src/irc_commands.h	/^    USER,$/;"	e	enum:irc_command_e
+USERHOST	src/irc_commands.h	/^    USERHOST,$/;"	e	enum:irc_command_e
+USERS	src/irc_commands.h	/^    USERS,$/;"	e	enum:irc_command_e
+USER_MODES_HASH	src/irc_session.h	44;"	d
+USER_MODES_KEY	src/irc_session.h	43;"	d
+USER_MODES_PARAM_HASH	src/irc_session.h	46;"	d
+USER_MODES_PARAM_KEY	src/irc_session.h	45;"	d
+USER_NAME_HASH	src/irc_session.h	32;"	d
+USER_NAME_KEY	src/irc_session.h	31;"	d
+VERSION	src/irc_commands.h	/^    VERSION,$/;"	e	enum:irc_command_e
+WALLOPS	src/irc_commands.h	/^    WALLOPS,$/;"	e	enum:irc_command_e
+WHO	src/irc_commands.h	/^    WHO,$/;"	e	enum:irc_command_e
+WHOIS	src/irc_commands.h	/^    WHOIS,$/;"	e	enum:irc_command_e
+WHOWAS	src/irc_commands.h	/^    WHOWAS,$/;"	e	enum:irc_command_e
+_GNU_SOURCE	src/irc_msg.c	17;"	d	file:
+__IRC_CHANNEL__	src/irc_channel.h	2;"	d
+__IRC_COMMANDS_H__	src/irc_commands.h	18;"	d
+__IRC_CONN_H__	src/irc_conn.h	18;"	d
+__IRC_MODES_H__	src/irc_modes.h	18;"	d
+__IRC_MSG_H__	src/irc_msg.h	18;"	d
+__IRC_SESSION_H__	src/irc_session.h	18;"	d
+a_to_cmode	src/irc_modes.c	/^irc_cmode_t a_to_cmode( int8_t const c )$/;"	f
+a_to_smode	src/irc_modes.c	/^irc_smode_t a_to_smode( int8_t const c )$/;"	f
+a_to_umode	src/irc_modes.c	/^irc_umode_t a_to_umode( int8_t const c )$/;"	f
+buf	src/irc_conn.h	/^	uint8_t			buf[IRC_READ_BUF]; \/* read buffer *\/$/;"	m	struct:irc_conn_s
+check_cmodes	src/irc_session.c	/^void check_cmodes( int8_t const * const modes )$/;"	f
+check_ipv4_part	src/irc_msg.c	/^static int check_ipv4_part( int8_t * pstart, int8_t *pend )$/;"	f	file:
+check_smodes	src/irc_session.c	/^void check_smodes( int8_t const * const modes )$/;"	f
+check_umodes	src/irc_session.c	/^void check_umodes( int8_t const * const modes )$/;"	f
+cmd	src/irc_msg.h	/^	irc_command_t cmd;$/;"	m	struct:irc_msg_s
+cmodes	src/irc_modes.c	/^static int8_t const * const cmodes = "abcdefhijklmnopqrstuvz!ACDGHIJKLMNOQRSV";$/;"	v	file:
+colon	src/irc_msg.c	/^static int8_t colon = ':';$/;"	v	file:
+command	src/irc_msg.h	/^	int8_t * command;			\/* command part of the message *\/$/;"	m	struct:irc_msg_s
+command	src/irc_session.h	/^		irc_ret_t (*command)(irc_session_t * const session, $/;"	m	struct:irc_session_s::irc_session_ops_s
+conn	src/irc_session.h	/^	irc_conn_t			conn;							\/* irc connection *\/$/;"	m	struct:irc_session_s
+connected	src/irc_conn.h	/^		irc_ret_t (*connected)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
+connected	src/irc_session.h	/^		irc_ret_t (*connected)(irc_session_t * const session, void * user_data);$/;"	m	struct:irc_session_s::irc_session_ops_s
+data	src/irc_msg.h	/^	uint8_t * data;				\/* pointer to data buffer *\/$/;"	m	struct:irc_msg_in_buf_s
+disconnect	src/irc_conn.h	/^	int				disconnect;		\/* pending disconnect? *\/$/;"	m	struct:irc_conn_s
+disconnected	src/irc_conn.h	/^		irc_ret_t (*disconnected)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
+disconnected	src/irc_session.h	/^		irc_ret_t (*disconnected)(irc_session_t * const session, void * user_data);$/;"	m	struct:irc_session_s::irc_session_ops_s
+el	src/irc_conn.h	/^	evt_loop_t*		el;				\/* event loop pointer *\/$/;"	m	struct:irc_conn_s
+el	src/irc_session.h	/^	evt_loop_t*			el;						\/* event loop *\/$/;"	m	struct:irc_session_s
+error	src/irc_session.h	/^		irc_ret_t (*error)(irc_session_t * const session, $/;"	m	struct:irc_session_s::irc_session_ops_s
+fnv_key_hash	src/irc_session.c	/^static uint32_t fnv_key_hash(void const * const key)$/;"	f	file:
+host	src/irc_msg.h	/^	int8_t * host;$/;"	m	struct:irc_msg_s
+in	src/irc_msg.h	/^	irc_msg_in_buf_t	in;		\/* used when reading and parsing messages from stream *\/$/;"	m	struct:irc_msg_s
+inp	src/irc_conn.h	/^	uint8_t*		inp;			\/* pointer to where incoming data gets written *\/$/;"	m	struct:irc_conn_s
+iov	src/irc_msg.h	/^	struct iovec * iov;			\/* list of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s	typeref:struct:irc_msg_out_buf_s::iovec
+ipv4	src/irc_msg.h	/^	int8_t * ipv4;$/;"	m	struct:irc_msg_s
+ipv6	src/irc_msg.h	/^	int8_t * ipv6;$/;"	m	struct:irc_msg_s
+irc_cmd_get_command_from_string	src/irc_commands.c	/^irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)$/;"	f
+irc_cmd_get_string	src/irc_commands.c	/^int8_t const * irc_cmd_get_string(irc_command_t const cmd)$/;"	f
+irc_cmd_get_type_string	src/irc_commands.c	/^int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )$/;"	f
+irc_cmode_e	src/irc_modes.h	/^typedef enum irc_cmode_e$/;"	g
+irc_cmode_t	src/irc_modes.h	/^} irc_cmode_t;$/;"	t	typeref:enum:irc_cmode_e
+irc_command_e	src/irc_commands.h	/^typedef enum irc_command_e$/;"	g
+irc_command_t	src/irc_commands.h	/^} irc_command_t;$/;"	t	typeref:enum:irc_command_e
+irc_commands	src/irc_commands.c	/^int8_t const * const irc_commands[NUM_COMMANDS] =$/;"	v
+irc_conn_connect	src/irc_conn.c	/^irc_ret_t irc_conn_connect( irc_conn_t* const conn,				\/* irc context *\/$/;"	f
+irc_conn_connected	src/irc_session.c	/^static irc_ret_t irc_conn_connected( irc_conn_t * const conn, $/;"	f	file:
+irc_conn_deinitialize	src/irc_conn.c	/^void irc_conn_deinitialize( irc_conn_t * const conn )$/;"	f
+irc_conn_delete	src/irc_conn.c	/^void irc_conn_delete(void * c)$/;"	f
+irc_conn_disconnect	src/irc_conn.c	/^irc_ret_t irc_conn_disconnect( irc_conn_t* const conn, int do_wait )$/;"	f
+irc_conn_disconnected	src/irc_session.c	/^static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn, $/;"	f	file:
+irc_conn_initialize	src/irc_conn.c	/^void irc_conn_initialize( irc_conn_t * const conn,$/;"	f
+irc_conn_message_in	src/irc_session.c	/^static irc_ret_t irc_conn_message_in( irc_conn_t * const conn, $/;"	f	file:
+irc_conn_message_out	src/irc_session.c	/^static irc_ret_t irc_conn_message_out( irc_conn_t * const conn,$/;"	f	file:
+irc_conn_new	src/irc_conn.c	/^irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	\/* callbacks for irc messages *\/$/;"	f
+irc_conn_ops_s	src/irc_conn.h	/^	struct irc_conn_ops_s$/;"	s	struct:irc_conn_s
+irc_conn_ops_t	src/irc_conn.h	/^typedef struct irc_conn_ops_s irc_conn_ops_t;$/;"	t	typeref:struct:irc_conn_ops_s
+irc_conn_s	src/irc_conn.h	/^struct irc_conn_s$/;"	s
+irc_conn_send_msg	src/irc_conn.c	/^irc_ret_t irc_conn_send_msg( irc_conn_t* const conn,$/;"	f
+irc_conn_t	src/irc_conn.h	/^typedef struct irc_conn_s irc_conn_t;$/;"	t	typeref:struct:irc_conn_s
+irc_msg_add_parameter	src/irc_msg.c	/^irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, int8_t const * const param)$/;"	f
+irc_msg_compile	src/irc_msg.c	/^irc_ret_t irc_msg_compile(irc_msg_t* const msg)$/;"	f
+irc_msg_delete	src/irc_msg.c	/^void irc_msg_delete(void * m)$/;"	f
+irc_msg_finalize	src/irc_msg.c	/^irc_ret_t irc_msg_finalize( irc_msg_t * const msg )$/;"	f
+irc_msg_in_buf_s	src/irc_msg.h	/^typedef struct irc_msg_in_buf_s$/;"	s
+irc_msg_in_buf_t	src/irc_msg.h	/^} irc_msg_in_buf_t;$/;"	t	typeref:struct:irc_msg_in_buf_s
+irc_msg_initialize	src/irc_msg.c	/^irc_ret_t irc_msg_initialize($/;"	f
+irc_msg_log	src/irc_msg.c	/^void irc_msg_log( irc_msg_t const * const msg )$/;"	f
+irc_msg_new	src/irc_msg.c	/^irc_msg_t* irc_msg_new()$/;"	f
+irc_msg_out_buf_s	src/irc_msg.h	/^typedef struct irc_msg_out_buf_s$/;"	s
+irc_msg_out_buf_t	src/irc_msg.h	/^} irc_msg_out_buf_t;$/;"	t	typeref:struct:irc_msg_out_buf_s
+irc_msg_parse	src/irc_msg.c	/^irc_ret_t irc_msg_parse(irc_msg_t* const msg)$/;"	f
+irc_msg_parse_prefix	src/irc_msg.c	/^static irc_ret_t irc_msg_parse_prefix(irc_msg_t* const msg)$/;"	f	file:
+irc_msg_s	src/irc_msg.h	/^typedef struct irc_msg_s$/;"	s
+irc_msg_set_command	src/irc_msg.c	/^irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)$/;"	f
+irc_msg_set_trailing	src/irc_msg.c	/^irc_ret_t irc_msg_set_trailing( irc_msg_t* const msg, int8_t const * const trailing)$/;"	f
+irc_msg_t	src/irc_msg.h	/^} irc_msg_t;$/;"	t	typeref:struct:irc_msg_s
+irc_receive_data	src/irc_conn.c	/^static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread )$/;"	f	file:
+irc_receive_msg	src/irc_conn.c	/^static irc_ret_t irc_receive_msg( irc_conn_t* const conn, size_t * const nread )$/;"	f	file:
+irc_ret_e	src/irc_commands.h	/^typedef enum irc_ret_e$/;"	g
+irc_ret_t	src/irc_commands.h	/^} irc_ret_t;$/;"	t	typeref:enum:irc_ret_e
+irc_scan_for_msg	src/irc_conn.c	/^static irc_ret_t irc_scan_for_msg( irc_conn_t * const conn )$/;"	f	file:
+irc_session_connect	src/irc_session.c	/^irc_ret_t irc_session_connect( irc_session_t * const session )$/;"	f
+irc_session_deinitialize	src/irc_session.c	/^void irc_session_deinitialize( irc_session_t * const session )$/;"	f
+irc_session_delete	src/irc_session.c	/^void irc_session_delete( void * s )$/;"	f
+irc_session_disconnect	src/irc_session.c	/^irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )$/;"	f
+irc_session_get	src/irc_session.c	/^void * irc_session_get( irc_session_t * const session,$/;"	f
+irc_session_get_prehash	src/irc_session.c	/^void * irc_session_get_prehash( irc_session_t * const session,$/;"	f
+irc_session_initialize	src/irc_session.c	/^void irc_session_initialize( irc_session_t * const session,$/;"	f
+irc_session_new	src/irc_session.c	/^irc_session_t * irc_session_new( irc_session_ops_t * const ops,$/;"	f
+irc_session_ops_s	src/irc_session.h	/^	struct irc_session_ops_s$/;"	s	struct:irc_session_s
+irc_session_ops_t	src/irc_session.h	/^typedef struct irc_session_ops_s irc_session_ops_t;$/;"	t	typeref:struct:irc_session_ops_s
+irc_session_s	src/irc_session.h	/^struct irc_session_s$/;"	s
+irc_session_set	src/irc_session.c	/^irc_ret_t irc_session_set( irc_session_t * const session,$/;"	f
+irc_session_set_prehash	src/irc_session.c	/^irc_ret_t irc_session_set_prehash( irc_session_t * const session,$/;"	f
+irc_session_state_e	src/irc_session.h	/^typedef enum irc_session_state_e$/;"	g
+irc_session_state_t	src/irc_session.h	/^} irc_session_state_t;$/;"	t	typeref:enum:irc_session_state_e
+irc_session_t	src/irc_session.h	/^typedef struct irc_session_s irc_session_t;$/;"	t	typeref:struct:irc_session_s
+irc_smode_e	src/irc_modes.h	/^typedef enum irc_smode_e$/;"	g
+irc_smode_t	src/irc_modes.h	/^} irc_smode_t;$/;"	t	typeref:enum:irc_smode_e
+irc_umode_e	src/irc_modes.h	/^typedef enum irc_umode_e$/;"	g
+irc_umode_t	src/irc_modes.h	/^} irc_umode_t;$/;"	t	typeref:enum:irc_umode_e
+is_digit	src/irc_msg.c	/^static int is_digit( int8_t const c )$/;"	f	file:
+is_hex	src/irc_msg.c	/^static int is_hex( int8_t const c )$/;"	f	file:
+is_letter	src/irc_msg.c	/^static int is_letter( int8_t const c )$/;"	f	file:
+is_special	src/irc_msg.c	/^static int is_special( int8_t const c )$/;"	f	file:
+is_user_octet	src/irc_msg.c	/^static int is_user_octet( int8_t const c )$/;"	f	file:
+key_eq	src/irc_session.c	/^static int key_eq(void const * const l, void const * const r)$/;"	f	file:
+main	test/test_all.c	/^int main()$/;"	f
+message_in	src/irc_conn.h	/^		irc_ret_t (*message_in)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
+message_out	src/irc_conn.h	/^		irc_ret_t (*message_out)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
+min	src/irc_conn.c	36;"	d	file:
+msg	src/irc_conn.h	/^	irc_msg_t		msg;			\/* pending message *\/$/;"	m	struct:irc_conn_s
+msgend	src/irc_msg.c	/^static int8_t const * const msgend = "\\r\\n";$/;"	v	file:
+nick	src/irc_msg.h	/^	int8_t * nick;$/;"	m	struct:irc_msg_s
+num_params	src/irc_msg.h	/^	int32_t  num_params;		\/* number of parameters *\/$/;"	m	struct:irc_msg_s
+nvec	src/irc_msg.h	/^	size_t nvec;				\/* number of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s
+ops	src/irc_conn.h	/^	}				ops;			\/* callbacks *\/$/;"	m	struct:irc_conn_s	typeref:struct:irc_conn_s::irc_conn_ops_s
+ops	src/irc_session.h	/^	}					ops;					\/* session callbacks *\/$/;"	m	struct:irc_session_s	typeref:struct:irc_session_s::irc_session_ops_s
+out	src/irc_msg.h	/^	irc_msg_out_buf_t	out;	\/* the buffer used when building messages from scratch for sending *\/$/;"	m	struct:irc_msg_s
+parameters	src/irc_msg.h	/^	int8_t * parameters[IRC_NUM_PARAMS]; \/* pointers to each param *\/$/;"	m	struct:irc_msg_s
+parse_client_server_reply	src/irc_session.c	/^static void parse_client_server_reply( irc_session_t * const session,$/;"	f	file:
+parse_host	src/irc_msg.c	/^static int parse_host( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+parse_hostname	src/irc_msg.c	/^static int parse_hostname( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+parse_ipv4	src/irc_msg.c	/^static int parse_ipv4( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+parse_ipv6	src/irc_msg.c	/^static int parse_ipv6( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+parse_nick	src/irc_msg.c	/^static int parse_nick( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+parse_nickuserhost	src/irc_msg.c	/^static int parse_nickuserhost( irc_msg_t * const msg )$/;"	f	file:
+parse_prefix	src/irc_msg.c	/^static int parse_prefix( irc_msg_t * const msg )$/;"	f	file:
+parse_user	src/irc_msg.c	/^static int parse_user( irc_msg_t * const msg, int8_t ** pcur )$/;"	f	file:
+prefix	src/irc_msg.h	/^	int8_t * prefix;			\/* points to the prefix string in the buffer *\/$/;"	m	struct:irc_msg_s
+reply	src/irc_session.h	/^		irc_ret_t (*reply)(irc_session_t * const session, $/;"	m	struct:irc_session_s::irc_session_ops_s
+scanp	src/irc_conn.h	/^	uint8_t*		scanp;			\/* pointer to byte we haven't scanned *\/$/;"	m	struct:irc_conn_s
+send_nick	src/irc_session.c	/^static void send_nick( irc_session_t * const session )$/;"	f	file:
+send_pass	src/irc_session.c	/^static void send_pass( irc_session_t * const session )$/;"	f	file:
+send_pong	src/irc_session.c	/^static void send_pong( irc_session_t * const session,$/;"	f	file:
+send_quit	src/irc_session.c	/^static void send_quit( irc_session_t * const session )$/;"	f	file:
+send_user	src/irc_session.c	/^static void send_user( irc_session_t * const session )$/;"	f	file:
+settings	src/irc_session.h	/^	ht_t*				settings;						\/* hashtable of settings *\/$/;"	m	struct:irc_session_s
+size	src/irc_msg.h	/^	size_t size;				\/* number of bytes in buffer *\/$/;"	m	struct:irc_msg_in_buf_s
+smodes	src/irc_modes.c	/^static int8_t const * const smodes = "ahlnsADFHLMT";$/;"	v	file:
+socket	src/irc_conn.h	/^	socket_t		socket;			\/* socket to the server *\/$/;"	m	struct:irc_conn_s
+socket_connect_fn	src/irc_conn.c	/^static socket_ret_t socket_connect_fn( socket_t * const s,$/;"	f	file:
+socket_disconnect_fn	src/irc_conn.c	/^static socket_ret_t socket_disconnect_fn( socket_t * const s,$/;"	f	file:
+socket_error_fn	src/irc_conn.c	/^static socket_ret_t socket_error_fn( socket_t * const s,$/;"	f	file:
+socket_read_fn	src/irc_conn.c	/^static int32_t socket_read_fn( socket_t * const s,$/;"	f	file:
+socket_write_fn	src/irc_conn.c	/^static int32_t socket_write_fn( socket_t * const s,$/;"	f	file:
+space	src/irc_msg.c	/^static int8_t space = ' ';$/;"	v	file:
+startp	src/irc_conn.h	/^	uint8_t*		startp;			\/* start of the pending message *\/$/;"	m	struct:irc_conn_s
+state	src/irc_session.h	/^	irc_session_state_t state;					\/* session state *\/$/;"	m	struct:irc_session_s
+trailing	src/irc_msg.h	/^	int8_t * trailing;			\/* trailing part of message *\/$/;"	m	struct:irc_msg_s
+umodes	src/irc_modes.c	/^static int8_t const * const umodes = "abcdfghiklmnopqrstuvwxyzABCGHINORSTVW";$/;"	v	file:
+user	src/irc_msg.h	/^	int8_t * user;$/;"	m	struct:irc_msg_s
+user_data	src/irc_conn.h	/^	void*			user_data;		\/* user data *\/$/;"	m	struct:irc_conn_s
+user_data	src/irc_session.h	/^	void *				user_data;				\/* callback context *\/$/;"	m	struct:irc_session_s
+warnp	src/irc_conn.h	/^	uint8_t*		warnp;			\/* pointer to the guard band in the buffer *\/$/;"	m	struct:irc_conn_s
+wmsgs	src/irc_conn.h	/^	array_t			wmsgs;			\/* array of messages pending send *\/$/;"	m	struct:irc_conn_s
