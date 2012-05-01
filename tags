@@ -10,18 +10,19 @@ AWAY	src/irc_commands.h	/^    AWAY,$/;"	e	enum:irc_command_e
 BUILDDIRS	Makefile	/^BUILDDIRS = $(DIRS:%=build-%)$/;"	m
 CFLAGS	src/Makefile	/^CFLAGS=-O3 -gstabs+ -I$(CUTIL_ROOT)\/include$/;"	m
 CFLAGS	test/Makefile	/^CFLAGS=-O3 -gstabs+ -I$(CIRC_ROOT)\/include -I$(CUTIL_ROOT)\/include$/;"	m
-CHANNEL_MODES_HASH	src/irc_session.h	48;"	d
-CHANNEL_MODES_KEY	src/irc_session.h	47;"	d
-CHANNEL_MODES_PARAM_HASH	src/irc_session.h	50;"	d
-CHANNEL_MODES_PARAM_KEY	src/irc_session.h	49;"	d
+CHANNEL_MODES_HASH	src/irc_session.h	49;"	d
+CHANNEL_MODES_KEY	src/irc_session.h	48;"	d
+CHANNEL_MODES_PARAM_HASH	src/irc_session.h	51;"	d
+CHANNEL_MODES_PARAM_KEY	src/irc_session.h	50;"	d
 CIRC_ROOT	test/Makefile	/^CIRC_ROOT=..\/src$/;"	m
 CLEANDIRS	Makefile	/^CLEANDIRS = $(DIRS:%=clean-%)$/;"	m
 CMD_BASE	src/irc_commands.h	36;"	d
 CONNECT	src/irc_commands.h	/^    CONNECT,$/;"	e	enum:irc_command_e
-CUTIL_ROOT	src/Makefile	/^CUTIL_ROOT=\/usr\/local$/;"	m
-CUTIL_ROOT	test/Makefile	/^CUTIL_ROOT=\/usr\/local$/;"	m
+CUTIL_ROOT	src/Makefile	/^CUTIL_ROOT?=\/usr\/local$/;"	m
+CUTIL_ROOT	test/Makefile	/^CUTIL_ROOT?=\/usr\/local$/;"	m
 DEBUG_ON	src/irc_msg.c	27;"	d	file:
 DEBUG_ON	src/irc_session.c	28;"	d	file:
+DEFAULT_WRITE_QUEUE_SIZE	src/irc_conn.c	39;"	d	file:
 DIE	src/irc_commands.h	/^    DIE,$/;"	e	enum:irc_command_e
 DIRS	Makefile	/^DIRS = src test$/;"	m
 ERROR	src/irc_commands.h	/^    ERROR,$/;"	e	enum:irc_command_e
@@ -79,10 +80,10 @@ ERR_WILDTOPLEVEL	src/irc_commands.h	/^    ERR_WILDTOPLEVEL        = 414,$/;"	e	e
 ERR_YOUREBANNEDCREEP	src/irc_commands.h	/^    ERR_YOUREBANNEDCREEP    = 465,$/;"	e	enum:irc_command_e
 ERR_YOUWILLBEBANNED	src/irc_commands.h	/^    ERR_YOUWILLBEBANNED     = 466,$/;"	e	enum:irc_command_e
 FIRST_COMMAND	src/irc_commands.h	/^    FIRST_COMMAND = PASS,$/;"	e	enum:irc_command_e
-FNV_PRIME	src/irc_session.c	38;"	d	file:
+FNV_PRIME	src/irc_session.c	39;"	d	file:
 HDR	src/Makefile	/^HDR=irc_channel.h irc_commands.h irc_conn.h irc_modes.h irc_msg.h irc_session.h$/;"	m
-HOST_NAME_HASH	src/irc_session.h	42;"	d
-HOST_NAME_KEY	src/irc_session.h	41;"	d
+HOST_NAME_HASH	src/irc_session.h	43;"	d
+HOST_NAME_KEY	src/irc_session.h	42;"	d
 INFO	src/irc_commands.h	/^    INFO,$/;"	e	enum:irc_command_e
 INSTALL	Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
 INSTALL	src/Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
@@ -143,7 +144,7 @@ IRC_MSG_MOREDATA	src/irc_commands.h	/^    IRC_MSG_MOREDATA    = 2,$/;"	e	enum:ir
 IRC_MSG_SIZE	src/irc_msg.h	20;"	d
 IRC_NUM_PARAMS	src/irc_msg.h	21;"	d
 IRC_OK	src/irc_commands.h	/^    IRC_OK              = 1,$/;"	e	enum:irc_ret_e
-IRC_PARAM_LEN	src/irc_session.h	23;"	d
+IRC_PARAM_LEN	src/irc_session.h	24;"	d
 IRC_READ_BUF	src/irc_conn.h	23;"	d
 IRC_SESSION_ACTIVE	src/irc_session.h	/^	IRC_SESSION_ACTIVE,$/;"	e	enum:irc_session_state_e
 IRC_SESSION_CONNECTED	src/irc_session.h	/^	IRC_SESSION_CONNECTED,$/;"	e	enum:irc_session_state_e
@@ -210,13 +211,13 @@ IRC_UMODE_x	src/irc_modes.h	/^	IRC_UMODE_x,$/;"	e	enum:irc_umode_e
 IRC_UMODE_y	src/irc_modes.h	/^	IRC_UMODE_y,$/;"	e	enum:irc_umode_e
 IRC_UMODE_z	src/irc_modes.h	/^	IRC_UMODE_z,$/;"	e	enum:irc_umode_e
 ISON	src/irc_commands.h	/^    ISON,$/;"	e	enum:irc_command_e
-IS_CMODE	src/irc_modes.h	159;"	d
+IS_CMODE	src/irc_modes.h	161;"	d
 IS_COMMAND	src/irc_commands.h	317;"	d
 IS_ERROR	src/irc_commands.h	315;"	d
 IS_REPLY	src/irc_commands.h	316;"	d
 IS_RESERVED	src/irc_commands.h	318;"	d
-IS_SMODE	src/irc_modes.h	176;"	d
-IS_UMODE	src/irc_modes.h	141;"	d
+IS_SMODE	src/irc_modes.h	178;"	d
+IS_UMODE	src/irc_modes.h	143;"	d
 IS_VALID_COMMAND	src/irc_commands.h	342;"	d
 JOIN	src/irc_commands.h	/^    JOIN,$/;"	e	enum:irc_command_e
 KICK	src/irc_commands.h	/^    KICK,$/;"	e	enum:irc_command_e
@@ -232,10 +233,10 @@ MOTD	src/irc_commands.h	/^    MOTD,$/;"	e	enum:irc_command_e
 NAME	src/Makefile	/^NAME=circ$/;"	m
 NAMES	src/irc_commands.h	/^    NAMES,$/;"	e	enum:irc_command_e
 NICK	src/irc_commands.h	/^    NICK,$/;"	e	enum:irc_command_e
-NICKSERV_PASS_HASH	src/irc_session.h	38;"	d
-NICKSERV_PASS_KEY	src/irc_session.h	37;"	d
-NICK_NAME_HASH	src/irc_session.h	30;"	d
-NICK_NAME_KEY	src/irc_session.h	29;"	d
+NICKSERV_PASS_HASH	src/irc_session.h	39;"	d
+NICKSERV_PASS_KEY	src/irc_session.h	38;"	d
+NICK_NAME_HASH	src/irc_session.h	31;"	d
+NICK_NAME_KEY	src/irc_session.h	30;"	d
 NOCMD	src/irc_commands.h	/^    NOCMD = -1,$/;"	e	enum:irc_command_e
 NOTICE	src/irc_commands.h	/^    NOTICE,$/;"	e	enum:irc_command_e
 NUM_COMMANDS	src/irc_commands.h	/^    NUM_COMMANDS = LAST_COMMAND - FIRST_COMMAND,$/;"	e	enum:irc_command_e
@@ -248,13 +249,13 @@ PART	src/irc_commands.h	/^    PART,$/;"	e	enum:irc_command_e
 PASS	src/irc_commands.h	/^    PASS = CMD_BASE,$/;"	e	enum:irc_command_e
 PING	src/irc_commands.h	/^    PING,$/;"	e	enum:irc_command_e
 PONG	src/irc_commands.h	/^    PONG,$/;"	e	enum:irc_command_e
-PREFIX	src/Makefile	/^PREFIX=\/usr\/local$/;"	m
+PREFIX	src/Makefile	/^PREFIX?=\/usr\/local$/;"	m
 PRIVMSG	src/irc_commands.h	/^    PRIVMSG,$/;"	e	enum:irc_command_e
 QUIT	src/irc_commands.h	/^    QUIT,$/;"	e	enum:irc_command_e
-QUIT_MSG_HASH	src/irc_session.h	40;"	d
-QUIT_MSG_KEY	src/irc_session.h	39;"	d
-REAL_NAME_HASH	src/irc_session.h	34;"	d
-REAL_NAME_KEY	src/irc_session.h	33;"	d
+QUIT_MSG_HASH	src/irc_session.h	41;"	d
+QUIT_MSG_KEY	src/irc_session.h	40;"	d
+REAL_NAME_HASH	src/irc_session.h	35;"	d
+REAL_NAME_KEY	src/irc_session.h	34;"	d
 REHASH	src/irc_commands.h	/^    REHASH,$/;"	e	enum:irc_command_e
 RESTART	src/irc_commands.h	/^    RESTART,$/;"	e	enum:irc_command_e
 RPL_ADMINEMAIL	src/irc_commands.h	/^    RPL_ADMINEMAIL          = 259,$/;"	e	enum:irc_command_e
@@ -383,18 +384,18 @@ RPL_YOUREOPER	src/irc_commands.h	/^    RPL_YOUREOPER           = 381,$/;"	e	enum
 RPL_YOURESERVICE	src/irc_commands.h	/^    RPL_YOURESERVICE        = 383,$/;"	e	enum:irc_command_e
 RPL_YOURHOST	src/irc_commands.h	/^    RPL_YOURHOST            = 2,$/;"	e	enum:irc_command_e
 RPL_YOURID	src/irc_commands.h	/^	RPL_YOURID				= 42,  \/* IRCnet *\/$/;"	e	enum:irc_command_e
-SERVER_HOST_HASH	src/irc_session.h	28;"	d
-SERVER_HOST_KEY	src/irc_session.h	27;"	d
-SERVER_MODES_HASH	src/irc_session.h	52;"	d
-SERVER_MODES_KEY	src/irc_session.h	51;"	d
-SERVER_MODES_PARAM_HASH	src/irc_session.h	54;"	d
-SERVER_MODES_PARAM_KEY	src/irc_session.h	53;"	d
-SERVER_PASS_HASH	src/irc_session.h	36;"	d
-SERVER_PASS_KEY	src/irc_session.h	35;"	d
-SERVER_PORT_HASH	src/irc_session.h	26;"	d
-SERVER_PORT_KEY	src/irc_session.h	25;"	d
-SERVER_VERSION_HASH	src/irc_session.h	56;"	d
-SERVER_VERSION_KEY	src/irc_session.h	55;"	d
+SERVER_HOST_HASH	src/irc_session.h	29;"	d
+SERVER_HOST_KEY	src/irc_session.h	28;"	d
+SERVER_MODES_HASH	src/irc_session.h	53;"	d
+SERVER_MODES_KEY	src/irc_session.h	52;"	d
+SERVER_MODES_PARAM_HASH	src/irc_session.h	55;"	d
+SERVER_MODES_PARAM_KEY	src/irc_session.h	54;"	d
+SERVER_PASS_HASH	src/irc_session.h	37;"	d
+SERVER_PASS_KEY	src/irc_session.h	36;"	d
+SERVER_PORT_HASH	src/irc_session.h	27;"	d
+SERVER_PORT_KEY	src/irc_session.h	26;"	d
+SERVER_VERSION_HASH	src/irc_session.h	57;"	d
+SERVER_VERSION_KEY	src/irc_session.h	56;"	d
 SERVICE	src/irc_commands.h	/^    SERVICE,$/;"	e	enum:irc_command_e
 SERVLIST	src/irc_commands.h	/^    SERVLIST,$/;"	e	enum:irc_command_e
 SHELL	Makefile	/^SHELL=\/bin\/sh$/;"	m
@@ -414,12 +415,12 @@ UNINSTALLDIRS	Makefile	/^UNINSTALLDIRS = $(DIRS:%=uninstall-%)$/;"	m
 USER	src/irc_commands.h	/^    USER,$/;"	e	enum:irc_command_e
 USERHOST	src/irc_commands.h	/^    USERHOST,$/;"	e	enum:irc_command_e
 USERS	src/irc_commands.h	/^    USERS,$/;"	e	enum:irc_command_e
-USER_MODES_HASH	src/irc_session.h	44;"	d
-USER_MODES_KEY	src/irc_session.h	43;"	d
-USER_MODES_PARAM_HASH	src/irc_session.h	46;"	d
-USER_MODES_PARAM_KEY	src/irc_session.h	45;"	d
-USER_NAME_HASH	src/irc_session.h	32;"	d
-USER_NAME_KEY	src/irc_session.h	31;"	d
+USER_MODES_HASH	src/irc_session.h	45;"	d
+USER_MODES_KEY	src/irc_session.h	44;"	d
+USER_MODES_PARAM_HASH	src/irc_session.h	47;"	d
+USER_MODES_PARAM_KEY	src/irc_session.h	46;"	d
+USER_NAME_HASH	src/irc_session.h	33;"	d
+USER_NAME_KEY	src/irc_session.h	32;"	d
 VERSION	src/irc_commands.h	/^    VERSION,$/;"	e	enum:irc_command_e
 WALLOPS	src/irc_commands.h	/^    WALLOPS,$/;"	e	enum:irc_command_e
 WHO	src/irc_commands.h	/^    WHO,$/;"	e	enum:irc_command_e
@@ -536,7 +537,7 @@ key_eq	src/irc_session.c	/^static int key_eq(void const * const l, void const * 
 main	test/test_all.c	/^int main()$/;"	f
 message_in	src/irc_conn.h	/^		irc_ret_t (*message_in)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
 message_out	src/irc_conn.h	/^		irc_ret_t (*message_out)(irc_conn_t * const conn, $/;"	m	struct:irc_conn_s::irc_conn_ops_s
-min	src/irc_conn.c	36;"	d	file:
+min	src/irc_conn.c	37;"	d	file:
 msg	src/irc_conn.h	/^	irc_msg_t		msg;			\/* pending message *\/$/;"	m	struct:irc_conn_s
 msgend	src/irc_msg.c	/^static int8_t const * const msgend = "\\r\\n";$/;"	v	file:
 nick	src/irc_msg.h	/^	int8_t * nick;$/;"	m	struct:irc_msg_s
