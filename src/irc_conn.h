@@ -17,8 +17,8 @@
 #ifndef __IRC_CONN_H__
 #define __IRC_CONN_H__
 
-#include "socket.h"
-#include "array.h"
+#include <cutil/socket.h>
+#include <cutil/array.h>
 
 #define IRC_READ_BUF (4 * IRC_MSG_SIZE)
 

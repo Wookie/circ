@@ -27,9 +27,10 @@
 
 #define DEBUG_ON
 
-#include "debug.h"
-#include "macros.h"
-#include "events.h"
+#include <cutil/debug.h>
+#include <cutil/macros.h>
+#include <cutil/events.h>
+
 #include "irc_commands.h"
 #include "irc_msg.h"
 #include "irc_conn.h"

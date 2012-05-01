@@ -1,14 +1,17 @@
 # build circ library
 #
+
+# configurable variables
+CUTIL_ROOT?=/usr/local
+PREFIX?=/usr/local
+
 SHELL=/bin/sh
 NAME=circ
 SRC=irc_commands.c irc_conn.c irc_modes.c irc_msg.c irc_session.c
 HDR=irc_channel.h irc_commands.h irc_conn.h irc_modes.h irc_msg.h irc_session.h
 OBJ=$(SRC:.c=.o)
 OUT=lib$(NAME).a
-CUTIL_ROOT=/usr/local
 CFLAGS=-O3 -gstabs+ -I$(CUTIL_ROOT)/include
-PREFIX=/usr/local
 
 # install utility
 INSTALL=/usr/bin/install

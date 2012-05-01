@@ -1,12 +1,15 @@
 # build circ test executable
 #
+
+# configurable variables
+CUTIL_ROOT?=/usr/local
+
 SHELL=/bin/sh
 SRC=test_all.c
 OBJ=$(SRC:.c=.o)
 OUT=test_all
 LIBS=-lcirc -lcutil -lcunit -lexpat
 CIRC_ROOT=../src
-CUTIL_ROOT=/usr/local
 CFLAGS=-O3 -gstabs+ -I$(CIRC_ROOT)/include -I$(CUTIL_ROOT)/include
 LDFLAGS=-gstabs+ -L$(CIRC_ROOT)/lib -L$(CUTIL_ROOT)/lib
 

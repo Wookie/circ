@@ -24,11 +24,12 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 
-#include "debug.h"
-#include "macros.h"
-#include "array.h"
-#include "events.h"
-#include "socket.h"
+#include <cutil/debug.h>
+#include <cutil/macros.h>
+#include <cutil/array.h>
+#include <cutil/events.h>
+#include <cutil/socket.h>
+
 #include "irc_commands.h"
 #include "irc_msg.h"
 #include "irc_conn.h"

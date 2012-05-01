@@ -17,8 +17,9 @@
 #ifndef __IRC_SESSION_H__
 #define __IRC_SESSION_H__
 
+#include <cutil/hashtable.h>
+
 #include "irc_modes.h"
-#include "hashtable.h"
 
 #define IRC_PARAM_LEN	(512)
 

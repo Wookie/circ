@@ -20,8 +20,9 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "debug.h"
-#include "macros.h"
+#include <cutil/debug.h>
+#include <cutil/macros.h>
+
 #include "irc_commands.h"
 
 /* the message commands map to these strings */
