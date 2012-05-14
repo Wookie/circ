@@ -3,6 +3,7 @@ syntax: glob
 src/circ
 src/include
 src/lib
+src/gen_hashes
 src/*.o
 src/*.a
 test/*.o

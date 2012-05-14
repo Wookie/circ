@@ -23,6 +23,7 @@ typedef enum irc_ret_e
     IRC_OK              = 1,
     IRC_MSG_MOREDATA    = 2,
     IRC_CONTINUE		= 3,
+	IRC_DONE			= 4,
     
     /* errors */
     IRC_ERR             = -1,

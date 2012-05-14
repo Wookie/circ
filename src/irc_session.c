@@ -326,10 +326,7 @@ static irc_ret_t irc_conn_message_in( irc_conn_t * const conn,
 			break;
 		case IRC_SESSION_USER:
 			session->state = IRC_SESSION_ACTIVE;
-			if ( session->ops.connected != NULL )
-			{
-				(*(session->ops.connected))(session, session->user_data);
-			}
+			/* TODO: on_connect callback */
 			break;
 		case IRC_SESSION_ACTIVE:
 			/* do nothing */
@@ -348,20 +345,9 @@ static irc_ret_t irc_conn_message_in( irc_conn_t * const conn,
 		parse_client_server_reply( session, msg );
 	}
 	
-	/* make callbacks */
-	if ( IS_COMMAND(msg->cmd) && (session->ops.command != NULL) )
-	{
-		return (*(session->ops.command))(session, msg, session->user_data);
-	}
-	else if ( IS_REPLY(msg->cmd) && (session->ops.reply != NULL) )
-	{
-		return (*(session->ops.reply))(session, msg, session->user_data);
-	}
-	else if ( IS_ERROR(msg->cmd) && (session->ops.error != NULL) )
-	{
-		return (*(session->ops.error))(session, msg, session->user_data);
-	}
-
+	/* TODO: make handler callbacks by looking up the event by name and iterating
+	 * over the handler function pointers calling them until we run out of handlers
+	 * or one returns IRC_DONE */
 	WARN("unknown incoming message!\n");
 
 	return IRC_OK;
@@ -436,17 +422,12 @@ static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn,
 
 	DEBUG("session has been taken down completely\n");
 
-	if ( session->ops.disconnected != NULL )
-	{
-		DEBUG("calling session disconnected callback\n");
-		(*(session->ops.disconnected))(session, session->user_data);
-	}
+	/* TODO: on_disconnect handler callback */
 
 	return IRC_OK;
 }
 
 void irc_session_initialize( irc_session_t * const session,
-							 irc_session_ops_t * const ops,
 							 evt_loop_t * const el,
 							 void * user_data )
 {
@@ -467,31 +448,31 @@ void irc_session_initialize( irc_session_t * const session,
 	/* store the event loop handle */
 	session->el = el;
 
-	/* store the callbacks */
-	MEMCPY( &(session->ops), ops, sizeof(irc_session_ops_t) );
-	session->user_data = user_data;
-
 	/* create the irc connection */
 	irc_conn_initialize( &(session->conn), &conn_ops, el, (void*)session );
 
 	/* create the settings hashtable */
 	session->settings = ht_new( 64, &fnv_key_hash, FREE, &key_eq, NULL );
+
+	/* create the handlers hashtable */
+	session->handlers = ht_new( 8, &fnv_key_hash, FREE, &key_eq, NULL );
+
+	/* store the handler context */
+	session->user_data = user_data;
 }
 
-irc_session_t * irc_session_new( irc_session_ops_t * const ops,
-								 evt_loop_t * const el,
+irc_session_t * irc_session_new( evt_loop_t * const el,
 								 void * user_data )
 {
 	irc_session_t * session = NULL;
 
-	CHECK_PTR_RET( ops, NULL );
 	CHECK_PTR_RET( el, NULL );
 
 	/* allocate the session struct */
 	session = MALLOC( sizeof(irc_session_t) );
 	CHECK_PTR_RET_MSG( session, NULL, "failed to allocate session struct\n" );
 
-	irc_session_initialize( session, ops, el, user_data );
+	irc_session_initialize( session, el, user_data );
 
 	return session;
 }
@@ -507,8 +488,12 @@ void irc_session_deinitialize( irc_session_t * const session )
 	/* must be disconnected to deinitialize everything */
 	irc_conn_deinitialize( &(session->conn) );
 
-	/* clean up hash table */
+	/* clean up hash tables */
 	ht_delete( session->settings );
+	hg_delete( session->handlers );
+
+	/* drop pointer to context */
+	session->user_data = NULL;
 }
 
 
