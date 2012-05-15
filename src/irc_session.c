@@ -556,6 +556,20 @@ void * irc_session_get_prehash( irc_session_t * const session,
 	return ht_find_prehash( session->settings, hash, key );
 }
 
+
+irc_ret_t irc_session_set_handler( irc_session_t * const session,
+								   int8_t * const event_name,
+								   event_handler_fn event_handler,
+								   int32_t const priority )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( event_name, IRC_BADPARAM );
+	CHECK_PTR_RET( event_handler, IRC_BADPARAM );
+
+
+}
+
+
 irc_ret_t irc_session_connect( irc_session_t * const session )
 {
 	int8_t * host;
