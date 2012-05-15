@@ -27,18 +27,16 @@ typedef struct event_name_s
 	uint32_t hash;
 } event_name_t;
 
-/* the event names for 100 IRC msg codes */
-extern event_name_t const irc_events_h_100[];
-/* the event names for 100 IRC msg codes */
-extern int8_t const * const irc_events_100[];
+/* the event names for 000 IRC msg codes */
+extern event_name_t const irc_events_h_000[];
 /* the event names for 200 IRC msg codes */
-extern int8_t const * const irc_events_200[];
+extern event_name_t const irc_events_h_200[];
 /* the event names for 300 IRC msg codes */
-extern int8_t const * const irc_events_300[];
+extern event_name_t const irc_events_h_300[];
 /* the event names for 400 IRC msg codes */
-extern int8_t const * const irc_events_400[];
+extern event_name_t const irc_events_h_400[];
 /* the event names for 500 IRC msg codes */
-extern int8_t const * const irc_events_500[];
+extern event_name_t const irc_events_h_500[];
 
 /* translate a command into an event_name */
 int8_t const * irc_event_get_name_from_cmd( irc_command_t const cmd );
