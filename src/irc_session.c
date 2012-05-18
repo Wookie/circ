@@ -30,11 +30,163 @@
 #include <cutil/debug.h>
 #include <cutil/macros.h>
 #include <cutil/events.h>
+#include <cutil/btree.h>
 
 #include "irc_commands.h"
+#include "irc_event.h"
 #include "irc_msg.h"
 #include "irc_conn.h"
 #include "irc_session.h"
+
+/* these are the session specific event handlers */
+
+/* this gets called when we receive a PING message from the server */
+static irc_ret_t session_ping_handler( irc_session_t * const session,
+									   irc_msg_t * const msg,
+									   void * user_data )
+{
+	int8_t const * dest;
+	irc_msg_t * pong = NULL;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
+
+	/* get a pointer to the last part of the PING message */
+	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
+	DEBUG("received PING from %s\n", dest);
+
+	/* send PONG */
+	pong = irc_msg_new();
+	irc_msg_initialize( pong, PONG, NULL, 1, dest );
+
+	/* send the PONG command */
+	irc_conn_send_msg( &(session->conn), pong );
+
+	return IRC_DONE;
+}
+
+/* this gets called when we receive an ERR_NEEDMOREPARAMS error from the server */
+static irc_ret_t session_err_needmoreparams_handler( irc_session_t * const session,
+													 irc_msg_t * const msg,
+													 void * user_data )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_RET( (msg->cmd == ERR_NEEDMOREPARAMS), IRC_BADPARAM );
+
+	/* this is a valid response to the following commands:
+	 *	PASS
+	 *	USER
+	 *	OPER
+	 *	USER
+	 *	SERVICE
+	 *	SQUIT
+	 *	JOIN
+	 *	PART
+	 *	MODE
+	 *	TOPIC
+	 *	INVITE
+	 *	KICK
+	 *	CONNECT
+	 *	KILL
+	 *	WALLOPS
+	 *	USERHOST
+	 *	ISON
+	 */
+	
+	WARN( "received %s for command: %s (%s)\n", 
+		  irc_cmd_get_string( msg->cmd ), 
+		  msg->parameters[msg->num_params-1], 
+		  msg->trailing );
+
+	/* chain to the next handler */
+	return IRC_OK;
+}
+
+/* this gets called when we receive an ERR_ALREADYREGISTERED error from the server */
+static irc_ret_t session_err_alreadyregistered_handler( irc_session_t * const session,
+														irc_msg_t * const msg,
+														void * user_data )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_RET( (msg->cmd == ERR_ALREADYREGISTERED), IRC_BADPARAM );
+
+	/* this is a valid response to the following commands:
+	 *	PASS
+	 *	USER
+	 *	SERVICE
+	 */
+
+	WARN( "received %s (%s)\n", irc_cmd_get_string( msg->cmd ), msg->trailing );
+
+	/* chain to the next handler */
+	return IRC_OK;
+}
+
+/* this gets called when we receive an ERR_UNAVAILRESOURCE error from the server */
+static irc_ret_t session_err_unavailresource_handler( irc_session_t * const session,
+													  irc_msg_t * const msg,
+													  void * user_data )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_RET( (msg->cmd == ERR_ALREADYREGISTERED), IRC_BADPARAM );
+
+	/* this is a valid response to the following commands:
+	 *	NICK
+	 *	JOIN
+	 */
+
+	WARN( "received %s %s (%s)\n", 
+		  irc_cmd_get_string( msg->cmd ), 
+		  msg->parameters[msg->num_params-1], 
+		  msg->trailing );
+
+	/* chain to the next handler */
+	return IRC_OK;
+}
+
+/* this gets called when we receive an ERR_UNAVAILRESOURCE error from the server */
+static irc_ret_t session_nick_error_handler( irc_session_t * const session,
+											 irc_msg_t * const msg,
+											 void * user_data )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	/* these are all of the NICK errors other than ERR_UNAVAILRESOURCE */
+
+	/* chain to the next handler */
+	return IRC_OK;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #define FNV_PRIME (0x01000193)
 static uint32_t fnv_key_hash(void const * const key)
@@ -49,9 +201,59 @@ static uint32_t fnv_key_hash(void const * const key)
 	return hash;
 }
 
-static int key_eq(void const * const l, void const * const r)
+static int int_less( void * l, void * r )
+{
+	int li = (int)l;
+	int ri = (int)r;
+
+	if ( li < ri )
+		return -1;
+	else if ( li > ri )
+		return 1;
+	return 0;
+}
+
+static int string_eq(void const * const l, void const * const r)
 {
 	return (strcmp( l, r ) == 0);
+}
+
+static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
+										   irc_msg_t * const msg,
+										   irc_command_t const cmd )
+{
+	bt_itr_t itr;
+	event_handler_fn handler_fn = NULL;
+	bt_t * handler_list = NULL;
+	
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	handler_list = ht_find_prehash ( session->handlers, 
+									 irc_event_get_has_from_cmd ( cmd ),
+									 (void*)irc_event_get_name_from_cmd( cmd ) );
+	CHECK_PTR_RET_MSG( handler_list, IRC_ERR, 
+					   "no handler registered for %s", irc_cmd_get_string( cmd ) );
+
+	/* iterator through the list of handlers calling them until we either run out of
+	 * handlers or one of the handlers returns IRC_DONE. */
+	itr = bt_itr_begin( handler_list );
+	for ( ; itr != bt_itr_end( handler_list ); itr = bt_itr_next( handler_list, itr ) )
+	{
+		handler_fn = (event_handler_fn)bt_itr_get( handler_list, itr );
+
+		if ( handler_fn == NULL )
+		{
+			WARN("NULL handler fn pointer!\n");
+			continue;
+		}
+
+		if ( (*handler_fn)( session, msg, session->user_data ) == IRC_DONE )
+			break;
+	}
+
+	return IRC_OK;
 }
 
 static void send_pass( irc_session_t * const session )
@@ -118,21 +320,6 @@ static void send_quit( irc_session_t * const session )
 
 	/* send the QUIT command */
 	irc_conn_send_msg( &(session->conn), quit );
-}
-
-static void send_pong( irc_session_t * const session,
-					   int8_t const * const dest )
-{
-	irc_msg_t * pong = NULL;
-	CHECK_PTR( session );
-	CHECK_PTR( dest );
-
-	/* send PONG */
-	pong = irc_msg_new();
-	irc_msg_initialize( pong, PONG, NULL, 1, dest );
-
-	/* send the PONG command */
-	irc_conn_send_msg( &(session->conn), pong );
 }
 
 void check_umodes( int8_t const * const modes )
@@ -297,19 +484,6 @@ static irc_ret_t irc_conn_message_in( irc_conn_t * const conn,
 	irc_session_t * session = (irc_session_t*)user_data;
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 
-	/* handle PING with PONG */
-	if ( msg->cmd == PING )
-	{
-		/* get a pointer to the last part of the PING message */
-		dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
-
-		/* send a PONG response */
-		DEBUG("received PING from %s\n", dest);
-		send_pong( session, dest );
-
-		return IRC_OK;
-	}
-
 	/* execute the connection registration state machine */
 	switch ( session->state )
 	{
@@ -422,7 +596,8 @@ static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn,
 
 	DEBUG("session has been taken down completely\n");
 
-	/* TODO: on_disconnect handler callback */
+	/* call "disconnected" handler */
+	irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );
 
 	return IRC_OK;
 }
@@ -431,12 +606,27 @@ void irc_session_initialize( irc_session_t * const session,
 							 evt_loop_t * const el,
 							 void * user_data )
 {
+	int i, j;
+	bt_t * bt = NULL;
+	event_name_t const * event_list;
+
 	static irc_conn_ops_t conn_ops = 
 	{
 		&irc_conn_message_in,
 		&irc_conn_message_out,
 		&irc_conn_connected,
 		&irc_conn_disconnected
+	};
+
+	static event_name_t const * const event_lists[] =
+	{
+		irc_reply_events_000,
+		irc_reply_events_200,
+		irc_reply_events_300,
+		irc_error_events_400,
+		irc_error_events_500,
+		irc_command_events,
+		irc_session_events
 	};
 
 	/* zero everything out */
@@ -452,14 +642,51 @@ void irc_session_initialize( irc_session_t * const session,
 	irc_conn_initialize( &(session->conn), &conn_ops, el, (void*)session );
 
 	/* create the settings hashtable */
-	session->settings = ht_new( 64, &fnv_key_hash, FREE, &key_eq, NULL );
+	session->settings = ht_new( 64, &fnv_key_hash, FREE, &string_eq, NULL );
 
 	/* create the handlers hashtable */
-	session->handlers = ht_new( 8, &fnv_key_hash, FREE, &key_eq, NULL );
+	session->handlers = ht_new( 8, &fnv_key_hash, &bt_delete, &string_eq, NULL );
 
 	/* store the handler context */
 	session->user_data = user_data;
+
+	/* now set up all of the handler chains for all of the different events */
+	for ( i = 0; i < ARRAY_SIZE( event_lists ); ++i )
+	{
+		event_list = event_lists[i];
+
+		for ( j = 0; j < ARRAY_SIZE( event_list ); ++j )
+		{
+			if ( event_list[j].name == NULL )
+				continue;
+
+			/* create a new btree to store the handlers in priority order */
+			bt = bt_new( 1, int_less, NULL, NULL );
+
+			/* add the btree tot he handlers hashtable under the event name */
+			hg_add_prehash( session->handlers, 
+							event_list[j].hash, 
+							(void*)event_list[j].name,
+							(void*)bt );
+
+			DEBUG( "added handler list for: %s\n", event_list[j].name );
+		}
+	}
+
+	/* now set the PING handler */
+	irc_session_set_handler( session, T("ping"), 
+							 &session_ping_handler, SESSION_HANDLER_PRIORITY );
+	irc_session_set_handler( session, T("needmoreparams"), 
+						     &session_err_needmoreparams_handler, 
+							 SESSION_HANDLER_LAST_PRIORITY );
+	irc_session_set_handler( session, T("alreadyregistered"), 
+							 &session_err_alreadyregistered_handler, 
+							 SESSION_HANDLER_LAST_PRIORITY );
+	irc_session_set_handler( session, T("unavailresource"), 
+							 &session_err_unavailresource_handler, 
+							 SESSION_HANDLER_LAST_PRIORITY );
 }
+
 
 irc_session_t * irc_session_new( evt_loop_t * const el,
 								 void * user_data )
@@ -560,15 +787,22 @@ void * irc_session_get_prehash( irc_session_t * const session,
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
 								   int8_t * const event_name,
 								   event_handler_fn event_handler,
-								   int32_t const priority )
+								   int const priority )
 {
+	bt_t * handler_list = NULL;
+
 	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
 	CHECK_PTR_RET( event_name, IRC_BADPARAM );
 	CHECK_PTR_RET( event_handler, IRC_BADPARAM );
 
+	/* look up the btree associated with the specified event name */
+	handler_list = (bt_t*)ht_find( session->handlers, (void*)event_name );
+	CHECK_PTR_RET( handler_list, IRC_BADPARAM );
 
+	/* add the new handler pointer at the specified priority */
+	bt_add( handler_list, (void*)priority, (void*)event_handler );
 }
-
 
 irc_ret_t irc_session_connect( irc_session_t * const session )
 {

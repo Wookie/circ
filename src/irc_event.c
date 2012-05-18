@@ -27,7 +27,7 @@
 #include "irc_event.h"
 
 /* the event names for 000 IRC msg codes */
-event_name_t const irc_events_h_000[] =
+event_name_t const irc_reply_events_000[] =
 {
 	{ NULL,	0 },
 	{ T("welcome"),			0x905c7ca7 },	/* 001 */
@@ -40,7 +40,7 @@ event_name_t const irc_events_h_000[] =
 /* no IRC codes in the 100 range */
 
 /* the event names for 200 IRC msg codes */
-event_name_t const irc_events_h_200[] =
+event_name_t const irc_reply_events_200[] =
 {
 	{ T("tracelink"),		0xad392f44 },	/* 200 */
 	{ T("traceconnecting"), 0xc7d3013a },	/* 201 */
@@ -113,7 +113,7 @@ event_name_t const irc_events_h_200[] =
 
 
 /* the event names for 300 IRC msg codes */
-event_name_t const irc_events_h_300[] =
+event_name_t const irc_reply_events_300[] =
 {
 	{ T("none"),			0x2ca33bdb },	/* 300 */
 	{ T("away"),			0xd3c2c5fb },	/* 301 */
@@ -215,7 +215,7 @@ event_name_t const irc_events_h_300[] =
 
 
 /* the event names for 400 IRC msg codes */
-event_name_t const irc_events_h_400[] =
+event_name_t const irc_error_events_400[] =
 {
 	{ NULL, 0 },
 	{ T("nosuchnick"),		0x9c6cc270 },	/* 401 */
@@ -314,12 +314,71 @@ event_name_t const irc_events_h_400[] =
 
 
 /* the event names for 500 IRC msg codes */
-event_name_t const irc_events_h_500[] =
+event_name_t const irc_error_events_500[] =
 {
 	{ NULL, 0 },
 	{ T("umodeunknownflag"),0x40c76d91 },	/* 501 */
 	{ T("usersdontmatch"),	0x04f12e25 },	/* 502 */
 };
+
+/* the event names for IRC commands */
+event_name_t const irc_command_events[] =
+{
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ T("mode"), 0xc57b7248 },
+	{ NULL, 0 },
+	{ T("quit"), 0xea4b2998 },
+	{ T("squit"), 0x6e9fa331 },
+	{ T("join"), 0xdc402d65 },
+	{ T("part"), 0x5ffa86a6 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ T("invite"), 0xb4b1289e },
+	{ T("kick"), 0x820c394f },
+	{ T("privmsg"), 0x08793e69 },
+	{ T("notice"), 0xb1b66d8d },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ T("kill"), 0x790c2a95 },
+	{ T("ping"), 0x73e71ef1 },
+	{ T("pong"), 0x73e2a10f },
+	{ T("error"), 0x70192415 },
+	{ T("away"), 0xd3c2c5fb },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+	{ T("wallops"), 0x0b278dd7 },
+	{ NULL, 0 },
+	{ NULL, 0 },
+};
+
+
+/* the event names for IRC session events */
+event_name_t const irc_session_events[] =
+{
+	{ T("connected"), 0x61201b16 },
+	{ T("disconnected"), 0x7f0ec4a4 },
+};
+
 
 /* translate a command into an event name */
 int8_t const * irc_event_get_name_from_cmd(irc_command_t const cmd)
@@ -331,23 +390,31 @@ int8_t const * irc_event_get_name_from_cmd(irc_command_t const cmd)
 
 	if ( (c > 0) && (c < 100) )
 	{
-		return irc_events_h_000[c].name;
+		return irc_reply_events_000[c].name;
 	}
 	else if ( (c >= 200) && (c < 300) )
 	{
-		return irc_events_h_200[c].name;
+		return irc_reply_events_200[c - 200].name;
 	}
 	else if ( (c >= 300) && (c < 400) )
 	{
-		return irc_events_h_300[c].name;
+		return irc_reply_events_300[c - 300].name;
 	}
 	else if ( (c >= 400) && (c < 500) ) 
 	{
-		return irc_events_h_400[c].name;
+		return irc_error_events_400[c - 400].name;
 	}
-	else if ( c >= 500 )
+	else if ( (c >= 500) && (c < FIRST_COMMAND) )
 	{
-		return irc_events_h_500[c].name;
+		return irc_error_events_500[c - 500].name;
+	}
+	else if ( (c >= FIRST_COMMAND) && (c < LAST_COMMAND) )
+	{
+		return irc_command_events[c - FIRST_COMMAND].name;
+	}
+	else
+	{
+		return irc_session_events[c - FIRST_SESSION_EVENT].name;
 	}
 
 	return NULL;
@@ -363,23 +430,31 @@ uint32_t irc_event_get_hash_from_cmd(irc_command_t const cmd)
 
 	if ( (c > 0) && (c < 100) )
 	{
-		return irc_events_h_000[c].hash;
+		return irc_reply_events_000[c].hash;
 	}
 	else if ( (c >= 200) && (c < 300) )
 	{
-		return irc_events_h_200[c].hash;
+		return irc_reply_events_200[c - 200].hash;
 	}
 	else if ( (c >= 300) && (c < 400) )
 	{
-		return irc_events_h_300[c].hash;
+		return irc_reply_events_300[c - 300].hash;
 	}
 	else if ( (c >= 400) && (c < 500) ) 
 	{
-		return irc_events_h_400[c].hash;
+		return irc_error_events_400[c - 400].hash;
 	}
-	else if ( c >= 500 )
+	else if ( (c >= 500) && (c < FIRST_COMMAND) )
 	{
-		return irc_events_h_500[c].hash;
+		return irc_error_events_500[c - 500].hash;
+	}
+	else if ( (c >= FIRST_COMMAND) && (c < LAST_COMMAND) )
+	{
+		return irc_command_events[c - FIRST_COMMAND].hash;
+	}
+	else
+	{
+		return irc_session_events[c - FIRST_SESSION_EVENT].hash;
 	}
 	
 	return 0;

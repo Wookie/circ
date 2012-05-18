@@ -312,6 +312,78 @@ int8_t const * const irc_events_500[] =
 	T("usersdontmatch"),	/* 502 */
 };
 
+/* the event names for IRC commands */
+int8_t const * const irc_command_events[] =
+{
+    /* RFC 2812, Section 3.1 -- Connection Registration */
+    NULL,			/* PASS */
+    NULL,			/* NICK */
+    NULL,			/* USER */
+    NULL,			/* OPER */
+    T("mode"),		/* MODE */
+    NULL,			/* SERVICE */
+    T("quit"),		/* QUIT */
+    T("squit"),		/* SQUIT */
+
+    /* RFC 2812, Section 3.2 -- Channel Operations */
+    T("join"),		/* JOIN */
+    T("part"),		/* PART */
+    /* MODE */  /* also a connection registration command */
+    NULL,			/* TOPIC */
+    NULL,			/* NAMES */
+    NULL,			/* LIST */
+    T("invite"),		/* INVITE */
+    T("kick"),		/* KICK */
+    
+    /* RFC 2812, Section 3.3 -- Sending Messages */
+    T("privmsg"),	/* PRIVMSG */
+    T("notice"),		/* NOTICE */
+    
+    /* RFC 2812, Section 3.4 -- Server Queries and Commands */
+    NULL,			/* MOTD */
+    NULL,			/* LUSERS */
+    NULL,			/* VERSION */
+    NULL,			/* STATS */
+    NULL,			/* LINKS */
+    NULL,			/* TIME */
+    NULL,			/* CONNECT */
+    NULL,			/* TRACE */
+    NULL,			/* ADMIN */
+    NULL,			/* INFO */
+        
+    /* RFC 2812, Section 3.5 -- Service Query and Commands */
+    NULL,			/* SERVLIST */
+    NULL,			/* SQUERY */
+    
+    /* RFC 2812, Section 3.6 -- User Based Queries */
+    NULL,			/* WHO */
+    NULL,			/* WHOIS */
+    NULL,			/* WHOWAS */
+    
+    /* RFC 2812, Section 3.7 -- Misc Messages */
+    T("kill"),		/* KILL */
+    T("ping"),		/* PING */
+    T("pong"),		/* PONG */
+    T("error"),		/* ERROR */
+    
+    /* RFC 2812, Section 4 -- Optional Features */
+    T("away"),		/* AWAY */
+    NULL,			/* REHASH */
+    NULL,			/* DIE */
+    NULL,			/* RESTART */
+    NULL,			/* SUMMON */
+    NULL,			/* USERS */
+    T("wallops"),	/* WALLOPS */
+    NULL,			/* USERHOST */
+    NULL			/* ISON */
+};
+
+int8_t const * const irc_session_events[] =
+{
+	T("connected"),		/* when the session is established */
+	T("disconnected")	/* when the session is torn down */
+};
+
 
 #define ARRAY_SIZE( x ) (sizeof(x) / sizeof(x[0]))
 
@@ -418,6 +490,41 @@ int main(int argc, char** argv)
 		}
 	}
 	printf( "};\n\n\n" );
+
+	/* commands */
+	printf( "/* the event names for IRC commands msg codes */\n" );
+	printf( "event_name_t const irc_command_events[] =\n" );
+	printf( "{\n" );
+	for ( i = 0; i < ARRAY_SIZE(irc_command_events); i++ )
+	{
+		if ( irc_command_events[i] != NULL )
+		{
+			printf( "\t{ T(\"%s\"), 0x%08x },\n", irc_command_events[i], fnv_key_hash(irc_command_events[i]) );
+		}
+		else
+		{
+			printf( "\t{ NULL, 0 },\n" );
+		}
+	}
+	printf( "};\n\n\n" );
+
+	/* session */
+	printf( "/* the event names for IRC session events */\n" );
+	printf( "event_name_t const irc_session_events[] =\n" );
+	printf( "{\n" );
+	for ( i = 0; i < ARRAY_SIZE(irc_session_events); i++ )
+	{
+		if ( irc_session_events[i] != NULL )
+		{
+			printf( "\t{ T(\"%s\"), 0x%08x },\n", irc_session_events[i], fnv_key_hash(irc_session_events[i]) );
+		}
+		else
+		{
+			printf( "\t{ NULL, 0 },\n" );
+		}
+	}
+	printf( "};\n\n\n" );
+
 
 	return 0;
 }

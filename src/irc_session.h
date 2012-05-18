@@ -69,6 +69,9 @@ typedef enum irc_session_state_e
 
 } irc_session_state_t;
 
+#define SESSION_HANDLER_PRIORITY (-10000)
+#define SESSION_HANDLER_LAST_PRIORITY ((int)0x8FFFFFFF)
+
 typedef struct irc_session_s irc_session_t;
 
 typedef irc_ret_t (*event_handler_fn)(irc_session_t * const session, 
@@ -115,7 +118,7 @@ void * irc_session_get_prehash( irc_session_t * const session,
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
 								   int8_t * const event_name,
 								   event_handler_fn event_handler,
-								   int32_t const priority );
+								   int const priority );
 
 /* connect/disconnect from the server */
 irc_ret_t irc_session_connect( irc_session_t * const session );

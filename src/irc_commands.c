@@ -91,6 +91,13 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
     T("ISON")
 };
 
+/* session event strings */
+int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
+{
+	T("CONNECTED"),
+	T("DISCONNECTED")
+};
+
 /* translate a command into a string */
 int8_t const * irc_cmd_get_string(irc_command_t const cmd)
 {
@@ -100,6 +107,10 @@ int8_t const * irc_cmd_get_string(irc_command_t const cmd)
     {
         return irc_commands[cmd - CMD_BASE];   
     }
+	else if (IS_SESSION_EVENT(cmd))
+	{
+		return irc_session_events[cmd - SESSION_BASE];
+	}
     else
     {
         sprintf(C(code), "%03d", cmd);
@@ -114,6 +125,7 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )
 	static int8_t const * const ERROR = T("ERROR");
 	static int8_t const * const REPLY = T("REPLY");
 	static int8_t const * const COMMAND = T("COMMAND");
+	static int8_t const * const SESSION_EVENT = T("SESSION_EVENT");
 	static int8_t const * const RESERVED = T("RESERVED");
 	static int8_t const * const UNKNOWN = T("UNKNOWN");
 
@@ -128,6 +140,10 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )
 	else if ( IS_COMMAND( cmd ) )
 	{
 		return COMMAND;
+	}
+	else if ( IS_SESSION_EVENT( cmd ) )
+	{
+		return SESSION_EVENT;
 	}
 	else if ( IS_RESERVED( cmd ) )
 	{
@@ -148,7 +164,7 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
     {
         return atoi(C(str));
     }
-    else
+    else if ( IS_COMMAND(cmd) )
     {
         /* scan through the command strings looking for a match */
         for(cmd = FIRST_COMMAND; cmd < LAST_COMMAND; cmd++)
@@ -157,7 +173,17 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
                 return cmd;
         }
     }
+	else if ( IS_SESSION_EVENT(cmd) )
+	{
+		/* scan through the session event strings looking for a match */
+		for(cmd = FIRST_SESSION_EVENT; cmd < LAST_SESSION_EVENT; cmd++)
+		{
+			if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
+				return cmd;
+		}
+	}
         
     /* no match so return no command */
     return NOCMD;
 }
+

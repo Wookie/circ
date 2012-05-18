@@ -35,6 +35,7 @@ typedef enum irc_ret_e
 } irc_ret_t;
 
 #define CMD_BASE (10000)
+#define SESSION_BASE (20000)
 
 typedef enum irc_command_e
 {
@@ -112,6 +113,13 @@ typedef enum irc_command_e
     LAST_COMMAND,
     FIRST_COMMAND = PASS,
     NUM_COMMANDS = LAST_COMMAND - FIRST_COMMAND,
+
+	/* session events */
+	SESSION_CONNECTED = SESSION_BASE,
+	SESSION_DISCONNECTED,
+	LAST_SESSION_EVENT,
+	FIRST_SESSION_EVENT = SESSION_CONNECTED,
+	NUM_SESSION_EVENTS = LAST_SESSION_EVENT - FIRST_SESSION_EVENT,
     
     /* RFC 2812, Section 5 -- Replies */
     
@@ -316,6 +324,7 @@ typedef enum irc_command_e
 #define IS_ERROR(x) ((x >= 400) && (x < FIRST_COMMAND))
 #define IS_REPLY(x) ((x >= 1) && (x < 400))
 #define IS_COMMAND(x) ((x >= FIRST_COMMAND) && (x < LAST_COMMAND))
+#define IS_SESSION_EVENT(x) ((x >= FIRST_SESSION_EVENT) && (x < LAST_SESSION_EVENT))
 #define IS_RESERVED(x) ( \
     (x == RPL_STATSCLINE) || \
     (x == RPL_STATSNLINE) || \
@@ -340,7 +349,7 @@ typedef enum irc_command_e
     (x == RPL_INFOSTART) || \
     (x == RPL_MYPORTIS) || \
     (x == ERR_NOSERVICEHOST))
-#define IS_VALID_COMMAND(x) (IS_ERROR(x) || IS_REPLY(x) || IS_COMMAND(x) || (x == NOCMD))
+#define IS_VALID_COMMAND(x) (IS_ERROR(x) || IS_REPLY(x) || IS_COMMAND(x) || IS_SESSION_EVENT(x) || (x == NOCMD))
 
 /* translate a command into a string */
 int8_t const * irc_cmd_get_string( irc_command_t const cmd );
@@ -352,3 +361,4 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd );
 irc_command_t irc_cmd_get_command_from_string( int8_t const * const str );
 
 #endif//__IRC_COMMANDS_H__
+
