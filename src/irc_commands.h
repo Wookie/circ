@@ -263,6 +263,10 @@ typedef enum irc_command_e
     RPL_USERS               = 393,
     RPL_ENDOFUSERS          = 394,
     RPL_NOUSERS             = 395,
+
+	LAST_RPL,
+	FIRST_RPL = RPL_WELCOME,
+	NUM_RPLS = LAST_RPL - FIRST_RPL,
     
     /* RFC 2812, Section 5.2 -- Error Replies */
     ERR_NOSUCHNCK           = 401,
@@ -317,12 +321,16 @@ typedef enum irc_command_e
     ERR_NOOPERHOST          = 491,
     ERR_NOSERVICEHOST       = 492, /* reserved */
     ERR_UMODEUNKNOWNFLAG    = 501,
-    ERR_USERSDONTMATCH      = 502
+    ERR_USERSDONTMATCH      = 502,
+
+	LAST_ERR,
+	FIRST_ERR = ERR_NOSUCHNCK,
+	NUM_ERRS = LAST_ERR - FIRST_ERR
 
 } irc_command_t;
 
-#define IS_ERROR(x) ((x >= 400) && (x < FIRST_COMMAND))
-#define IS_REPLY(x) ((x >= 1) && (x < 400))
+#define IS_ERROR(x) ((x >= FIRST_ERR) && (x < LAST_ERR))
+#define IS_REPLY(x) ((x >= FIRST_RPL) && (x < LAST_RPL))
 #define IS_COMMAND(x) ((x >= FIRST_COMMAND) && (x < LAST_COMMAND))
 #define IS_SESSION_EVENT(x) ((x >= FIRST_SESSION_EVENT) && (x < LAST_SESSION_EVENT))
 #define IS_RESERVED(x) ( \

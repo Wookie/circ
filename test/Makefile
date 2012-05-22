@@ -8,9 +8,9 @@ SHELL=/bin/sh
 SRC=test_all.c
 OBJ=$(SRC:.c=.o)
 OUT=test_all
-LIBS=-lcirc -lcutil -lcunit -lexpat
+LIBS=-lcirc -lcutil -lcunit -lev
 CIRC_ROOT=../src
-CFLAGS=-O3 -gstabs+ -I$(CIRC_ROOT)/include -I$(CUTIL_ROOT)/include
+CFLAGS=-O0 -gstabs+ -I$(CIRC_ROOT)/include -I$(CUTIL_ROOT)/include
 LDFLAGS=-gstabs+ -L$(CIRC_ROOT)/lib -L$(CUTIL_ROOT)/lib
 
 all:

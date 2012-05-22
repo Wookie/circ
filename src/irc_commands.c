@@ -164,7 +164,7 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
     {
         return atoi(C(str));
     }
-    else if ( IS_COMMAND(cmd) )
+    else
     {
         /* scan through the command strings looking for a match */
         for(cmd = FIRST_COMMAND; cmd < LAST_COMMAND; cmd++)
@@ -172,9 +172,7 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
             if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
                 return cmd;
         }
-    }
-	else if ( IS_SESSION_EVENT(cmd) )
-	{
+		
 		/* scan through the session event strings looking for a match */
 		for(cmd = FIRST_SESSION_EVENT; cmd < LAST_SESSION_EVENT; cmd++)
 		{

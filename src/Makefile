@@ -7,11 +7,11 @@ PREFIX?=/usr/local
 
 SHELL=/bin/sh
 NAME=circ
-SRC=irc_commands.c irc_conn.c irc_event.c irc_modes.c irc_msg.c irc_session.c
-HDR=irc_channel.h irc_commands.h irc_conn.h irc_event.h irc_modes.h irc_msg.h irc_session.h
+SRC=irc_commands.c irc_conn.c irc_modes.c irc_msg.c irc_session.c
+HDR=irc_channel.h irc_commands.h irc_conn.h irc_modes.h irc_msg.h irc_session.h
 OBJ=$(SRC:.c=.o)
 OUT=lib$(NAME).a
-CFLAGS=-O3 -gstabs+ -I$(CUTIL_ROOT)/include
+CFLAGS=-O0 -gstabs+ -I$(CUTIL_ROOT)/include
 
 # install utility
 INSTALL=/usr/bin/install
