@@ -645,11 +645,21 @@ irc_ret_t irc_session_set_handler( irc_session_t * const session,
 
 		/* add the btree to the handlers hashtable under the command */
 		ht_add( session->handlers, (void*)cmd, (void*)handler_list );
+
+		if ( ht_find( session->handlers, (void*)cmd ) != (void*)handler_list )
+		{
+			WARN( "adding handler list to session handlers failed!\n" );
+		}
 	}
 	else
 	{
 		/* add the new handler pointer at the specified priority */
 		bt_add( handler_list, (void*)priority, (void*)event_handler );
+	}
+
+	if ( bt_find( handler_list, (void*)priority ) != (void*)event_handler )
+	{
+		WARN( "adding event handler to event handler list failed!\n" );
 	}
 
 	return IRC_OK;
