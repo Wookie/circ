@@ -37,6 +37,43 @@
 #include "irc_conn.h"
 #include "irc_session.h"
 
+/* handles calling the handlers associated with the cmd */
+static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
+										   irc_msg_t * const msg,
+										   irc_command_t const cmd )
+{
+	bt_itr_t itr;
+	event_handler_fn handler_fn = NULL;
+	bt_t * handler_list = NULL;
+	
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
+
+	handler_list = ht_find( session->handlers, (void*)cmd );
+	CHECK_PTR_RET( handler_list, IRC_ERR );
+
+	/* iterator through the list of handlers calling them until we either run out of
+	 * handlers or one of the handlers returns IRC_DONE. */
+	itr = bt_itr_begin( handler_list );
+	for ( ; itr != bt_itr_end( handler_list ); itr = bt_itr_next( handler_list, itr ) )
+	{
+		handler_fn = (event_handler_fn)bt_itr_get( handler_list, itr );
+
+		if ( handler_fn == NULL )
+		{
+			WARN("NULL handler fn pointer!\n");
+			continue;
+		}
+
+		DEBUG( "Calling handler for %s\n", irc_cmd_get_string( cmd ) );
+		if ( (*handler_fn)( session, msg, session->user_data ) == IRC_DONE )
+			break;
+	}
+
+	return IRC_OK;
+}
+
+
 /* these are the session specific event handlers */
 
 /* this gets called when we receive a PING message from the server */
@@ -65,6 +102,30 @@ static irc_ret_t session_ping_handler( irc_session_t * const session,
 	return IRC_DONE;
 }
 
+/* this gets called when we receive a RPL_WELCOME message from the server */
+static irc_ret_t session_rpl_welcome_handler( irc_session_t * const session,
+									   irc_msg_t * const msg,
+									   void * user_data )
+{
+	int8_t const * dest;
+	irc_msg_t * pong = NULL;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
+
+	/* get a pointer to the last part of the PING message */
+	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
+	DEBUG("received RPL_WELCOME from %s\n", dest);
+
+	/* we have a registered connection to the server, we're now active */
+	session->state = IRC_SESSION_ACTIVE;
+
+	/* call the irc session connected event callback */
+	irc_session_call_handler( session, NULL, SESSION_CONNECTED );
+	
+	return IRC_DONE;
+}
 
 void check_umodes( int8_t const * const modes )
 {
@@ -104,7 +165,7 @@ void check_smodes( int8_t const * const modes )
 
 
 /* this gets called when we receive a RPL_MYINFO message from the server */
-static irc_ret_t session_myinfo_handler( irc_session_t * const session,
+static irc_ret_t session_rpl_myinfo_handler( irc_session_t * const session,
 										 irc_msg_t * const msg,
 										 void * user_data )
 {
@@ -292,42 +353,6 @@ static int int_less( void * l, void * r )
 	else if ( li > ri )
 		return 1;
 	return 0;
-}
-
-
-static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
-										   irc_msg_t * const msg,
-										   irc_command_t const cmd )
-{
-	bt_itr_t itr;
-	event_handler_fn handler_fn = NULL;
-	bt_t * handler_list = NULL;
-	
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	handler_list = ht_find( session->handlers, (void*)cmd );
-	CHECK_PTR_RET( handler_list, IRC_ERR );
-
-	/* iterator through the list of handlers calling them until we either run out of
-	 * handlers or one of the handlers returns IRC_DONE. */
-	itr = bt_itr_begin( handler_list );
-	for ( ; itr != bt_itr_end( handler_list ); itr = bt_itr_next( handler_list, itr ) )
-	{
-		handler_fn = (event_handler_fn)bt_itr_get( handler_list, itr );
-
-		if ( handler_fn == NULL )
-		{
-			WARN("NULL handler fn pointer!\n");
-			continue;
-		}
-
-		if ( (*handler_fn)( session, msg, session->user_data ) == IRC_DONE )
-			break;
-	}
-
-	return IRC_OK;
 }
 
 static void send_pass( irc_session_t * const session )
@@ -524,10 +549,14 @@ void irc_session_initialize( irc_session_t * const session,
 							 &session_ping_handler, 
 							 SESSION_HANDLER_FIRST_PRIORITY );
 
-#if 0
+	/* handle RPL_WELCOME */
+	irc_session_set_handler( session, RPL_WELCOME,
+							 &session_rpl_welcome_handler,
+							 SESSION_HANDLER_FIRST_PRIORITY );
+
 	/* handle RPL_MYINFO */
 	irc_session_set_handler( session, RPL_MYINFO,
-							 &session_myinfo_handler,
+							 &session_rpl_myinfo_handler,
 							 SESSION_HANDLER_FIRST_PRIORITY );
 
 	/* set the ERR_NEEDMOREPARAMS handler at lowest priority */
@@ -544,7 +573,7 @@ void irc_session_initialize( irc_session_t * const session,
 	irc_session_set_handler( session, ERR_UNAVAILRESOURCE,
 							 &session_err_unavailresource_handler, 
 							 SESSION_HANDLER_LAST_PRIORITY );
-#endif
+	
 	/* set the catch-all handler */
 	irc_session_set_handler( session, ANYCMD,
 							 &session_log_handler,
@@ -708,7 +737,7 @@ irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
 	
 	DEBUG("don't have registered connection so tear down immediately\n");
 
-	if ( session->state = IRC_SESSION_PENDING_DISCONNECT )
+	if ( session->state == IRC_SESSION_PENDING_DISCONNECT )
 	{
 		/* have already tried to disconnect... */
 		session->state = IRC_SESSION_DISCONNECTED;
@@ -722,6 +751,7 @@ irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
 	else
 	{
 		/* haven't tried to disconnect yet... */
+		DEBUG("beginning connection disconnect\n");
 
 		/* move to pending disconnect state */
 		session->state = IRC_SESSION_PENDING_DISCONNECT;

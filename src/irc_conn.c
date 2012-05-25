@@ -24,6 +24,8 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 
+#define  DEBUG_ON
+
 #include <cutil/debug.h>
 #include <cutil/macros.h>
 #include <cutil/array.h>
