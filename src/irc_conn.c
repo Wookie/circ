@@ -86,7 +86,7 @@ static socket_ret_t socket_error_fn( socket_t * const s,
 	if ( conn->disconnect )
 	{
 		DEBUG( "received error during pending disconnect, closing socket\n" );
-		socket_disconnect( &(conn->socket) );
+		socket_disconnect( conn->socket );
 	}
 	
 	return SOCKET_OK;
@@ -116,7 +116,7 @@ static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread
 
 	while ( nleft > 0 )
 	{
-		nr = socket_read( &(conn->socket), conn->inp, nleft );
+		nr = socket_read( conn->socket, conn->inp, nleft );
 
 		if ( nr == 0 )
 			break;
@@ -315,7 +315,7 @@ static int32_t socket_write_fn( socket_t * const s,
 	{
 		DEBUG("all pending message sends have completed, now we can disconnect\n");
 		/* all messages have been written */
-		socket_disconnect( &(conn->socket) );
+		socket_disconnect( conn->socket );
 	}
 
 	return 0;
@@ -348,7 +348,7 @@ void irc_conn_initialize( irc_conn_t * const conn,
 	
 	/* initialize the socket */
 	conn->disconnect = FALSE;
-	socket_initialize( &(conn->socket), SOCKET_TCP, &sock_ops, conn->el, conn );
+	conn->socket = socket_new( SOCKET_TCP, &sock_ops, conn->el, conn );
 
 	/* initialize the write msg array */
 	array_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL );
@@ -383,13 +383,14 @@ irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	/* callbacks for irc messa
 void irc_conn_deinitialize( irc_conn_t * const conn )
 {
 	CHECK_PTR( conn );
-	CHECK_MSG( !socket_is_connected( &(conn->socket) ), "deinitializing active irc conn\n" );
+	CHECK_MSG( !socket_is_connected( conn->socket ), "deinitializing active irc conn\n" );
 
 	/* we're disconnected */
 	DEBUG("irc connection deinitializing\n");
 
 	/* clean up the socket */
-	socket_deinitialize( &(conn->socket) );
+	socket_delete( (void*)conn->socket );
+	conn->socket = NULL;
 
 	/* clean up write array */
 	array_deinitialize( &(conn->wmsgs) );
@@ -400,7 +401,7 @@ void irc_conn_delete(void * c)
 {
 	irc_conn_t* conn = (irc_conn_t*)c;
 	CHECK_PTR( conn );
-	CHECK_MSG( !socket_is_connected( &(conn->socket) ), "deleting active irc conn\n" );
+	CHECK_MSG( !socket_is_connected( conn->socket ), "deleting active irc conn\n" );
 
 	/* deinitialize, don't wait for messages to be written */
 	irc_conn_deinitialize( conn );
@@ -417,13 +418,13 @@ irc_ret_t irc_conn_connect( irc_conn_t* const conn,				/* irc context */
 	CHECK_PTR_RET(conn, IRC_BADPARAM);
 	
 	/* disconnect any existing socket if needed */
-	if ( socket_is_connected( &(conn->socket) ) )
+	if ( socket_is_connected( conn->socket ) )
 	{
 		WARN( "socket already connected\n" );
 		return IRC_ERR;
 	}
 	
-	if ( socket_connect( &(conn->socket), server_host, server_port ) != SOCKET_OK )
+	if ( socket_connect( conn->socket, server_host, server_port ) != SOCKET_OK )
 		return IRC_SOCKET_ERROR;
 
 	return IRC_OK;
@@ -442,7 +443,7 @@ irc_ret_t irc_conn_disconnect( irc_conn_t* const conn, int do_wait )
 		DEBUG("no messages waiting, closing socket immediately\n");
 
 		/* disconnect the socket */
-		socket_disconnect( &(conn->socket) );
+		socket_disconnect( conn->socket );
 	}
 	else
 	{
@@ -481,7 +482,7 @@ irc_ret_t irc_conn_send_msg( irc_conn_t* const conn,
 	irc_msg_log( msg );
 
 	/* queue up the msg for writing using gather I/O for speed */
-	socket_writev( &(conn->socket), msg->out.iov, msg->out.nvec );
+	socket_writev( conn->socket, msg->out.iov, msg->out.nvec );
 	
 	return IRC_OK;
 }

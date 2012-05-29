@@ -49,7 +49,7 @@ struct irc_conn_s
 
 	/* socket */
 	int				disconnect;		/* pending disconnect? */
-	socket_t		socket;			/* socket to the server */
+	socket_t*		socket;			/* socket to the server */
 
 	/* write queue of irc messages */
 	array_t			wmsgs;			/* array of messages pending send */
