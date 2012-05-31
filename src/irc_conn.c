@@ -40,6 +40,34 @@
 
 #define DEFAULT_WRITE_QUEUE_SIZE (8)
 
+struct irc_conn_s
+{
+	/* event loop */
+	evt_loop_t*		el;				/* event loop pointer */
+
+	/* callbacks and user data */
+	irc_conn_ops_t	ops;
+	void*			user_data;		/* user data */
+
+	/* socket */
+	int				disconnect;		/* pending disconnect? */
+	socket_t*		socket;			/* socket to the server */
+
+	/* write queue of irc messages */
+	array_t			wmsgs;			/* array of messages pending send */
+
+	/* next message we're decoding */
+	irc_msg_t		msg;			/* pending message */
+
+	/* "ring" buffer for reading data from socket */
+	uint8_t			buf[IRC_READ_BUF]; /* read buffer */
+	uint8_t*		startp;			/* start of the pending message */
+	uint8_t*		scanp;			/* pointer to byte we haven't scanned */
+	uint8_t*		inp;			/* pointer to where incoming data gets written */
+	uint8_t*		warnp;			/* pointer to the guard band in the buffer */
+};
+
+
 static socket_ret_t socket_connect_fn( socket_t * const s,
 									   void * user_data )
 {
@@ -322,10 +350,10 @@ static int32_t socket_write_fn( socket_t * const s,
 }
 
 
-void irc_conn_initialize( irc_conn_t * const conn,
-						  irc_conn_ops_t * const ops,
-						  evt_loop_t * const el,
-						  void * user_data )
+static void irc_conn_initialize( irc_conn_t * const conn,
+								 irc_conn_ops_t * const ops,
+								 evt_loop_t * const el,
+								 void * user_data )
 {
 	static socket_ops_t sock_ops = 
 	{ 
@@ -380,7 +408,7 @@ irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	/* callbacks for irc messa
 }
 
 
-void irc_conn_deinitialize( irc_conn_t * const conn )
+static void irc_conn_deinitialize( irc_conn_t * const conn )
 {
 	CHECK_PTR( conn );
 	CHECK_MSG( !socket_is_connected( conn->socket ), "deinitializing active irc conn\n" );

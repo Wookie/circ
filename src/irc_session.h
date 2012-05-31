@@ -56,31 +56,22 @@ typedef enum irc_session_state_e
 
 } irc_session_state_t;
 
-#define SESSION_HANDLER_FIRST_PRIORITY (INT_MAX)
-#define SESSION_HANDLER_LAST_PRIORITY (INT_MIN)
+#define HANDLER_FIRST (INT_MAX)
+#define HANDLER_LAST (INT_MIN)
 
 typedef struct irc_session_s irc_session_t;
 
 typedef irc_ret_t (*event_handler_fn)(irc_session_t * const session, 
 									  irc_msg_t * const msg, 
 									  void * user_data);
+#define HANDLER_FN(x) irc_ret_t session_##x##_handler( irc_session_t * const session, \
+													   irc_msg_t * const msg, \
+													   void * user_data )
+#define SET_HANDLER(x, y) irc_session_set_handler( session, x, &session_##x##_handler, y )
 
-struct irc_session_s
-{
-	irc_session_state_t state;					/* session state */
-	evt_loop_t*			el;						/* event loop */
-	irc_conn_t			conn;					/* irc connection */
-	ht_t*				settings;				/* hashtable of settings */
-	ht_t*				handlers;				/* hashtable of event handlers */
-	void *				user_data;				/* handler context */
-};
+#define HANDLER(x) session_##x##_handler
 
-/* session creation/destruction functions */
-void irc_session_initialize( irc_session_t * const session,
-							 evt_loop_t * const evt,
-							 void * user_data );
-void irc_session_deinitialize( irc_session_t * const session );
-
+/* create/destroy session */
 irc_session_t * irc_session_new( evt_loop_t * const evt,
 								 void * user_data );
 void irc_session_delete( void * s );
