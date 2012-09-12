@@ -23,7 +23,7 @@
 #include <cutil/debug.h>
 #include <cutil/macros.h>
 
-#include "irc_commands.h"
+#include "commands.h"
 
 /* the message commands map to these strings */
 int8_t const * const irc_commands[NUM_COMMANDS] =

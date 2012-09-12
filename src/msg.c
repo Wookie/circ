@@ -28,8 +28,8 @@
 #include <cutil/debug.h>
 #include <cutil/macros.h>
 
-#include "irc_commands.h"
-#include "irc_msg.h"
+#include "commands.h"
+#include "msg.h"
 
 static int8_t colon = ':';
 static int8_t space = ' ';

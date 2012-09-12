@@ -19,9 +19,12 @@
 
 #include <limits.h>
 
+#include <cutil/events.h>
 #include <cutil/hashtable.h>
 
-#include "irc_modes.h"
+#include "commands.h"
+#include "modes.h"
+#include "msg.h"
 
 #define IRC_PARAM_LEN	(512)
 

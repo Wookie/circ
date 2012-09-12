@@ -1,10 +1,11 @@
 syntax: glob
-.*.swp
-src/circ
-src/include
+src/cutil
 src/lib
-src/gen_hashes
-src/*.o
-src/*.a
-test/*.o
-test/test_all
+src/include
+tests/test_all
+*.o
+*.a
+.*.swp
+*.gcno
+*.gcda
+src/cutil.info

@@ -24,5 +24,7 @@ irc_channel_t * irc_channel_new( int8_t * const name,
 								 int8_t * const topic );
 void irc_channel_delete( void * c );
 
+int8_t * irc_channel_get_name( irc_channel_t * c );
+
 
 #endif

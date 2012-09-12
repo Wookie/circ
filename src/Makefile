@@ -4,14 +4,21 @@
 # configurable variables
 CUTIL_ROOT?=../cutil/src
 PREFIX?=/usr/local
+COVERAGE?=../coverage
+EXTRA_LIBS_ROOT?=/usr/local
 
 SHELL=/bin/sh
 NAME=circ
-SRC=irc_commands.c irc_conn.c irc_modes.c irc_msg.c irc_session.c
-HDR=irc_channel.h irc_commands.h irc_conn.h irc_modes.h irc_msg.h irc_session.h
+SRC=channel.c commands.c conn.c modes.c msg.c session.c
+HDR=channel.h commands.h conn.h modes.h msg.h session.h
 OBJ=$(SRC:.c=.o)
 OUT=lib$(NAME).a
-CFLAGS=-O0 -gstabs+ -I$(CUTIL_ROOT)/include
+GCDA=$(SRC:.c=.gcda)
+GCNO=$(SRC:.c=.gcno)
+GCOV=$(SRC:.c=.c.gcov)
+CFLAGS=-O3 -I$(CUTIL_ROOT)/include
+coverage: CFLAGS=-fprofile-arcs -ftest-coverage -O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)/include -I../tests
+test: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)/include -I../tests
 
 # install utility
 INSTALL=/usr/bin/install
@@ -25,6 +32,9 @@ all: $(OUT) gen_hashes
 
 $(OUT): $(OBJ)
 	ar rcs $(OUT) $(OBJ)
+	rm -rf $(NAME)
+	rm -rf include
+	rm -rf lib
 	ln -s . $(NAME)
 	ln -s . include
 	ln -s . lib
@@ -44,14 +54,27 @@ uninstall:
 
 test: all
 
+coverage: all
+
+report:
+	lcov --base-directory . --directory . -c -o cutil.info
+	lcov --remove cutil.info "/usr*" -o cutil.info
+	rm -rf $(COVERAGE)
+	genhtml -o $(COVERAGE) -t "cutil test coverage" --num-spaces 4 cutil.info
+
 clean:
 	rm -rf $(NAME)
 	rm -rf include
 	rm -rf lib
 	rm -rf $(OBJ)
 	rm -rf $(OUT)
+	rm -rf $(GCDA)
+	rm -rf $(GCNO)
+	rm -rf $(GCOV)
+	rm -rf ev.h.gcov
+	rm -rf gen_hashes.gcov
 	rm -rf gen_hashes.o
 	rm -rf gen_hashes
 
-.PHONY: all install uninstall clean test
+.PHONY: all install uninstall clean test coverage report
 

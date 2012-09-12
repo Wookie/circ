@@ -31,12 +31,13 @@
 #include <cutil/macros.h>
 #include <cutil/events.h>
 #include <cutil/btree.h>
+#include <cutil/pair.h>
 
-#include "irc_commands.h"
-#include "irc_msg.h"
-#include "irc_conn.h"
-#include "irc_channel.h"
-#include "irc_session.h"
+#include "commands.h"
+#include "msg.h"
+#include "conn.h"
+#include "channel.h"
+#include "session.h"
 
 #define CHECK_HANDLER_PRAMS CHECK_PTR_RET( session, IRC_BADPARAM ); \
 							CHECK_PTR_RET( msg, IRC_BADPARAM );
@@ -85,13 +86,19 @@ static irc_ret_t irc_session_call_handler( irc_session_t * const session,
 										   irc_command_t const cmd )
 {
 	bt_itr_t itr;
+	ht_itr_t htitr;
 	event_handler_fn handler_fn = NULL;
+	pair_t * p = NULL;
 	bt_t * handler_list = NULL;
 	
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
 
-	handler_list = ht_find( session->handlers, (void*)cmd );
+	p = pair_new( (void*)cmd, NULL );
+	htitr = ht_find( session->handlers, p );
+	pair_delete( p );
+	p = (pair_t*)ht_get( session->handlers, htitr );
+	handler_list = p ? pair_second( p ) : NULL;
 	CHECK_PTR_RET( handler_list, IRC_ERR );
 
 	/* iterator through the list of handlers calling them until we either run out of
@@ -321,6 +328,62 @@ static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn,
 	return IRC_OK;
 }
 
+static uint_t setting_hash_fn( void const * const key )
+{
+	CHECK_PTR_RET( key, 0 );
+	return (uint_t)pair_first((pair_t*)key);
+}
+
+static int setting_match_fn( void const * const l, void const * const r )
+{
+	CHECK_PTR_RET( l, FALSE );
+	CHECK_PTR_RET( r, FALSE );
+	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
+}
+
+static void setting_delete_fn( void * p )
+{
+	pair_t * pair = (pair_t*)p;
+	CHECK_PTR( pair );
+
+	FREE( pair_second( p ) );
+	pair_delete( p );
+}
+
+static uint_t channel_hash_fn( void const * const key )
+{
+	return fnv_key_hash( irc_channel_get_name( (irc_channel_t*)key ) );
+}
+
+static int channel_match_fn( void const * const l, void const * const r )
+{
+	return strncmp( irc_channel_get_name( (irc_channel_t*)l ),
+					irc_channel_get_name( (irc_channel_t*)r ),
+					256 );
+}
+
+static uint_t handler_hash_fn( void const * const key )
+{
+	CHECK_PTR_RET( key, 0 );
+	return (uint_t)pair_first((pair_t*)key);
+}
+
+static int handler_match_fn( void const * const l, void const * const r )
+{
+	CHECK_PTR_RET( l, FALSE );
+	CHECK_PTR_RET( r, FALSE );
+	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
+}
+
+static void handler_delete_fn( void * p )
+{
+	pair_t * pair = (pair_t*)p;
+	CHECK_PTR( pair );
+
+	bt_delete( pair_second( p ) );
+	pair_delete( p );
+}
+
 
 static int irc_session_initialize( irc_session_t * const session,
 								   evt_loop_t * const el,
@@ -352,15 +415,15 @@ static int irc_session_initialize( irc_session_t * const session,
 	CHECK_PTR_RET( session->conn, FALSE );
 
 	/* create the settings hashtable */
-	session->settings = ht_new( 64, NULL, FREE, NULL, NULL );
+	session->settings = ht_new( 64, &setting_hash_fn, &setting_match_fn, &setting_delete_fn );
 	CHECK_PTR_RET( session->settings, FALSE );
 
 	/* create the channels hashtable */
-	session->channels = ht_new( 128, &fnv_key_hash, &irc_channel_delete, &string_eq, FREE );
+	session->channels = ht_new( 128, &channel_hash_fn, &channel_match_fn, &irc_channel_delete );
 	CHECK_PTR_RET( session->channels, FALSE );
 
 	/* create the handlers hashtable */
-	session->handlers = ht_new( 8, NULL, &bt_delete, NULL, NULL );
+	session->handlers = ht_new( 8, &handler_hash_fn, &handler_match_fn, &handler_delete_fn );
 	CHECK_PTR_RET( session->handlers, FALSE );
 
 	/* store the handler context */
@@ -385,10 +448,14 @@ irc_session_t * irc_session_new( evt_loop_t * const el,
 	CHECK_PTR_RET( el, NULL );
 
 	/* allocate the session struct */
-	session = MALLOC( sizeof(irc_session_t) );
+	session = CALLOC( 1, sizeof(irc_session_t) );
 	CHECK_PTR_RET_MSG( session, NULL, "failed to allocate session struct\n" );
 
-	irc_session_initialize( session, el, user_data );
+	if ( !irc_session_initialize( session, el, user_data ) )
+	{
+		FREE( session );
+		return NULL;
+	}
 
 	return session;
 }
@@ -429,10 +496,16 @@ irc_ret_t irc_session_set( irc_session_t * const session,
 						   irc_session_setting_t const setting,
 						   void * const value )
 {
+	pair_t * p, * r = NULL;
+	ht_itr_t itr;
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 	CHECK_PTR_RET( value, IRC_BADPARAM );
-	ht_remove( session->settings, (void*)setting);
-	ht_add( session->settings, (void*)setting, value );
+	p = pair_new( (void*)setting, (void*)value );
+	itr = ht_find( session->settings, (void*)p );
+	r = (pair_t*)ht_get( session->settings, itr );
+	ht_remove( session->settings, itr );
+	setting_delete_fn( r );
+	ht_insert( session->settings, p );
 	return IRC_OK;
 }
 
@@ -440,8 +513,14 @@ irc_ret_t irc_session_set( irc_session_t * const session,
 void * irc_session_get( irc_session_t * const session,
 					    irc_session_setting_t const setting )
 {
+	pair_t * p = NULL;
+	ht_itr_t itr;
 	CHECK_PTR_RET( session, NULL );
-	return ht_find( session->settings, (void*)setting );
+	p = pair_new( (void*)setting, NULL );
+	itr = ht_find( session->settings, (void*)p );
+	pair_delete( p );
+	p = ht_get( session->settings, itr );
+	return (void*)pair_second( p );
 }
 
 
@@ -451,6 +530,8 @@ irc_ret_t irc_session_set_handler( irc_session_t * const session,
 								   int const priority )
 {
 	int ret = FALSE;
+	ht_itr_t itr;
+	pair_t * p = NULL;
 	bt_t * handler_list = NULL;
 
 	CHECK_PTR_RET( session, IRC_BADPARAM );
@@ -459,7 +540,11 @@ irc_ret_t irc_session_set_handler( irc_session_t * const session,
 	CHECK_PTR_RET( event_handler, IRC_BADPARAM );
 
 	/* look up the btree associated with the specified event name */
-	handler_list = (bt_t*)ht_find( session->handlers, (void*)cmd );
+	p = pair_new( (void*)cmd, NULL );
+	itr = ht_find( session->handlers, (void*)p );
+	pair_delete( p );
+	p = ((pair_t*)ht_get( session->handlers, itr ));
+	handler_list = p ? pair_second( p ) : NULL;
 
 	if ( handler_list == NULL )
 	{
@@ -472,14 +557,8 @@ irc_ret_t irc_session_set_handler( irc_session_t * const session,
 		CHECK_RET( ret, IRC_ERR );
 
 		/* add the btree to the handlers hashtable under the command */
-		ret = ht_add( session->handlers, (void*)cmd, (void*)handler_list );
+		ret = ht_insert( session->handlers, pair_new( (void*)cmd, (void*)handler_list ) );
 		CHECK_RET( ret, IRC_ERR );
-
-		if ( ht_find( session->handlers, (void*)cmd ) != (void*)handler_list )
-		{
-			WARN( "adding handler list to session handlers failed!\n" );
-			return IRC_ERR;
-		}
 	}
 	else
 	{
@@ -581,7 +660,6 @@ static HANDLER_FN( PING )
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;
 
-	CHECK_HANDLER_PARAMS();
 	CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
 
 	/* get a pointer to the last part of the PING message */
@@ -604,7 +682,6 @@ static HANDLER_FN( RPL_WELCOME )
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;
 
-	CHECK_HANDLER_PARAMS();
 	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
 
 	/* get a pointer to the last part of the PING message */
@@ -626,7 +703,6 @@ static HANDLER_FN( RPL_MYINFO )
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;
 
-	CHECK_HANDLER_PARAMS();
 	CHECK_RET( (msg->cmd == RPL_MYINFO), IRC_BADPARAM );
 
 	switch( msg->num_params )
@@ -686,7 +762,6 @@ static HANDLER_FN( RPL_MYINFO )
 /* this handles MODE commands from the server */
 static HANDLER_FN( MODE )
 {
-	CHECK_HANDLER_PARAMS();
 	CHECK_RET( (msg->cmd == MODE), IRC_BADPARAM );
 
 	/* chain to the next handler */
@@ -696,8 +771,6 @@ static HANDLER_FN( MODE )
 /* this is the catch-all handler that logs all inbound messages */
 static HANDLER_FN( ANYCMD )
 {
-	CHECK_HANDLER_PARAMS();
-
 	/* log it */
 	irc_msg_log( msg );	
 
@@ -705,4 +778,13 @@ static HANDLER_FN( ANYCMD )
 	return IRC_OK;
 }
 
+#ifdef UNIT_TESTING
+
+#include <CUnit/Basic.h>
+
+void test_session_private_functions( void )
+{
+}
+
+#endif
 

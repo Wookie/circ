@@ -18,12 +18,11 @@
 
 #include <cutil/debug.h>
 #include <cutil/macros.h>
-#include <cutil/events.h>
-#include <cutil/btree.h>
+#include <cutil/list.h>
 
-#include "irc_commands.h"
-#include "irc_msg.h"
-#include "irc_channel.h"
+#include "commands.h"
+#include "msg.h"
+#include "channel.h"
 
 struct irc_channel_s
 {
@@ -31,7 +30,7 @@ struct irc_channel_s
     int8_t*     pass;           /* the channel password */
     int8_t*     topic;          /* channel topic */
     /*int32_t     mode[MODE_WORDS];*//* mode flags */
-    array_t*    clients;        /* array of clients in the channel (irc_client_t*) */
+    list_t*    clients;         /* list of clients in the channel (irc_client_t*) */
 };
 
 
@@ -53,12 +52,20 @@ irc_channel_t * irc_channel_new( int8_t * const name,
 	if ( topic != NULL )
 		ch->topic = STRDUP( topic );
 
+	/* create the client list */
+	ch->clients = list_new( 0, FREE );
+	if ( ch->clients == NULL )
+	{
+		irc_channel_delete( ch );
+		return NULL;
+	}
+
 	return ch;
 }
 
 void irc_channel_delete( void * c )
 {
-	irc_channelt_t * ch = (irc_channel_t*)c;
+	irc_channel_t * ch = (irc_channel_t*)c;
 	CHECK_PTR( ch );
 
 	if ( ch->name != NULL )
@@ -71,9 +78,15 @@ void irc_channel_delete( void * c )
 		FREE( ch->topic );
 
 	if ( ch->clients != NULL )
-		array_delete( (void*)ch->clients );
+		list_delete( (void*)ch->clients );
 
 	FREE( ch );
+}
+
+int8_t * irc_channel_get_name( irc_channel_t * c )
+{
+	CHECK_PTR_RET( c, NULL );
+	return c->name;
 }
 
 

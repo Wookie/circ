@@ -26,27 +26,27 @@
 
 #include <cutil/debug.h>
 #include <cutil/macros.h>
+#include <cutil/events.h>
 
-#if 0
-#include "test_binary.h"
-#include "test_xml.h"
-#endif
+#include "test_macros.h"
+#include "test_flags.h"
+
+SUITE( session );
+
+evt_loop_t * el = NULL;
 
 int main()
 {
-	CU_pSuite binary_test_suite;
-	CU_pSuite notation_test_suite;
-	CU_pSuite xml_test_suite;
-
 	/* initialize the CUnit test registry */
 	if ( CUE_SUCCESS != CU_initialize_registry() )
 		return CU_get_error();
 
-#if 0
 	/* add each suite of tests */
-	binary_test_suite = add_binary_test_suite();
-	xml_test_suite = add_xml_test_suite();
-#endif
+	ADD_SUITE( session );
+
+	/* set up the event loop */
+	el = evt_new();
+	CHECK_PTR_RET( el, 0 );
 
 	/* run all tests using the CUnit Basic interface */
 	CU_basic_set_mode( CU_BRM_VERBOSE );
@@ -54,6 +54,9 @@ int main()
 
 	/* clean up */
 	CU_cleanup_registry();
+
+	/* clean up the event loop */
+	evt_delete( el );
 
 	return CU_get_error();
 }

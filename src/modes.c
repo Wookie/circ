@@ -14,7 +14,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-#include "irc_modes.h"
+#include "modes.h"
 
 static int8_t const * const umodes = "abcdfghiklmnopqrstuvwxyzABCGHINORSTVW";
 

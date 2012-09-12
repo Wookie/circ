@@ -28,13 +28,13 @@
 
 #include <cutil/debug.h>
 #include <cutil/macros.h>
-#include <cutil/array.h>
+#include <cutil/list.h>
 #include <cutil/events.h>
 #include <cutil/socket.h>
 
-#include "irc_commands.h"
-#include "irc_msg.h"
-#include "irc_conn.h"
+#include "commands.h"
+#include "msg.h"
+#include "conn.h"
 
 #define min(x, y) (((x) < (y)) ? (x) : (y))
 
@@ -54,7 +54,7 @@ struct irc_conn_s
 	socket_t*		socket;			/* socket to the server */
 
 	/* write queue of irc messages */
-	array_t			wmsgs;			/* array of messages pending send */
+	list_t			wmsgs;			/* list of messages pending send */
 
 	/* next message we're decoding */
 	irc_msg_t		msg;			/* pending message */
@@ -317,8 +317,8 @@ static int32_t socket_write_fn( socket_t * const s,
 
 	DEBUG( "irc write callback\n" );
 
-	/* get the irc_msg_t pointer from the head of the array */
-	msg = (irc_msg_t*)array_get_head( &(conn->wmsgs) );
+	/* get the irc_msg_t pointer from the head of the list */
+	msg = (irc_msg_t*)list_get_head( &(conn->wmsgs) );
 
 	/* check to make sure it matches what we're being given */
 	if ( (void*)msg->out.iov == (void*)buffer )
@@ -326,7 +326,7 @@ static int32_t socket_write_fn( socket_t * const s,
 		DEBUG( "message write complete\n" );
 
 		/* clean up */
-		array_pop_head( &(conn->wmsgs) );
+		list_pop_head( &(conn->wmsgs) );
 
 		/* call the message out callback */
 		if ( conn->ops.message_out != NULL )
@@ -339,7 +339,7 @@ static int32_t socket_write_fn( socket_t * const s,
 		WARN( "received write callback with buffer mismatch\n" );
 	}
 
-	if ( conn->disconnect && (array_size( &(conn->wmsgs) ) == 0) )
+	if ( conn->disconnect && (list_count( &(conn->wmsgs) ) == 0) )
 	{
 		DEBUG("all pending message sends have completed, now we can disconnect\n");
 		/* all messages have been written */
@@ -378,8 +378,8 @@ static void irc_conn_initialize( irc_conn_t * const conn,
 	conn->disconnect = FALSE;
 	conn->socket = socket_new( SOCKET_TCP, &sock_ops, conn->el, conn );
 
-	/* initialize the write msg array */
-	array_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL );
+	/* initialize the write msg list */
+	list_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL );
 
 	/* initialize read buffer pointers */
 	conn->startp = conn->scanp = conn->inp = conn->buf;
@@ -420,8 +420,8 @@ static void irc_conn_deinitialize( irc_conn_t * const conn )
 	socket_delete( (void*)conn->socket );
 	conn->socket = NULL;
 
-	/* clean up write array */
-	array_deinitialize( &(conn->wmsgs) );
+	/* clean up write list */
+	list_deinitialize( &(conn->wmsgs) );
 }
 
 /* these function allocate/deallocate the opaque handle */
@@ -466,7 +466,7 @@ irc_ret_t irc_conn_disconnect( irc_conn_t* const conn, int do_wait )
 	/* set pending disconnect flag */
 	conn->disconnect = TRUE;
 
-	if ( !do_wait || (array_size( &(conn->wmsgs) ) == 0) )
+	if ( !do_wait || (list_count( &(conn->wmsgs) ) == 0) )
 	{
 		DEBUG("no messages waiting, closing socket immediately\n");
 
@@ -504,7 +504,7 @@ irc_ret_t irc_conn_send_msg( irc_conn_t* const conn,
 	}
 
 	/* remember the message being queued up to write */
-	array_push_tail( &(conn->wmsgs), (void*)msg );
+	list_push_tail( &(conn->wmsgs), (void*)msg );
 
 	DEBUG("sending message:\n");
 	irc_msg_log( msg );
