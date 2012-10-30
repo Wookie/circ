@@ -1,7 +1,8 @@
 syntax: glob
-src/cutil
+src/circ
 src/lib
 src/include
+src/gen_hashes
 tests/test_all
 *.o
 *.a

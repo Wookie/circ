@@ -163,6 +163,7 @@ static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread
 
 static irc_ret_t irc_scan_for_msg( irc_conn_t * const conn )
 {
+	int found_r = FALSE;
 	irc_msg_in_buf_t * m = &conn->msg.in;
 	uint8_t *p = conn->scanp;
 
@@ -170,26 +171,39 @@ static irc_ret_t irc_scan_for_msg( irc_conn_t * const conn )
 
 	while ( p < conn->inp )
 	{
-		if ( (p[0] == '\r') && (p[1] == '\n') )
+		if ( found_r )
 		{
-			/* we found the end of a msg */
+			if ( *p == '\n' )
+			{
+				/* we found the end of a msg */
 
-			p++; /* now points to '\n' */
-			p++; /* now points to byte after msg */
+				++p; /* now points to byte after msg */
+				
+				/* set up our irc message structure */
+				m->data = conn->startp;
+				m->size = (size_t)((void*)p - (void*)m->data);
+
+				/* update the irc conn state */
+				conn->startp = p;
+				DEBUG("scanned %d bytes, found full message, %d left to scan\n", (p - conn->scanp), (conn->inp - p));
+				conn->scanp = p;
 			
-			/* set up our irc message structure */
-			m->data = conn->startp;
-			m->size = (size_t)((void*)p - (void*)m->data);
-
-			/* update the irc conn state */
-			conn->startp = p;
-			DEBUG("scanned %d bytes, found full message, %d left to scan\n", (p - conn->scanp), (conn->inp - p));
-			conn->scanp = p;
-		
-			/* we have found a full message...if we haven't scanned
-			 * everything we've read, then reaturn IRC_CONTINUE, otherwise
-			 * that's it and we return IRC_OK */
-			return ( (p < conn->inp) ? IRC_CONTINUE : IRC_OK );
+				/* we have found a full message...if we haven't scanned
+				 * everything we've read, then reaturn IRC_CONTINUE, otherwise
+				 * that's it and we return IRC_OK */
+				return ( (p < conn->inp) ? IRC_CONTINUE : IRC_OK );
+			}
+			else
+			{
+				found_r = FALSE;
+			}
+		}
+		else
+		{
+			if ( *p == '\r' )
+			{
+				found_r = TRUE;
+			}
 		}
 		
 		++p;
