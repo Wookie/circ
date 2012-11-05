@@ -479,7 +479,7 @@ GCOV	cutil/src/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
 GCOV	cutil/tests/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
 GCOV	src/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
 GCOV	tests/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
-GCOVDIRS	Makefile	/^GCOVDIRS = $(BASEDIRS:%=gcov-%)$/;"	m
+GCOVDIRS	Makefile	/^GCOVDIRS = $(SRCDIR:%=gcov-%) $(TESTDIR:%=gcov-%)$/;"	m
 GCOVDIRS	cutil/Makefile	/^GCOVDIRS = $(DIRS:%=gcov-%)$/;"	m
 GETDTABLESIZE	cutil/src/macros.h	108;"	d
 GETDTABLESIZE	cutil/src/macros.h	199;"	d
@@ -745,7 +745,7 @@ REPEAT	cutil/tests/test_hashtable.c	34;"	d	file:
 REPEAT	cutil/tests/test_list.c	34;"	d	file:
 REPEAT	cutil/tests/test_privileges.c	33;"	d	file:
 REPEAT	cutil/tests/test_socket.c	34;"	d	file:
-REPORTDIRS	Makefile	/^REPORTDIRS = $(BASEDIRS:%=report-%)$/;"	m
+REPORTDIRS	Makefile	/^REPORTDIRS = $(SRCDIR:%=report-%) $(TESTDIR:%=report-%)$/;"	m
 REPORTDIRS	cutil/Makefile	/^REPORTDIRS = $(DIRS:%=report-%)$/;"	m
 RESTART	src/commands.h	/^    RESTART,$/;"	e	enum:irc_command_e
 RPL_ADMINEMAIL	src/commands.h	/^    RPL_ADMINEMAIL          = 259,$/;"	e	enum:irc_command_e
