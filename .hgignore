@@ -9,5 +9,5 @@ tests/test_all
 .*.swp
 *.gcno
 *.gcda
-src/cutil.info
+src/*.info
 coverage/circ/src/gen_hashes*
