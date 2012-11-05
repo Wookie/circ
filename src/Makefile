@@ -17,6 +17,7 @@ GCDA=$(SRC:.c=.gcda)
 GCNO=$(SRC:.c=.gcno)
 GCOV=$(SRC:.c=.c.gcov)
 CFLAGS=-O3 -I$(CUTIL_ROOT)/include
+debug: CFLAGS=-O0 -gstabs+ -I$(CUTIL_ROOT)/include
 coverage: CFLAGS=-fprofile-arcs -ftest-coverage -O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)/include -I../tests
 test: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)/include -I../tests
 
@@ -56,6 +57,8 @@ test: all
 
 coverage: all
 
+debug: all
+
 report:
 	lcov --base-directory . --directory . -c -o cutil.info
 	lcov --remove cutil.info "/usr*" -o cutil.info
@@ -76,5 +79,5 @@ clean:
 	rm -rf gen_hashes.o
 	rm -rf gen_hashes
 
-.PHONY: all install uninstall clean test coverage report
+.PHONY: all install uninstall clean test debug coverage report
 
