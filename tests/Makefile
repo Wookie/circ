@@ -19,7 +19,6 @@ LDFLAGS=-gstabs+ -L$(CIRC_ROOT)/lib -L$(CUTIL_ROOT)/lib
 # set LDFLAGS to something gcov can use
 coverage: LDFLAGS=-fprofile-arcs -O0 -gstabs+ -L$(CIRC_ROOT)/lib -L$(CUTIL_ROOT)/lib -L$(EXTRA_LIBS_ROOT)/lib
 
-
 all:
 
 test: $(OUT)
