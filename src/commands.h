@@ -78,7 +78,7 @@ typedef enum irc_command_e
     STATS,
     LINKS,
     TIME,
-    CONNECT,
+    CONNECT_, /* NOTE: name collision with CONNECT macro in cutil/src/macros.h */
     TRACE,
     ADMIN,
     INFO,

@@ -10,3 +10,4 @@ tests/test_all
 *.gcno
 *.gcda
 src/cutil.info
+coverage/circ/src/gen_hashes*
