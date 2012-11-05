@@ -7,7 +7,6 @@
 1	coverage/circ/src/channel.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
 1	coverage/circ/src/commands.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
 1	coverage/circ/src/conn.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
-1	coverage/circ/src/gen_hashes.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
 1	coverage/circ/src/msg.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
 1	coverage/circ/src/session.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
 1	cutil/coverage/cutil/src/aiofd.c.gcov.html	/^<a name="1"><span class="lineNum">       1 <\/span>                :            : \/*<\/a>$/;"	a
@@ -165,11 +164,9 @@
 386	coverage/circ/src/session.c.gcov.html	/^<a name="386"><span class="lineNum">     386 <\/span>                :            : <\/a>$/;"	a
 389	coverage/circ/src/msg.c.gcov.html	/^<a name="389"><span class="lineNum">     389 <\/span>                :            : }<\/a>$/;"	a
 39	cutil/coverage/cutil/src/pair.c.gcov.html	/^<a name="39"><span class="lineNum">      39 <\/span>                :            : }<\/a>$/;"	a
-390	coverage/circ/src/gen_hashes.c.gcov.html	/^<a name="390"><span class="lineNum">     390 <\/span>                :            : <\/a>$/;"	a
 393	cutil/coverage/cutil/src/child.c.gcov.html	/^<a name="393"><span class="lineNum">     393 <\/span>                :            : }<\/a>$/;"	a
 399	cutil/coverage/cutil/src/events.c.gcov.html	/^<a name="399"><span class="lineNum">     399 <\/span>                :<span class="lineCov">          1 : }<\/span><\/a>$/;"	a
 401	cutil/coverage/cutil/src/child.c.gcov.html	/^<a name="401"><span class="lineNum">     401 <\/span>                :            : }<\/a>$/;"	a
-402	coverage/circ/src/gen_hashes.c.gcov.html	/^<a name="402"><span class="lineNum">     402 <\/span>                :            : }<\/a>$/;"	a
 402	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="402"><span class="lineNum">     402 <\/span>                :            : }<\/a>$/;"	a
 404	coverage/circ/src/conn.c.gcov.html	/^<a name="404"><span class="lineNum">     404 <\/span>                :            : <\/a>$/;"	a
 405	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="405"><span class="lineNum">     405 <\/span>                :            : }<\/a>$/;"	a
@@ -313,7 +310,6 @@ ARRAY_SIZE	cutil/src/macros.h	37;"	d
 ARRAY_SIZE	src/gen_hashes.c	388;"	d	file:
 ASSERT	cutil/src/macros.h	40;"	d
 AWAY	src/commands.h	/^    AWAY,$/;"	e	enum:irc_command_e
-BASEDIRS	Makefile	/^BASEDIRS = src tests$/;"	m
 BIND	cutil/src/macros.h	193;"	d
 BIND	cutil/src/macros.h	84;"	d
 BIT	cutil/src/bitset.c	27;"	d	file:
@@ -329,6 +325,7 @@ CFLAGS	cutil/src/Makefile	/^test: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(EXTRA_L
 CFLAGS	cutil/tests/Makefile	/^CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)\/include -I$(EXTRA_LIBS_ROOT)\/include$/;"	m
 CFLAGS	src/Makefile	/^CFLAGS=-O3 -I$(CUTIL_ROOT)\/include$/;"	m
 CFLAGS	src/Makefile	/^coverage: CFLAGS=-fprofile-arcs -ftest-coverage -O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)\/include -I..\/tests$/;"	m
+CFLAGS	src/Makefile	/^debug: CFLAGS=-O0 -gstabs+ -I$(CUTIL_ROOT)\/include$/;"	m
 CFLAGS	src/Makefile	/^test: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)\/include -I..\/tests$/;"	m
 CFLAGS	tests/Makefile	/^CFLAGS=-O0 -gstabs+ -I$(CIRC_ROOT)\/include -I$(CUTIL_ROOT)\/include$/;"	m
 CHANNEL_MODES	src/session.h	/^	CHANNEL_MODES		= 0x9b5b9912,$/;"	e	enum:irc_session_setting_e
@@ -356,14 +353,13 @@ COVERAGE	Makefile	/^COVERAGE?=.\/coverage$/;"	m
 COVERAGE	cutil/Makefile	/^COVERAGE?=.\/coverage$/;"	m
 COVERAGE	cutil/src/Makefile	/^COVERAGE?=..\/coverage$/;"	m
 COVERAGE	src/Makefile	/^COVERAGE?=..\/coverage$/;"	m
-CUTIL	Makefile	/^CUTIL = cutil$/;"	m
-CUTILDIRS	Makefile	/^CUTILDIRS = $(CUTIL:%=cutildir-%)$/;"	m
 CUTIL_ROOT	cutil/tests/Makefile	/^CUTIL_ROOT=..\/src$/;"	m
 CUTIL_ROOT	src/Makefile	/^CUTIL_ROOT?=..\/cutil\/src$/;"	m
 CUTIL_ROOT	tests/Makefile	/^CUTIL_ROOT?=..\/cutil\/src$/;"	m
 DEBUG	cutil/src/debug.h	17;"	d
 DEBUG	cutil/src/debug.h	20;"	d
 DEBUG	cutil/src/debug.h	22;"	d
+DEBUGDIRS	Makefile	/^DEBUGDIRS = $(DEPS:%=debug-%) $(SRCDIR:%=debug-%)$/;"	m
 DEBUGDIRS	cutil/Makefile	/^DEBUGDIRS = $(SRCDIR:%=debug-%)$/;"	m
 DEBUG_ON	cutil/src/debug.h	25;"	d
 DEBUG_ON	src/channel.c	17;"	d	file:
@@ -372,8 +368,10 @@ DEBUG_ON	src/msg.c	27;"	d	file:
 DEBUG_ON	src/session.c	28;"	d	file:
 DEFAULT_INITIAL_CAPACITY	cutil/src/btree.c	32;"	d	file:
 DEFAULT_WRITE_QUEUE_SIZE	src/conn.c	41;"	d	file:
+DEPDIRS	Makefile	/^DEPDIRS = $(DEPS:%=depdirs-%)$/;"	m
+DEPS	Makefile	/^DEPS = cutil$/;"	m
 DIE	src/commands.h	/^    DIE,$/;"	e	enum:irc_command_e
-DIRS	Makefile	/^DIRS = $(CUTIL) $(BASEDIRS)$/;"	m
+DIRS	Makefile	/^DIRS = $(DEPS) $(SRCDIR) $(TESTDIR)$/;"	m
 DIRS	cutil/Makefile	/^DIRS = $(SRCDIR) $(TESTDIR)$/;"	m
 DWORDS_NEEDED	cutil/src/bitset.c	25;"	d	file:
 DWORD_INDEX	cutil/src/bitset.c	26;"	d	file:
@@ -939,6 +937,7 @@ SRC	cutil/src/Makefile	/^SRC=aiofd.c bitset.c btree.c buffer.c child.c daemon.c 
 SRC	cutil/tests/Makefile	/^SRC=test_all.c test_aiofd.c test_bitset.c test_btree.c test_buffer.c test_child.c test_events.c test_flags.c test_hashtable.c test_list.c test_pair.c test_privileges.c test_sanitize.c test_socket.c$/;"	m
 SRC	src/Makefile	/^SRC=channel.c commands.c conn.c modes.c msg.c session.c$/;"	m
 SRC	tests/Makefile	/^SRC=test_all.c test_flags.c test_session.c$/;"	m
+SRCDIR	Makefile	/^SRCDIR = src$/;"	m
 SRCDIR	cutil/Makefile	/^SRCDIR = src$/;"	m
 STATS	src/commands.h	/^    STATS,$/;"	e	enum:irc_command_e
 STRCMP	cutil/src/macros.h	68;"	d
@@ -947,6 +946,7 @@ SUITE	cutil/tests/test_macros.h	20;"	d
 SUITE	tests/test_macros.h	20;"	d
 SUMMON	src/commands.h	/^    SUMMON,$/;"	e	enum:irc_command_e
 T	cutil/src/macros.h	224;"	d
+TESTDIR	Makefile	/^TESTDIR = tests$/;"	m
 TESTDIR	cutil/Makefile	/^TESTDIR = tests$/;"	m
 TESTDIRS	Makefile	/^TESTDIRS = $(DIRS:%=test-%)$/;"	m
 TESTDIRS	cutil/Makefile	/^TESTDIRS = $(DIRS:%=test-%)$/;"	m
@@ -1252,50 +1252,79 @@ fail_alloc	cutil/tests/test_flags.c	/^int fail_alloc = FALSE;$/;"	v
 fail_alloc	tests/test_flags.c	/^int fail_alloc = FALSE;$/;"	v
 fail_alloc_bak	cutil/src/buffer.c	/^int fail_alloc_bak = FALSE;$/;"	v
 fail_bitset_deinit	cutil/tests/test_flags.c	/^int fail_bitset_deinit = FALSE;$/;"	v
+fail_bitset_deinit	tests/test_flags.c	/^int fail_bitset_deinit = FALSE;$/;"	v
 fail_bitset_init	cutil/tests/test_flags.c	/^int fail_bitset_init = FALSE;$/;"	v
+fail_bitset_init	tests/test_flags.c	/^int fail_bitset_init = FALSE;$/;"	v
 fail_buffer_deinit	cutil/tests/test_flags.c	/^int fail_buffer_deinit = FALSE;$/;"	v
+fail_buffer_deinit	tests/test_flags.c	/^int fail_buffer_deinit = FALSE;$/;"	v
 fail_buffer_init	cutil/tests/test_flags.c	/^int fail_buffer_init = FALSE;$/;"	v
+fail_buffer_init	tests/test_flags.c	/^int fail_buffer_init = FALSE;$/;"	v
 fail_buffer_init_alloc	cutil/tests/test_flags.c	/^int fail_buffer_init_alloc = FALSE;$/;"	v
+fail_buffer_init_alloc	tests/test_flags.c	/^int fail_buffer_init_alloc = FALSE;$/;"	v
 fail_socket_initialize	cutil/tests/test_flags.c	/^int fail_socket_initialize = FALSE;$/;"	v
+fail_socket_initialize	tests/test_flags.c	/^int fail_socket_initialize = FALSE;$/;"	v
 fake_accept	cutil/tests/test_flags.c	/^int fake_accept = FALSE;$/;"	v
 fake_accept	tests/test_flags.c	/^int fake_accept = FALSE;$/;"	v
 fake_accept_ret	cutil/tests/test_flags.c	/^int fake_accept_ret = -1;$/;"	v
 fake_accept_ret	tests/test_flags.c	/^int fake_accept_ret = -1;$/;"	v
 fake_aiofd_enable_read_evt	cutil/tests/test_flags.c	/^int fake_aiofd_enable_read_evt = FALSE;$/;"	v
+fake_aiofd_enable_read_evt	tests/test_flags.c	/^int fake_aiofd_enable_read_evt = FALSE;$/;"	v
 fake_aiofd_enable_read_evt_ret	cutil/tests/test_flags.c	/^int fake_aiofd_enable_read_evt_ret = FALSE;$/;"	v
+fake_aiofd_enable_read_evt_ret	tests/test_flags.c	/^int fake_aiofd_enable_read_evt_ret = FALSE;$/;"	v
 fake_aiofd_flush	cutil/tests/test_flags.c	/^int fake_aiofd_flush = FALSE;$/;"	v
+fake_aiofd_flush	tests/test_flags.c	/^int fake_aiofd_flush = FALSE;$/;"	v
 fake_aiofd_flush_ret	cutil/tests/test_flags.c	/^int fake_aiofd_flush_ret = FALSE;$/;"	v
+fake_aiofd_flush_ret	tests/test_flags.c	/^int fake_aiofd_flush_ret = FALSE;$/;"	v
 fake_aiofd_initialize	cutil/tests/test_flags.c	/^int fake_aiofd_initialize = FALSE;$/;"	v
+fake_aiofd_initialize	tests/test_flags.c	/^int fake_aiofd_initialize = FALSE;$/;"	v
 fake_aiofd_initialize_ret	cutil/tests/test_flags.c	/^int fake_aiofd_initialize_ret = FALSE;$/;"	v
+fake_aiofd_initialize_ret	tests/test_flags.c	/^int fake_aiofd_initialize_ret = FALSE;$/;"	v
 fake_aiofd_read	cutil/tests/test_flags.c	/^int fake_aiofd_read = FALSE;$/;"	v
+fake_aiofd_read	tests/test_flags.c	/^int fake_aiofd_read = FALSE;$/;"	v
 fake_aiofd_read_ret	cutil/tests/test_flags.c	/^int fake_aiofd_read_ret = 0;$/;"	v
+fake_aiofd_read_ret	tests/test_flags.c	/^int fake_aiofd_read_ret = 0;$/;"	v
 fake_aiofd_write	cutil/tests/test_flags.c	/^int fake_aiofd_write = FALSE;$/;"	v
+fake_aiofd_write	tests/test_flags.c	/^int fake_aiofd_write = FALSE;$/;"	v
 fake_aiofd_write_common	cutil/tests/test_flags.c	/^int fake_aiofd_write_common = FALSE;$/;"	v
+fake_aiofd_write_common	tests/test_flags.c	/^int fake_aiofd_write_common = FALSE;$/;"	v
 fake_aiofd_write_common_ret	cutil/tests/test_flags.c	/^int fake_aiofd_write_common_ret = FALSE;$/;"	v
+fake_aiofd_write_common_ret	tests/test_flags.c	/^int fake_aiofd_write_common_ret = FALSE;$/;"	v
 fake_aiofd_write_ret	cutil/tests/test_flags.c	/^int fake_aiofd_write_ret = FALSE;$/;"	v
+fake_aiofd_write_ret	tests/test_flags.c	/^int fake_aiofd_write_ret = FALSE;$/;"	v
 fake_aiofd_writev	cutil/tests/test_flags.c	/^int fake_aiofd_writev = FALSE;$/;"	v
+fake_aiofd_writev	tests/test_flags.c	/^int fake_aiofd_writev = FALSE;$/;"	v
 fake_aiofd_writev_ret	cutil/tests/test_flags.c	/^int fake_aiofd_writev_ret = FALSE;$/;"	v
+fake_aiofd_writev_ret	tests/test_flags.c	/^int fake_aiofd_writev_ret = FALSE;$/;"	v
 fake_bind	cutil/tests/test_flags.c	/^int fake_bind = FALSE;$/;"	v
 fake_bind	tests/test_flags.c	/^int fake_bind = FALSE;$/;"	v
 fake_bind_ret	cutil/tests/test_flags.c	/^int fake_bind_ret = -1;$/;"	v
 fake_bind_ret	tests/test_flags.c	/^int fake_bind_ret = -1;$/;"	v
 fake_connect	cutil/tests/test_flags.c	/^int fake_connect = FALSE;$/;"	v
 fake_connect	tests/test_flags.c	/^int fake_connect = FALSE;$/;"	v
-fake_connect_errno	tests/test_flags.c	/^int fake_connect_errno = FALSE;$/;"	v
-fake_connect_errno_value	tests/test_flags.c	/^int fake_connect_errno_value = 0;$/;"	v
 fake_connect_ret	cutil/tests/test_flags.c	/^int fake_connect_ret = -1;$/;"	v
 fake_connect_ret	tests/test_flags.c	/^int fake_connect_ret = -1;$/;"	v
 fake_errno	cutil/tests/test_flags.c	/^int fake_errno = FALSE;$/;"	v
+fake_errno	tests/test_flags.c	/^int fake_errno = FALSE;$/;"	v
 fake_errno_value	cutil/tests/test_flags.c	/^int fake_errno_value = 0;$/;"	v
+fake_errno_value	tests/test_flags.c	/^int fake_errno_value = 0;$/;"	v
 fake_ev_default_loop	cutil/tests/test_flags.c	/^int fake_ev_default_loop = FALSE;$/;"	v
+fake_ev_default_loop	tests/test_flags.c	/^int fake_ev_default_loop = FALSE;$/;"	v
 fake_ev_default_loop_ret	cutil/tests/test_flags.c	/^void* fake_ev_default_loop_ret = NULL;$/;"	v
+fake_ev_default_loop_ret	tests/test_flags.c	/^void* fake_ev_default_loop_ret = NULL;$/;"	v
 fake_event_handler_init	cutil/tests/test_flags.c	/^int fake_event_handler_init = FALSE;$/;"	v
+fake_event_handler_init	tests/test_flags.c	/^int fake_event_handler_init = FALSE;$/;"	v
 fake_event_handler_init_count	cutil/tests/test_flags.c	/^int fake_event_handler_init_count = 0;$/;"	v
+fake_event_handler_init_count	tests/test_flags.c	/^int fake_event_handler_init_count = 0;$/;"	v
 fake_event_handler_init_ret	cutil/tests/test_flags.c	/^int fake_event_handler_init_ret = FALSE;$/;"	v
+fake_event_handler_init_ret	tests/test_flags.c	/^int fake_event_handler_init_ret = FALSE;$/;"	v
 fake_event_start_handler	cutil/tests/test_flags.c	/^int fake_event_start_handler = FALSE;$/;"	v
+fake_event_start_handler	tests/test_flags.c	/^int fake_event_start_handler = FALSE;$/;"	v
 fake_event_start_handler_ret	cutil/tests/test_flags.c	/^int fake_event_start_handler_ret = FALSE;$/;"	v
+fake_event_start_handler_ret	tests/test_flags.c	/^int fake_event_start_handler_ret = FALSE;$/;"	v
 fake_event_stop_handler	cutil/tests/test_flags.c	/^int fake_event_stop_handler = FALSE;$/;"	v
+fake_event_stop_handler	tests/test_flags.c	/^int fake_event_stop_handler = FALSE;$/;"	v
 fake_event_stop_handler_ret	cutil/tests/test_flags.c	/^int fake_event_stop_handler_ret = FALSE;$/;"	v
+fake_event_stop_handler_ret	tests/test_flags.c	/^int fake_event_stop_handler_ret = FALSE;$/;"	v
 fake_fcntl	cutil/tests/test_flags.c	/^int fake_fcntl = FALSE;$/;"	v
 fake_fcntl	tests/test_flags.c	/^int fake_fcntl = FALSE;$/;"	v
 fake_fcntl_ret	cutil/tests/test_flags.c	/^int fake_fcntl_ret = -1;$/;"	v
@@ -1333,39 +1362,65 @@ fake_getuid	tests/test_flags.c	/^int fake_getuid = FALSE;$/;"	v
 fake_getuid_ret	cutil/tests/test_flags.c	/^int fake_getuid_ret = -1;$/;"	v
 fake_getuid_ret	tests/test_flags.c	/^int fake_getuid_ret = -1;$/;"	v
 fake_ht_deinit	cutil/tests/test_flags.c	/^int fake_ht_deinit = FALSE;$/;"	v
+fake_ht_deinit	tests/test_flags.c	/^int fake_ht_deinit = FALSE;$/;"	v
 fake_ht_deinit_ret	cutil/tests/test_flags.c	/^int fake_ht_deinit_ret = FALSE;$/;"	v
+fake_ht_deinit_ret	tests/test_flags.c	/^int fake_ht_deinit_ret = FALSE;$/;"	v
 fake_ht_find	cutil/tests/test_flags.c	/^int fake_ht_find = FALSE;$/;"	v
+fake_ht_find	tests/test_flags.c	/^int fake_ht_find = FALSE;$/;"	v
 fake_ht_find_ret	cutil/tests/test_hashtable.c	/^ht_itr_t fake_ht_find_ret;$/;"	v
+fake_ht_find_ret	tests/test_flags.c	/^ht_itr_t fake_ht_find_ret;$/;"	v
 fake_ht_grow	cutil/tests/test_flags.c	/^int fake_ht_grow = FALSE;$/;"	v
+fake_ht_grow	tests/test_flags.c	/^int fake_ht_grow = FALSE;$/;"	v
 fake_ht_grow_ret	cutil/tests/test_flags.c	/^int fake_ht_grow_ret = FALSE;$/;"	v
+fake_ht_grow_ret	tests/test_flags.c	/^int fake_ht_grow_ret = FALSE;$/;"	v
 fake_ht_init	cutil/tests/test_flags.c	/^int fake_ht_init = FALSE;$/;"	v
+fake_ht_init	tests/test_flags.c	/^int fake_ht_init = FALSE;$/;"	v
 fake_ht_init_ret	cutil/tests/test_flags.c	/^int fake_ht_init_ret = FALSE;$/;"	v
+fake_ht_init_ret	tests/test_flags.c	/^int fake_ht_init_ret = FALSE;$/;"	v
 fake_ioctl	cutil/tests/test_flags.c	/^int fake_ioctl = FALSE;$/;"	v
+fake_ioctl	tests/test_flags.c	/^int fake_ioctl = FALSE;$/;"	v
 fake_ioctl_ret	cutil/tests/test_flags.c	/^int fake_ioctl_ret = -1;$/;"	v
+fake_ioctl_ret	tests/test_flags.c	/^int fake_ioctl_ret = -1;$/;"	v
 fake_list_count	cutil/tests/test_flags.c	/^int fake_list_count = FALSE;$/;"	v
+fake_list_count	tests/test_flags.c	/^int fake_list_count = FALSE;$/;"	v
 fake_list_count_ret	cutil/tests/test_flags.c	/^int fake_list_count_ret = 0;$/;"	v
+fake_list_count_ret	tests/test_flags.c	/^int fake_list_count_ret = 0;$/;"	v
 fake_list_deinit	cutil/tests/test_flags.c	/^int fake_list_deinit = FALSE;$/;"	v
+fake_list_deinit	tests/test_flags.c	/^int fake_list_deinit = FALSE;$/;"	v
 fake_list_deinit_ret	cutil/tests/test_flags.c	/^int fake_list_deinit_ret = FALSE;$/;"	v
+fake_list_deinit_ret	tests/test_flags.c	/^int fake_list_deinit_ret = FALSE;$/;"	v
 fake_list_get	cutil/tests/test_flags.c	/^int fake_list_get = FALSE;$/;"	v
+fake_list_get	tests/test_flags.c	/^int fake_list_get = FALSE;$/;"	v
 fake_list_get_ret	cutil/tests/test_flags.c	/^void* fake_list_get_ret = NULL;$/;"	v
+fake_list_get_ret	tests/test_flags.c	/^void* fake_list_get_ret = NULL;$/;"	v
 fake_list_grow	cutil/tests/test_flags.c	/^int fake_list_grow = FALSE;$/;"	v
+fake_list_grow	tests/test_flags.c	/^int fake_list_grow = FALSE;$/;"	v
 fake_list_grow_ret	cutil/tests/test_flags.c	/^int fake_list_grow_ret = FALSE;$/;"	v
+fake_list_grow_ret	tests/test_flags.c	/^int fake_list_grow_ret = FALSE;$/;"	v
 fake_list_init	cutil/tests/test_flags.c	/^int fake_list_init = FALSE;$/;"	v
+fake_list_init	tests/test_flags.c	/^int fake_list_init = FALSE;$/;"	v
 fake_list_init_ret	cutil/tests/test_flags.c	/^int fake_list_init_ret = FALSE;$/;"	v
+fake_list_init_ret	tests/test_flags.c	/^int fake_list_init_ret = FALSE;$/;"	v
 fake_list_push	cutil/tests/test_flags.c	/^int fake_list_push = FALSE;$/;"	v
+fake_list_push	tests/test_flags.c	/^int fake_list_push = FALSE;$/;"	v
 fake_list_push_ret	cutil/tests/test_flags.c	/^int fake_list_push_ret = FALSE;$/;"	v
+fake_list_push_ret	tests/test_flags.c	/^int fake_list_push_ret = FALSE;$/;"	v
 fake_listen	cutil/tests/test_flags.c	/^int fake_listen = FALSE;$/;"	v
 fake_listen	tests/test_flags.c	/^int fake_listen = FALSE;$/;"	v
 fake_listen_ret	cutil/tests/test_flags.c	/^int fake_listen_ret = -1;$/;"	v
 fake_listen_ret	tests/test_flags.c	/^int fake_listen_ret = -1;$/;"	v
 fake_open_devnull	cutil/tests/test_flags.c	/^int fake_open_devnull = FALSE;$/;"	v
+fake_open_devnull	tests/test_flags.c	/^int fake_open_devnull = FALSE;$/;"	v
 fake_open_devnull_ret	cutil/tests/test_flags.c	/^int fake_open_devnull_ret = FALSE;$/;"	v
+fake_open_devnull_ret	tests/test_flags.c	/^int fake_open_devnull_ret = FALSE;$/;"	v
 fake_pipe	cutil/tests/test_flags.c	/^int fake_pipe = FALSE;$/;"	v
 fake_pipe	tests/test_flags.c	/^int fake_pipe = FALSE;$/;"	v
 fake_pipe_ret	cutil/tests/test_flags.c	/^int fake_pipe_ret = -1;$/;"	v
 fake_pipe_ret	tests/test_flags.c	/^int fake_pipe_ret = -1;$/;"	v
 fake_read	cutil/tests/test_flags.c	/^int fake_read = FALSE;$/;"	v
+fake_read	tests/test_flags.c	/^int fake_read = FALSE;$/;"	v
 fake_read_ret	cutil/tests/test_flags.c	/^int fake_read_ret = -1;$/;"	v
+fake_read_ret	tests/test_flags.c	/^int fake_read_ret = -1;$/;"	v
 fake_setegid	cutil/tests/test_flags.c	/^int fake_setegid = FALSE;$/;"	v
 fake_setegid	tests/test_flags.c	/^int fake_setegid = FALSE;$/;"	v
 fake_setegid_ret	cutil/tests/test_flags.c	/^int fake_setegid_ret = -1;$/;"	v
@@ -1393,24 +1448,41 @@ fake_setsockopt_ret	tests/test_flags.c	/^int fake_setsockopt_ret = -1;$/;"	v
 fake_socket	cutil/tests/test_flags.c	/^int fake_socket = FALSE;$/;"	v
 fake_socket	tests/test_flags.c	/^int fake_socket = FALSE;$/;"	v
 fake_socket_bind	cutil/tests/test_flags.c	/^int fake_socket_bind = FALSE;$/;"	v
+fake_socket_bind	tests/test_flags.c	/^int fake_socket_bind = FALSE;$/;"	v
 fake_socket_bind_ret	cutil/tests/test_flags.c	/^int fake_socket_bind_ret = FALSE;$/;"	v
+fake_socket_bind_ret	tests/test_flags.c	/^int fake_socket_bind_ret = FALSE;$/;"	v
 fake_socket_bound	cutil/tests/test_flags.c	/^int fake_socket_bound = FALSE;$/;"	v
+fake_socket_bound	tests/test_flags.c	/^int fake_socket_bound = FALSE;$/;"	v
 fake_socket_bound_ret	cutil/tests/test_flags.c	/^int fake_socket_bound_ret = FALSE;$/;"	v
+fake_socket_bound_ret	tests/test_flags.c	/^int fake_socket_bound_ret = FALSE;$/;"	v
 fake_socket_connect	cutil/tests/test_flags.c	/^int fake_socket_connect = FALSE;$/;"	v
+fake_socket_connect	tests/test_flags.c	/^int fake_socket_connect = FALSE;$/;"	v
 fake_socket_connect_ret	cutil/tests/test_flags.c	/^int fake_socket_connect_ret = FALSE;$/;"	v
+fake_socket_connect_ret	tests/test_flags.c	/^int fake_socket_connect_ret = FALSE;$/;"	v
 fake_socket_connected	cutil/tests/test_flags.c	/^int fake_socket_connected = FALSE;$/;"	v
+fake_socket_connected	tests/test_flags.c	/^int fake_socket_connected = FALSE;$/;"	v
 fake_socket_connected_ret	cutil/tests/test_flags.c	/^int fake_socket_connected_ret = FALSE;$/;"	v
+fake_socket_connected_ret	tests/test_flags.c	/^int fake_socket_connected_ret = FALSE;$/;"	v
 fake_socket_errval	cutil/tests/test_flags.c	/^int fake_socket_errval = 0;$/;"	v
+fake_socket_errval	tests/test_flags.c	/^int fake_socket_errval = 0;$/;"	v
 fake_socket_get_error_ret	cutil/tests/test_flags.c	/^int fake_socket_get_error_ret = FALSE;$/;"	v
+fake_socket_get_error_ret	tests/test_flags.c	/^int fake_socket_get_error_ret = FALSE;$/;"	v
 fake_socket_getsockopt	cutil/tests/test_flags.c	/^int fake_socket_getsockopt = FALSE;$/;"	v
+fake_socket_getsockopt	tests/test_flags.c	/^int fake_socket_getsockopt = FALSE;$/;"	v
 fake_socket_lookup_host	cutil/tests/test_flags.c	/^int fake_socket_lookup_host = FALSE;$/;"	v
+fake_socket_lookup_host	tests/test_flags.c	/^int fake_socket_lookup_host = FALSE;$/;"	v
 fake_socket_lookup_host_ret	cutil/tests/test_flags.c	/^int fake_socket_lookup_host_ret = FALSE;$/;"	v
+fake_socket_lookup_host_ret	tests/test_flags.c	/^int fake_socket_lookup_host_ret = FALSE;$/;"	v
 fake_socket_ret	cutil/tests/test_flags.c	/^int fake_socket_ret = -1;$/;"	v
 fake_socket_ret	tests/test_flags.c	/^int fake_socket_ret = -1;$/;"	v
 fake_write	cutil/tests/test_flags.c	/^int fake_write = FALSE;$/;"	v
+fake_write	tests/test_flags.c	/^int fake_write = FALSE;$/;"	v
 fake_write_ret	cutil/tests/test_flags.c	/^int fake_write_ret = -1;$/;"	v
+fake_write_ret	tests/test_flags.c	/^int fake_write_ret = -1;$/;"	v
 fake_writev	cutil/tests/test_flags.c	/^int fake_writev = FALSE;$/;"	v
+fake_writev	tests/test_flags.c	/^int fake_writev = FALSE;$/;"	v
 fake_writev_ret	cutil/tests/test_flags.c	/^int fake_writev_ret = -1;$/;"	v
+fake_writev_ret	tests/test_flags.c	/^int fake_writev_ret = -1;$/;"	v
 fd	cutil/src/events.h	/^		int fd;$/;"	m	struct:evt_params_u::__anon3
 filelog_fns	cutil/src/log.c	/^static cookie_io_functions_t filelog_fns =$/;"	v	file:
 filelog_writer	cutil/src/log.c	/^static ssize_t filelog_writer( void * cookie, char const * data, size_t leng )$/;"	f	file:
