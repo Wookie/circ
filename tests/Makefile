@@ -24,6 +24,8 @@ all:
 test: $(OUT)
 	./test_all
 
+testnr: $(OUT)
+
 coverage: $(OUT)
 	./test_all
 
