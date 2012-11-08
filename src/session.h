@@ -46,6 +46,7 @@ typedef enum irc_session_setting_e
 	SERVER_MODES		= 0xf4efe58c,
 	SERVER_MODES_PARAM	= 0xc8500f7f,
 	SERVER_VERSION		= 0xa73860b0
+	/*TODO: add RECONNECT_TIMEOUT */
 
 } irc_session_setting_t;
 
