@@ -357,7 +357,12 @@ typedef enum irc_command_e
     (x == RPL_INFOSTART) || \
     (x == RPL_MYPORTIS) || \
     (x == ERR_NOSERVICEHOST))
-#define IS_VALID_COMMAND(x) (IS_ERROR(x) || IS_REPLY(x) || IS_COMMAND(x) || IS_SESSION_EVENT(x) || (x == NOCMD))
+#define IS_VALID_COMMAND(x) (IS_ERROR(x) || \
+							 IS_REPLY(x) || \
+							 IS_COMMAND(x) || \
+							 IS_SESSION_EVENT(x) || \
+							 (x == NOCMD) || \
+							 (x == ANYCMD))
 
 /* translate a command into a string */
 int8_t const * irc_cmd_get_string( irc_command_t const cmd );
