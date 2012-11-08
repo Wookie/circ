@@ -772,7 +772,7 @@ static HANDLER_FN( MODE )
 static HANDLER_FN( ANYCMD )
 {
 	/* log it */
-	irc_msg_log( msg );	
+	/*irc_msg_log( msg );*/
 
 	/* chain to the next handler */
 	return IRC_OK;

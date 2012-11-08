@@ -725,62 +725,59 @@ irc_ret_t irc_msg_compile(irc_msg_t* const msg)
 void irc_msg_log( irc_msg_t const * const msg )
 {
 	int i;
-	LOG( "%20s:%-5d -- (%s", __FILE__, __LINE__, irc_cmd_get_type_string( msg->cmd ) );
+	LOG( "(%s\n", irc_cmd_get_type_string( msg->cmd ) );
 	if ( msg->prefix != NULL )
 	{
 		/* prefix can be nick!user@host */
 		if ( (msg->nick != NULL) && (msg->user != NULL) && (msg->host != NULL) )
 		{
-			LOG( " ( (%s ! %s @ %s) %s", msg->nick, msg->user, msg->host, msg->command );
+			LOG( "  (%s ! %s @ %s) %s\n", msg->nick, msg->user, msg->host, msg->command );
 		}
 
 		/* or it can be just nick@host */
 		else if ( (msg->nick != NULL) && (msg->host != NULL) )
 		{
-			LOG( " ( (%s @ %s) %s", msg->nick, msg->host, msg->command );
+			LOG( "  (%s @ %s) %s\n", msg->nick, msg->host, msg->command );
 		}
 
 		/* or just nick */
 		else if ( msg->nick != NULL )
 		{
-			LOG( " ( (%s) %s", msg->nick, msg->command );
+			LOG( "  (%s) %s\n", msg->nick, msg->command );
 		}
 
 		/* or just host */
 		else if ( msg->host != NULL )
 		{
-			LOG( " ( (%s) %s", msg->host, msg->command );
+			LOG( "  (%s) %s\n", msg->host, msg->command );
 		}
 
 		/* or an error */
 		else
 		{
-			LOG( " ( (ERR!) %s", msg->command );
+			LOG( "  (ERR!) %s\n", msg->command );
 		}
 	}
 	else
 	{
-		LOG( " (%s", msg->command );
+		LOG( "  (%s\n", msg->command );
 	}
 
 	if ( msg->num_params > 0 )
 	{
-		LOG(" (");
+		LOG("  (\n");
 		for ( i = 0; i < msg->num_params; i++ )
 		{
-			if ( i > 0 )
-				LOG(" ");
-			LOG( "%s", msg->parameters[i] );
+			LOG( "    %s\n", msg->parameters[i] );
 		}
-		LOG(")");
+		LOG("  )\n");
 	}
 	
 	if ( msg->trailing != NULL )
 	{
-		LOG( " %s", msg->trailing );
+		LOG( "  (%s)\n", msg->trailing );
 	}
-	LOG("))");
-	LOG("\n");
+	LOG(")\n");
 }
 
 /* initialize the message in one pass */
