@@ -357,9 +357,9 @@ static uint_t channel_hash_fn( void const * const key )
 
 static int channel_match_fn( void const * const l, void const * const r )
 {
-	return strncmp( irc_channel_get_name( (irc_channel_t*)l ),
+	return (strncmp( irc_channel_get_name( (irc_channel_t*)l ),
 					irc_channel_get_name( (irc_channel_t*)r ),
-					256 );
+					256 ) == 0);
 }
 
 static uint_t handler_hash_fn( void const * const key )
