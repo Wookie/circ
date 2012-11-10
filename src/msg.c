@@ -31,9 +31,9 @@
 #include "commands.h"
 #include "msg.h"
 
-static int8_t colon = ':';
-static int8_t space = ' ';
-static int8_t const * const msgend = "\r\n";
+static uint8_t colon = ':';
+static uint8_t space = ' ';
+static uint8_t const * const msgend = "\r\n";
 
 /* create a new message */
 irc_msg_t* irc_msg_new()
@@ -79,31 +79,31 @@ void irc_msg_delete(void * m)
 	FREE(msg);	  
 }
 
-static int is_letter( int8_t const c )
+static int is_letter( uint8_t const c )
 {
 	return ( ( (c >= 'a') && (c <= 'z') ) ||
 			 ( (c >= 'A') && (c <= 'Z') ) );
 }
 
-static int is_digit( int8_t const c )
+static int is_digit( uint8_t const c )
 {
 	return ( (c >= '0') && (c <= '9') );
 }
 
-static int is_hex( int8_t const c )
+static int is_hex( uint8_t const c )
 {
 	return ( is_digit(c) ||
 			 ( (c >= 'A') && (c <= 'F') ) ||
 			 ( (c >= 'a') && (c <= 'f') ) );
 }
 
-static int is_special( int8_t const c )
+static int is_special( uint8_t const c )
 {
 	return ( ( (c >= 0x5B) && (c <= 0x60) ) ||
 			 ( (c >= 0x7B) && (c <= 0x7D) ) );
 }
 
-static int is_user_octet( int8_t const c )
+static int is_user_octet( uint8_t const c )
 {
 	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
 			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
@@ -112,10 +112,10 @@ static int is_user_octet( int8_t const c )
 			 ( ((uint8_t)c >= 0x41) && ((uint8_t)c <= 0xFF) ) );
 }
 
-static int check_ipv4_part( int8_t * pstart, int8_t *pend )
+static int check_ipv4_part( uint8_t * pstart, uint8_t *pend )
 {
 	int value;
-	int8_t buf[4];
+	uint8_t buf[4];
 	CHECK_PTR_RET( pstart, FALSE );
 	CHECK_PTR_RET( pend, FALSE );
 	CHECK_RET( ((void*)pend - (void*)pstart) > 3, FALSE );
@@ -125,11 +125,11 @@ static int check_ipv4_part( int8_t * pstart, int8_t *pend )
 	return ( (value >= 0) && (value <= 255) );
 }
 
-static int parse_ipv4( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_ipv4( irc_msg_t * const msg, uint8_t ** pcur )
 {
 	int parts = 0;
-	int8_t * p = NULL;
-	int8_t * part = NULL;
+	uint8_t * p = NULL;
+	uint8_t * part = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -189,13 +189,13 @@ static int parse_ipv4( irc_msg_t * const msg, int8_t ** pcur )
 	return TRUE;
 }
 
-static int parse_ipv6( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_ipv6( irc_msg_t * const msg, uint8_t ** pcur )
 {
 	int first = TRUE;
 	int parts = 0;
 	int ipv4trailer = TRUE;
-	int8_t * p = NULL;
-	int8_t * part = NULL;
+	uint8_t * p = NULL;
+	uint8_t * part = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -248,10 +248,10 @@ static int parse_ipv6( irc_msg_t * const msg, int8_t ** pcur )
 	return TRUE;
 }
 
-static int parse_hostname( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_hostname( irc_msg_t * const msg, uint8_t ** pcur )
 {
 	int first = TRUE;
-	int8_t * p = NULL;
+	uint8_t * p = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -294,11 +294,11 @@ static int parse_hostname( irc_msg_t * const msg, int8_t ** pcur )
 	return TRUE;
 }
 
-static int parse_host( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_host( irc_msg_t * const msg, uint8_t ** pcur )
 {
 	int ipv4 = TRUE;
 	int first = TRUE;
-	int8_t * p = NULL;
+	uint8_t * p = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -363,9 +363,9 @@ static int parse_host( irc_msg_t * const msg, int8_t ** pcur )
 	return TRUE;
 }
 
-static int parse_user( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_user( irc_msg_t * const msg, uint8_t ** pcur )
 {
-	int8_t * p = NULL;
+	uint8_t * p = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -388,10 +388,10 @@ static int parse_user( irc_msg_t * const msg, int8_t ** pcur )
 	return TRUE;
 }
 
-static int parse_nick( irc_msg_t * const msg, int8_t ** pcur )
+static int parse_nick( irc_msg_t * const msg, uint8_t ** pcur )
 {
 	int first = TRUE;
-	int8_t * p = NULL;
+	uint8_t * p = NULL;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( pcur, FALSE );
@@ -436,8 +436,8 @@ static int parse_nick( irc_msg_t * const msg, int8_t ** pcur )
 static int parse_nickuserhost( irc_msg_t * const msg )
 {
 	int ret = FALSE;
-	int8_t * pcur = msg->prefix;
-	int8_t * p = msg->prefix;
+	uint8_t * pcur = msg->prefix;
+	uint8_t * p = msg->prefix;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( msg->prefix, FALSE );
@@ -483,7 +483,7 @@ static int parse_nickuserhost( irc_msg_t * const msg )
 static int parse_prefix( irc_msg_t * const msg )
 {
 	int first = TRUE;
-	int8_t * p = msg->prefix;
+	uint8_t * p = msg->prefix;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( msg->prefix, FALSE );
@@ -599,10 +599,10 @@ static irc_ret_t irc_msg_parse_prefix(irc_msg_t* const msg)
  */
 irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 {
-	int8_t* ptr = NULL;
-	int8_t* space = NULL;
-	int8_t* end = NULL;
-	int8_t* cmd = NULL;
+	uint8_t* ptr = NULL;
+	uint8_t* space = NULL;
+	uint8_t* end = NULL;
+	uint8_t* cmd = NULL;
 	
 	CHECK_PTR_RET(msg, IRC_BADPARAM);
 
@@ -784,7 +784,7 @@ void irc_msg_log( irc_msg_t const * const msg )
 irc_ret_t irc_msg_initialize(
 	irc_msg_t* const msg,
 	irc_command_t const cmd,
-	int8_t* const prefix,
+	uint8_t* const prefix,
 	int32_t const num_params,
 	...
 )
@@ -812,7 +812,7 @@ irc_ret_t irc_msg_initialize(
 	va_start(va, num_params);
 	for(i = 0; i < num_params; i++)
 	{
-		irc_msg_add_parameter(msg, va_arg(va, int8_t*));
+		irc_msg_add_parameter(msg, va_arg(va, uint8_t*));
 	}
 	va_end(va);
 
@@ -820,7 +820,7 @@ irc_ret_t irc_msg_initialize(
 }
 
 /* add a parameter */
-irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, int8_t const * const param)
+irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)
 {
 	CHECK_PTR_RET(msg, IRC_BADPARAM);
 	CHECK_PTR_RET(param, IRC_BADPARAM);
@@ -841,7 +841,7 @@ irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, int8_t const * const param
 }
 
 /* set the trailing parameter */
-irc_ret_t irc_msg_set_trailing( irc_msg_t* const msg, int8_t const * const trailing)
+irc_ret_t irc_msg_set_trailing( irc_msg_t* const msg, uint8_t const * const trailing)
 {
 	CHECK_PTR_RET(msg, IRC_BADPARAM);
 	CHECK_PTR_RET(trailing, IRC_BADPARAM);
@@ -970,7 +970,7 @@ irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)
 		msg->cmd = cmd;
 
 		/* we can just copy the pointer because these are statically allocated strings */
-		msg->command = (int8_t*)irc_cmd_get_string( cmd );
+		msg->command = (uint8_t*)irc_cmd_get_string( cmd );
 
 		return IRC_OK;
 	}
@@ -1224,7 +1224,7 @@ irc_ret_t irc_msg_compile(irc_msg_t* const msg)
 			int32_t params = 0;
 			int32_t chans = 0;
 			int32_t keys = 0;
-			int8_t* param = NULL;
+			uint8_t* param = NULL;
 			/* RFC 2812, Section 3.2.1 -- JOIN command
 			 * Format: JOIN ( <channel> *("," <channel> ) [ <key> *("," <key>) ] ) / "0"
 			 * Parameters:
@@ -1278,7 +1278,7 @@ irc_ret_t irc_msg_compile(irc_msg_t* const msg)
 		{
 			int32_t params = 0;
 			int32_t chans = 0;
-			int8_t* param = NULL;
+			uint8_t* param = NULL;
 			/* RFC 2812, Section 3.2.1 -- PART command 
 			 * Format: PART <channel> *( "," <channel> ) [ <Part Message> ]
 			 * Parameters: 
@@ -1550,7 +1550,7 @@ irc_ret_t irc_msg_clear_parameters(irc_msg_t* const msg)
 }
 
 /* set a parameter */
-irc_ret_t irc_msg_set_parameter(irc_msg_t* const msg, int32_t const index, int8_t const * const param)
+irc_ret_t irc_msg_set_parameter(irc_msg_t* const msg, int32_t const index, uint8_t const * const param)
 {
 	CHECK_PTR_RET(msg, IRC_BADPARAM);
 	CHECK_RET(((index >= 0) && (index < IRC_NUM_PARAMS)), IRC_BADPARAM);

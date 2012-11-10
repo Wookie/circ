@@ -20,47 +20,168 @@
 #include <cutil/macros.h>
 #include <cutil/list.h>
 
-#include "commands.h"
-#include "msg.h"
-#include "channel.h"
-
 struct irc_channel_s
 {
-    int8_t*     name;           /* name of the channel */
-    int8_t*     pass;           /* the channel password */
-    int8_t*     topic;          /* channel topic */
+	int			pending;		/* fully joined? */
+    uint8_t*	name;			/* name of the channel */
+    uint8_t*    pass;           /* the channel password */
+    uint8_t*    topic;          /* channel topic */
+	uint8_t*	part_msg;		/* part message */
     /*int32_t     mode[MODE_WORDS];*//* mode flags */
-    list_t*    clients;         /* list of clients in the channel (irc_client_t*) */
+    list_t*		clients;        /* list of clients in the channel */
+	list_t*		join_msgs;		/* list of join messages */
 };
+typedef struct irc_channel_s irc_channel_t;
+
+#include "commands.h"
+#include "msg.h"
+#include "conn.h"
+#include "session.h"
+#include "channel.h"
+
+/* this gets called when we successfully join a channel */
+static HANDLER_FN( JOIN )
+{
+	irc_channel_t * chan = NULL;
+	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
+	CHECK_PTR_RET( chan, IRC_ERR );
+	chan->pending = FALSE;
+	
+	/* TODO: call join hook */
+
+	return IRC_DONE;
+}
+
+static HANDLER_FN( RPL_TOPIC )
+{
+	irc_channel_t * chan = NULL;
+	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
+	CHECK_PTR_RET( chan, IRC_ERR );
+
+	/* store a copy of the topic */
+	if ( msg->trailing != NULL )
+	{
+		chan->topic = strdup( msg->trailing );
+	}
+
+	/* TODO: call topic hook */
+
+	return IRC_DONE;
+}
+
+static HANDLER_FN( RPL_NAMREPLY )
+{
+	uint8_t * name = NULL;
+	uint8_t * nick = NULL;
+	uint8_t * s = NULL;
+	uint8_t * f = NULL;
+	ht_itr_t itr;
+	irc_channel_t * chan = NULL;
+	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
+	CHECK_PTR_RET( chan, IRC_ERR );
+
+	name = msg->parameters[0];
+	if ( (name[0] == '@') || (name[0] == '*') || (name[0] == '=') )
+		name++;
+
+	s = f = msg->trailing;
+	while ( *f != '\0' )
+	{
+		if ( *f == ' ' )
+		{
+			/* trim flag */
+			if ( (*s == '@') || (*s == '+') )
+			{
+				s++;
+			}
+			STRNCPY( nick, s, (f - s) );
+			f++;
+			s = f;
+			list_push_tail( chan->clients, nick );
+
+			/* TODO: call user hook */
+		}
+		else
+		{
+			f++;
+		}
+	}
+
+	return IRC_DONE;
+}
+
+static HANDLER_FN( RPL_ENDOFNAMES )
+{
+	ht_itr_t itr;
+	list_itr_t nitr, nend;
+	uint8_t * name = NULL;
+	irc_channel_t * chan = NULL;
+	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
+	CHECK_PTR_RET( chan, IRC_ERR );
+
+	nitr = list_itr_begin( chan->clients );
+	nend = list_itr_end( chan->clients );
+	DEBUG( "Channel %s users:\n", chan->name );
+	for ( ; nitr != nend; nitr = list_itr_next( chan->clients, nitr ) )
+	{
+		name = (uint8_t*)list_get_head( chan->clients );
+		DEBUG( "\t%s\n", name );
+	}
+
+	return IRC_DONE;
+}
+
+irc_ret_t irc_channel_set_handlers( irc_session_t * const session )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+
+	/* register channel handlers */
+	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_NAMREPLY,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_ENDOFNAMES,		HANDLER_FIRST ), FALSE );
+
+	return IRC_OK;
+}
 
 
-irc_channel_t * irc_channel_new( int8_t * const name, 
-								 int8_t * const topic )
+irc_channel_t * irc_channel_new( uint8_t const * const name, 
+								 uint8_t const * const pass,
+								 uint8_t const * const part_msg )
 {
 	irc_channel_t * ch = NULL;
 	CHECK_PTR_RET( name, NULL );
-	CHECK_PTR_RET( topic, NULL );
 	
 	ch = (irc_channel_t*)CALLOC( 1, sizeof(irc_channel_t) );
 	CHECK_PTR_RET( ch, NULL );
 
 	/* store the name */
-	if ( name != NULL )
-		ch->name = STRDUP( name );
+	ch->name = STRDUP( name );
+	CHECK_PTR_GOTO( ch->name, irc_channel_new_fail );
 
-	/* store the topic */
-	if ( topic != NULL )
-		ch->topic = STRDUP( topic );
+	/* store the channel password */
+	if ( pass != NULL )
+	{
+		ch->pass = STRDUP( pass );
+		CHECK_PTR_GOTO( ch->pass, irc_channel_new_fail );
+	}
+
+	/* store the part message */
+	if ( part_msg != NULL )
+	{
+		ch->part_msg = STRDUP( part_msg );
+		CHECK_PTR_GOTO( ch->part_msg, irc_channel_new_fail );
+	}
 
 	/* create the client list */
 	ch->clients = list_new( 0, FREE );
-	if ( ch->clients == NULL )
-	{
-		irc_channel_delete( ch );
-		return NULL;
-	}
+	CHECK_PTR_GOTO( ch->clients, irc_channel_new_fail );
 
 	return ch;
+
+irc_channel_new_fail:
+	irc_channel_delete( ch );
+	return NULL;
 }
 
 void irc_channel_delete( void * c )
@@ -74,8 +195,8 @@ void irc_channel_delete( void * c )
 	if ( ch->pass != NULL )
 		FREE( ch->pass );
 
-	if ( ch->topic != NULL )
-		FREE( ch->topic );
+	if ( ch->part_msg != NULL )
+		FREE( ch->part_msg );
 
 	if ( ch->clients != NULL )
 		list_delete( (void*)ch->clients );
@@ -83,10 +204,65 @@ void irc_channel_delete( void * c )
 	FREE( ch );
 }
 
-int8_t * irc_channel_get_name( irc_channel_t * c )
+uint8_t * irc_channel_get_name( irc_channel_t * const c )
 {
 	CHECK_PTR_RET( c, NULL );
 	return c->name;
+}
+
+uint8_t * irc_channe_get_topic( irc_channel_t * const c )
+{
+	CHECK_PTR_RET( c, NULL );
+	return c->topic;
+}
+
+irc_ret_t irc_channel_join( irc_channel_t * const c, irc_conn_t * const conn )
+{
+	irc_msg_t * join = NULL;
+
+	CHECK_PTR_RET( c, IRC_BADPARAM );
+	CHECK_PTR_RET( conn, IRC_BADPARAM );
+	CHECK_RET( c->pending == FALSE, IRC_BADPARAM );
+
+	/* set the pending flag to TRUE */
+	c->pending = TRUE;
+
+	/* send the JOIN command */
+	join = irc_msg_new();
+	if ( c->pass != NULL )
+	{
+		irc_msg_initialize( join, JOIN, NULL, 2, c->name, c->pass );
+	}
+	else
+	{
+		irc_msg_initialize( join, JOIN, NULL, 1, c->name );
+	}
+
+	/* send the JOIN command */
+	irc_conn_send_msg( conn, join );
+
+	return IRC_OK;
+}
+
+irc_ret_t irc_channel_part( irc_channel_t * const c, irc_conn_t * const conn )
+{
+	irc_msg_t * part = NULL;
+
+	CHECK_PTR_RET( c, IRC_BADPARAM );
+	CHECK_PTR_RET( conn, IRC_BADPARAM );
+
+	/* send the PART command */
+	part = irc_msg_new();
+	irc_msg_initialize( part, PART, NULL, 1, c->name );
+	if ( c->part_msg != NULL )
+	{
+		irc_msg_set_trailing( part, c->part_msg );
+	}
+
+	/* send the PART command */
+	irc_conn_send_msg( conn, part );
+
+	return IRC_OK;
 }
 
 

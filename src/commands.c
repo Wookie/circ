@@ -98,6 +98,9 @@ int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 	T("DISCONNECTED")
 };
 
+int8_t const * const irc_any_cmd = T("ANYCMD");
+int8_t const * const irc_no_cmd = T("NOCMD");
+
 /* translate a command into a string */
 int8_t const * irc_cmd_get_string(irc_command_t const cmd)
 {
@@ -110,6 +113,14 @@ int8_t const * irc_cmd_get_string(irc_command_t const cmd)
 	else if (IS_SESSION_EVENT(cmd))
 	{
 		return irc_session_events[cmd - SESSION_BASE];
+	}
+	else if ( cmd == ANYCMD )
+	{
+		return irc_any_cmd;
+	}
+	else if ( cmd == NOCMD )
+	{
+		return irc_no_cmd;
 	}
     else
     {

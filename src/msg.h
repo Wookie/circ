@@ -39,18 +39,18 @@ typedef struct irc_msg_s
 {
 	irc_msg_in_buf_t	in;		/* used when reading and parsing messages from stream */
 	irc_msg_out_buf_t	out;	/* the buffer used when building messages from scratch for sending */
-	int8_t * prefix;			/* points to the prefix string in the buffer */
-	int8_t * command;			/* command part of the message */
-	int8_t * parameters[IRC_NUM_PARAMS]; /* pointers to each param */
-	int8_t * trailing;			/* trailing part of message */
+	uint8_t * prefix;			/* points to the prefix string in the buffer */
+	uint8_t * command;			/* command part of the message */
+	uint8_t * parameters[IRC_NUM_PARAMS]; /* pointers to each param */
+	uint8_t * trailing;			/* trailing part of message */
 	int32_t  num_params;		/* number of parameters */
 
 	irc_command_t cmd;
-	int8_t * nick;
-	int8_t * user;
-	int8_t * host;
-	int8_t * ipv4;
-	int8_t * ipv6;
+	uint8_t * nick;
+	uint8_t * user;
+	uint8_t * host;
+	uint8_t * ipv4;
+	uint8_t * ipv6;
 
 } irc_msg_t;
 
@@ -71,15 +71,15 @@ void irc_msg_log( irc_msg_t const * const msg );
 /* initialize the message in one pass */
 irc_ret_t irc_msg_initialize(irc_msg_t* const msg,
 							 irc_command_t const cmd,
-							 int8_t* const prefix,
+							 uint8_t* const prefix,
 							 int32_t const num_params,
 							 ...);
 
 /* add a parameter */
-irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, int8_t const * const param);
+irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param);
 
 /* set the trailing parameter */
-irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg, int8_t const * const trailing);
+irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg, uint8_t const * const trailing);
 
 /* "closes" a message and prepares it to be sent */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg );

@@ -99,5 +99,13 @@ irc_ret_t irc_session_set_handler( irc_session_t * const session,
 irc_ret_t irc_session_connect( irc_session_t * const session );
 irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit );
 
+irc_ret_t irc_session_join_channel( irc_session_t * const session,
+									uint8_t const * const name,
+									uint8_t const * const pass,
+									uint8_t const * const part_msg );
+irc_ret_t irc_session_part_channel( irc_session_t * const session );
+irc_channel_t * irc_session_get_channel( irc_session_t * const session,
+										 uint8_t const * const name );
+
 #endif//__IRC_SESSION__H__
 

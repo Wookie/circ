@@ -19,12 +19,18 @@
 
 typedef struct irc_channel_s irc_channel_t;
 
+irc_ret_t irc_channel_set_handlers( irc_session_t * const session );
 
-irc_channel_t * irc_channel_new( int8_t * const name,
-								 int8_t * const topic );
+irc_channel_t * irc_channel_new( uint8_t const * const name,
+								 uint8_t const * const pass,
+								 uint8_t const * const part_msg );
 void irc_channel_delete( void * c );
 
-int8_t * irc_channel_get_name( irc_channel_t * c );
+uint8_t * irc_channel_get_name( irc_channel_t * const c );
+uint8_t * irc_channel_get_topic( irc_channel_t * const c );
 
+/* join and part channels */
+irc_ret_t irc_channel_join( irc_channel_t * const c, irc_conn_t * const conn );
+irc_ret_t irc_channel_part( irc_channel_t * const c, irc_conn_t * const conn );
 
 #endif

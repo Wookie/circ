@@ -222,6 +222,41 @@ static void send_user( irc_session_t * const session )
 	irc_conn_send_msg( session->conn, user );
 }
 
+static void send_nickserv_identify( irc_session_t * const session )
+{
+	irc_msg_t * privmsg = NULL;
+	int8_t * trailing = NULL;
+	int8_t * nick_name = NULL;
+	int8_t * nickserv_pass = NULL;
+	CHECK_PTR( session );
+
+	nick_name = irc_session_get( session, NICK_NAME );
+	nickserv_pass = irc_session_get( session, NICKSERV_PASS );
+
+	if ( nickserv_pass != NULL )
+	{
+		trailing = CALLOC( 10 + strlen( nick_name ) + 1 + strlen( nickserv_pass ) + 1, sizeof(uint8_t) );
+		CHECK_PTR( trailing );
+		sprintf( trailing, "IDENTIFY %s %s", nick_name, nickserv_pass );
+	}
+	else
+	{
+		trailing = CALLOC( 10 + strlen( nick_name ) + 1, sizeof(uint8_t) );
+		CHECK_PTR( trailing );
+		sprintf( trailing, "IDENTIFY %s", nick_name );
+	}
+
+	/* send the PRIVMSG to NickServ command */
+	privmsg = irc_msg_new();
+	irc_msg_initialize( privmsg, PRIVMSG, NULL, 1, "NickServ" );
+	irc_msg_set_trailing( privmsg, trailing );
+
+	/* send the PRIVMSG command */
+	irc_conn_send_msg( session->conn, privmsg );
+
+	FREE( trailing );
+}
+
 static void send_quit( irc_session_t * const session )
 {
 	irc_msg_t * quit = NULL;
@@ -384,6 +419,65 @@ static void handler_delete_fn( void * p )
 	pair_delete( p );
 }
 
+irc_ret_t irc_session_join_channel( irc_session_t * const session,
+									uint8_t const * const name,
+									uint8_t const * const pass,
+									uint8_t const * const part_msg )
+{
+	irc_channel_t * chan = NULL;
+	ht_itr_t citr, pitr;
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( name, IRC_BADPARAM );
+
+	citr = ht_find( session->channels, name );
+	CHECK_RET( !ITR_EQ( citr, ht_itr_end( session->channels ) ), IRC_BAD_PARAM );
+
+	chan = irc_channel_new( name, pass, part_msg );
+	CHECK_PTR_RET( chan, IRC_ERR );
+
+	CHECK_GOTO( ht_insert( session->channels, (void*)chan ), join_channel_fail );
+
+	CHECK_RET( IRC_OK == irc_channel_join( chan, session->conn ), IRC_ERR );
+	return IRC_OK;
+
+join_channel_fail:
+	irc_channel_delete( chan );
+	return IRC_ERR;
+}
+
+irc_ret_t irc_session_part_channel( irc_session_t * const session, 
+									uint8_t const * const name )
+{
+	ht_itr_t citr, pitr;
+	irc_channel_t * chan = NULL;
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+
+	citr = ht_find( session->channels, name );
+	CHECK_RET( ITR_EQ( pitr, ht_itr_end( session->pending_channels ) ), IRC_ERR );
+
+	if ( !ITR_EQ( citr, ht_itr_end( session->channels ) ) )
+	{
+		chan = (irc_channel_t *)ht_get( session->channels, citr );
+		ht_remove( session->channels, citr );
+	}
+
+	CHECK_RET( IRC_OK == irc_channel_part( chan, session->conn ), IRC_ERR );
+
+	/* delete the channel */
+	irc_channel_delete( chan );
+
+	return IRC_OK;
+}
+
+irc_channel_t * irc_session_get_channel( irc_session_t * const session,
+										 uint8_t const * const name )
+{
+	ht_itr_t itr;
+	CHECK_PTR_RET( session, NULL );
+	CHECK_PTR_RET( name, NULL );
+	itr = ht_find( session->channels, name );
+	return (irc_channel_t *)ht_get( session->channels, itr );
+}
 
 static int irc_session_initialize( irc_session_t * const session,
 								   evt_loop_t * const el,
@@ -431,11 +525,12 @@ static int irc_session_initialize( irc_session_t * const session,
 
 	/* register handlers */
 	CHECK_RET( IRC_OK == SET_HANDLER( PING,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_WELCOME,			HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( RPL_MYINFO,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_WELCOME,			HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( MODE,					HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( ANYCMD,				HANDLER_LAST  ), FALSE );
-	
+
+
 	return TRUE;
 }
 
@@ -693,6 +788,9 @@ static HANDLER_FN( RPL_WELCOME )
 
 	/* call the irc session connected event callback */
 	irc_session_call_handler( session, NULL, SESSION_CONNECTED );
+
+	/* identify with the nickserv */
+	send_nickserv_identify( session );
 	
 	return IRC_DONE;
 }
