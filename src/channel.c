@@ -40,7 +40,7 @@ typedef struct irc_channel_s irc_channel_t;
 #include "channel.h"
 
 /* this gets called when we successfully join a channel */
-static HANDLER_FN( JOIN )
+HANDLER_FN( JOIN )
 {
 	irc_channel_t * chan = NULL;
 	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
@@ -52,7 +52,7 @@ static HANDLER_FN( JOIN )
 	return IRC_DONE;
 }
 
-static HANDLER_FN( RPL_TOPIC )
+HANDLER_FN( RPL_TOPIC )
 {
 	irc_channel_t * chan = NULL;
 	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
@@ -69,7 +69,7 @@ static HANDLER_FN( RPL_TOPIC )
 	return IRC_DONE;
 }
 
-static HANDLER_FN( RPL_NAMREPLY )
+HANDLER_FN( RPL_NAMREPLY )
 {
 	uint8_t * name = NULL;
 	uint8_t * nick = NULL;
@@ -94,7 +94,7 @@ static HANDLER_FN( RPL_NAMREPLY )
 			{
 				s++;
 			}
-			STRNCPY( nick, s, (f - s) );
+			strncpy( nick, s, (f - s) );
 			f++;
 			s = f;
 			list_push_tail( chan->clients, nick );
@@ -110,7 +110,7 @@ static HANDLER_FN( RPL_NAMREPLY )
 	return IRC_DONE;
 }
 
-static HANDLER_FN( RPL_ENDOFNAMES )
+HANDLER_FN( RPL_ENDOFNAMES )
 {
 	ht_itr_t itr;
 	list_itr_t nitr, nend;
@@ -129,19 +129,6 @@ static HANDLER_FN( RPL_ENDOFNAMES )
 	}
 
 	return IRC_DONE;
-}
-
-irc_ret_t irc_channel_set_handlers( irc_session_t * const session )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-
-	/* register channel handlers */
-	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_NAMREPLY,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_ENDOFNAMES,		HANDLER_FIRST ), FALSE );
-
-	return IRC_OK;
 }
 
 

@@ -103,9 +103,14 @@ irc_ret_t irc_session_join_channel( irc_session_t * const session,
 									uint8_t const * const name,
 									uint8_t const * const pass,
 									uint8_t const * const part_msg );
-irc_ret_t irc_session_part_channel( irc_session_t * const session );
+irc_ret_t irc_session_part_channel( irc_session_t * const session,
+									uint8_t const * const name );
 irc_channel_t * irc_session_get_channel( irc_session_t * const session,
 										 uint8_t const * const name );
+
+/* send the specified IRC command to the server */
+irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg );
+
 
 #endif//__IRC_SESSION__H__
 

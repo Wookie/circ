@@ -19,8 +19,6 @@
 
 typedef struct irc_channel_s irc_channel_t;
 
-irc_ret_t irc_channel_set_handlers( irc_session_t * const session );
-
 irc_channel_t * irc_channel_new( uint8_t const * const name,
 								 uint8_t const * const pass,
 								 uint8_t const * const part_msg );

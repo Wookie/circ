@@ -61,6 +61,12 @@ static HANDLER_FN( RPL_MYINFO );
 static HANDLER_FN( MODE );
 static HANDLER_FN( ANYCMD );
 
+/* channel handlers */
+extern HANDLER_FN( JOIN );
+extern HANDLER_FN( RPL_TOPIC );
+extern HANDLER_FN( RPL_NAMREPLY );
+extern HANDLER_FN( RPL_ENDOFNAMES );
+
 #define FNV_PRIME (0x01000193)
 static uint32_t fnv_key_hash(void const * const key)
 {
@@ -429,8 +435,8 @@ irc_ret_t irc_session_join_channel( irc_session_t * const session,
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 	CHECK_PTR_RET( name, IRC_BADPARAM );
 
-	citr = ht_find( session->channels, name );
-	CHECK_RET( !ITR_EQ( citr, ht_itr_end( session->channels ) ), IRC_BAD_PARAM );
+	citr = ht_find( session->channels, (void* const)name );
+	CHECK_RET( !ITR_EQ( citr, ht_itr_end( session->channels ) ), IRC_BADPARAM );
 
 	chan = irc_channel_new( name, pass, part_msg );
 	CHECK_PTR_RET( chan, IRC_ERR );
@@ -452,8 +458,8 @@ irc_ret_t irc_session_part_channel( irc_session_t * const session,
 	irc_channel_t * chan = NULL;
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 
-	citr = ht_find( session->channels, name );
-	CHECK_RET( ITR_EQ( pitr, ht_itr_end( session->pending_channels ) ), IRC_ERR );
+	citr = ht_find( session->channels, (void * const )name );
+	CHECK_RET( ITR_EQ( pitr, ht_itr_end( session->channels ) ), IRC_ERR );
 
 	if ( !ITR_EQ( citr, ht_itr_end( session->channels ) ) )
 	{
@@ -475,8 +481,31 @@ irc_channel_t * irc_session_get_channel( irc_session_t * const session,
 	ht_itr_t itr;
 	CHECK_PTR_RET( session, NULL );
 	CHECK_PTR_RET( name, NULL );
-	itr = ht_find( session->channels, name );
+	itr = ht_find( session->channels, (void * const)name );
 	return (irc_channel_t *)ht_get( session->channels, itr );
+}
+
+/* send the specified IRC command to the server */
+irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	return irc_conn_send_msg( session->conn, msg );
+}
+
+
+
+static int irc_session_set_channel_handlers( irc_session_t * const session )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+
+	/* register channel handlers */
+	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_NAMREPLY,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_ENDOFNAMES,		HANDLER_FIRST ), FALSE );
+
+	return TRUE;
 }
 
 static int irc_session_initialize( irc_session_t * const session,
@@ -530,6 +559,8 @@ static int irc_session_initialize( irc_session_t * const session,
 	CHECK_RET( IRC_OK == SET_HANDLER( MODE,					HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( ANYCMD,				HANDLER_LAST  ), FALSE );
 
+	/* register the channel handlers */
+	CHECK_RET( irc_session_set_channel_handlers( session ), FALSE );
 
 	return TRUE;
 }
