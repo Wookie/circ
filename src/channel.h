@@ -17,7 +17,17 @@
 #ifndef __IRC_CHANNEL__
 #define __IRC_CHANNEL__
 
-typedef struct irc_channel_s irc_channel_t;
+typedef struct irc_channel_s
+{
+	int			pending;		/* fully joined? */
+    uint8_t*	name;			/* name of the channel */
+    uint8_t*    pass;           /* the channel password */
+    uint8_t*    topic;          /* channel topic */
+	uint8_t*	part_msg;		/* part message */
+    /*int32_t     mode[MODE_WORDS];*//* mode flags */
+    list_t*		clients;        /* list of clients in the channel */
+	list_t*		join_msgs;		/* list of join messages */
+} irc_channel_t;
 
 irc_channel_t * irc_channel_new( uint8_t const * const name,
 								 uint8_t const * const pass,

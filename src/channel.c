@@ -20,24 +20,11 @@
 #include <cutil/macros.h>
 #include <cutil/list.h>
 
-struct irc_channel_s
-{
-	int			pending;		/* fully joined? */
-    uint8_t*	name;			/* name of the channel */
-    uint8_t*    pass;           /* the channel password */
-    uint8_t*    topic;          /* channel topic */
-	uint8_t*	part_msg;		/* part message */
-    /*int32_t     mode[MODE_WORDS];*//* mode flags */
-    list_t*		clients;        /* list of clients in the channel */
-	list_t*		join_msgs;		/* list of join messages */
-};
-typedef struct irc_channel_s irc_channel_t;
-
 #include "commands.h"
 #include "msg.h"
 #include "conn.h"
-#include "session.h"
 #include "channel.h"
+#include "session.h"
 
 /* this gets called when we successfully join a channel */
 HANDLER_FN( JOIN )
@@ -49,7 +36,7 @@ HANDLER_FN( JOIN )
 	
 	/* TODO: call join hook */
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 HANDLER_FN( RPL_TOPIC )
@@ -66,7 +53,7 @@ HANDLER_FN( RPL_TOPIC )
 
 	/* TODO: call topic hook */
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 HANDLER_FN( RPL_NAMREPLY )
@@ -107,7 +94,7 @@ HANDLER_FN( RPL_NAMREPLY )
 		}
 	}
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 HANDLER_FN( RPL_ENDOFNAMES )
@@ -128,7 +115,7 @@ HANDLER_FN( RPL_ENDOFNAMES )
 		DEBUG( "\t%s\n", name );
 	}
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 

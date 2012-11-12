@@ -435,20 +435,37 @@ irc_ret_t irc_session_join_channel( irc_session_t * const session,
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 	CHECK_PTR_RET( name, IRC_BADPARAM );
 
-	citr = ht_find( session->channels, (void* const)name );
-	CHECK_RET( !ITR_EQ( citr, ht_itr_end( session->channels ) ), IRC_BADPARAM );
+	/* make sure we don't already have a channel record */
+	chan = irc_session_get_channel( session, name );
+	CHECK_RET( chan == NULL, IRC_BADPARAM );
 
+	/* create the new channel */
 	chan = irc_channel_new( name, pass, part_msg );
 	CHECK_PTR_RET( chan, IRC_ERR );
 
+	/* add it to the list of channels */
 	CHECK_GOTO( ht_insert( session->channels, (void*)chan ), join_channel_fail );
 
+	/* join the channel */
 	CHECK_RET( IRC_OK == irc_channel_join( chan, session->conn ), IRC_ERR );
 	return IRC_OK;
 
 join_channel_fail:
 	irc_channel_delete( chan );
 	return IRC_ERR;
+}
+
+static irc_ret_t irc_session_remove_channel( irc_session_t * const session,
+											 uint8_t const * const name )
+{
+	ht_itr_t itr;
+	irc_channel_t lookup;
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( name, IRC_BADPARAM );
+	MEMSET( &lookup, 0, sizeof( irc_channel_t ) );
+	lookup.name = (uint8_t *)name;
+	itr = ht_find( session->channels, (void * const)&lookup );
+	return ( ht_remove( session->channels, itr ) ? IRC_OK : IRC_ERR );
 }
 
 irc_ret_t irc_session_part_channel( irc_session_t * const session, 
@@ -458,16 +475,14 @@ irc_ret_t irc_session_part_channel( irc_session_t * const session,
 	irc_channel_t * chan = NULL;
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 
-	citr = ht_find( session->channels, (void * const )name );
-	CHECK_RET( ITR_EQ( pitr, ht_itr_end( session->channels ) ), IRC_ERR );
+	/* get the channel */
+	chan = irc_session_get_channel( session, name );
 
-	if ( !ITR_EQ( citr, ht_itr_end( session->channels ) ) )
-	{
-		chan = (irc_channel_t *)ht_get( session->channels, citr );
-		ht_remove( session->channels, citr );
-	}
+	/* remove it from the channel map */
+	irc_session_remove_channel( session, name );
 
-	CHECK_RET( IRC_OK == irc_channel_part( chan, session->conn ), IRC_ERR );
+	/* send part message */
+	irc_channel_part( chan, session->conn );
 
 	/* delete the channel */
 	irc_channel_delete( chan );
@@ -479,9 +494,12 @@ irc_channel_t * irc_session_get_channel( irc_session_t * const session,
 										 uint8_t const * const name )
 {
 	ht_itr_t itr;
+	irc_channel_t lookup;
 	CHECK_PTR_RET( session, NULL );
 	CHECK_PTR_RET( name, NULL );
-	itr = ht_find( session->channels, (void * const)name );
+	MEMSET( &lookup, 0, sizeof( irc_channel_t ) );
+	lookup.name = (uint8_t *)name;
+	itr = ht_find( session->channels, (void * const)&lookup );
 	return (irc_channel_t *)ht_get( session->channels, itr );
 }
 
@@ -799,7 +817,7 @@ static HANDLER_FN( PING )
 	/* send the PONG command */
 	irc_conn_send_msg( session->conn, pong );
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 /* this gets called when we receive a RPL_WELCOME message from the server */
@@ -823,7 +841,7 @@ static HANDLER_FN( RPL_WELCOME )
 	/* identify with the nickserv */
 	send_nickserv_identify( session );
 	
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 /* this gets called when we receive a RPL_MYINFO message from the server */
@@ -885,7 +903,7 @@ static HANDLER_FN( RPL_MYINFO )
 							 strdup( msg->parameters[2] ) );
 	}
 
-	return IRC_DONE;
+	return IRC_OK;
 }
 
 /* this handles MODE commands from the server */
