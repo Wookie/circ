@@ -26,36 +26,6 @@
 #include "channel.h"
 #include "session.h"
 
-/* this gets called when we successfully join a channel */
-HANDLER_FN( JOIN )
-{
-	irc_channel_t * chan = NULL;
-	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
-	CHECK_PTR_RET( chan, IRC_ERR );
-	chan->pending = FALSE;
-	
-	/* TODO: call join hook */
-
-	return IRC_OK;
-}
-
-HANDLER_FN( RPL_TOPIC )
-{
-	irc_channel_t * chan = NULL;
-	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
-	CHECK_PTR_RET( chan, IRC_ERR );
-
-	/* store a copy of the topic */
-	if ( msg->trailing != NULL )
-	{
-		chan->topic = strdup( msg->trailing );
-	}
-
-	/* TODO: call topic hook */
-
-	return IRC_OK;
-}
-
 HANDLER_FN( RPL_NAMREPLY )
 {
 	uint8_t * name = NULL;

@@ -56,16 +56,27 @@ struct irc_session_s
 
 /* forward declare the message handlers */
 static HANDLER_FN( PING );
-static HANDLER_FN( RPL_WELCOME );
 static HANDLER_FN( RPL_MYINFO );
 static HANDLER_FN( MODE );
-static HANDLER_FN( ANYCMD );
+
+/* message handlers for firing off session handlers */
+static HANDLER_FN( RPL_WELCOME );
+static HANDLER_FN( TOPIC );
+static HANDLER_FN( RPL_TOPIC );
+static HANDLER_FN( RPL_TOPICINFO );
+static HANDLER_FN( JOIN );
+static HANDLER_FN( NICK );
+static HANDLER_FN( PART );
+static HANDLER_FN( NOTICE );
+static HANDLER_FN( PRIVMSG );
+static HANDLER_FN( QUIT );
 
 /* channel handlers */
-extern HANDLER_FN( JOIN );
-extern HANDLER_FN( RPL_TOPIC );
 extern HANDLER_FN( RPL_NAMREPLY );
 extern HANDLER_FN( RPL_ENDOFNAMES );
+
+/* catch-all handler */
+static HANDLER_FN( ANYCMD );
 
 #define FNV_PRIME (0x01000193)
 static uint32_t fnv_key_hash(void const * const key)
@@ -517,9 +528,7 @@ static int irc_session_set_channel_handlers( irc_session_t * const session )
 {
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 
-	/* register channel handlers */
-	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
+	/* register extern channel handlers */
 	CHECK_RET( IRC_OK == SET_HANDLER( RPL_NAMREPLY,			HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( RPL_ENDOFNAMES,		HANDLER_FIRST ), FALSE );
 
@@ -573,12 +582,24 @@ static int irc_session_initialize( irc_session_t * const session,
 	/* register handlers */
 	CHECK_RET( IRC_OK == SET_HANDLER( PING,					HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( RPL_MYINFO,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_WELCOME,			HANDLER_FIRST ), FALSE );
 	CHECK_RET( IRC_OK == SET_HANDLER( MODE,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( ANYCMD,				HANDLER_LAST  ), FALSE );
+
+	/* register handlers for session events */
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_WELCOME,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPICINFO,		HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( NICK,					HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( PART,					HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( NOTICE,				HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( PRIVMSG,				HANDLER_FIRST ), FALSE );
+	CHECK_RET( IRC_OK == SET_HANDLER( QUIT,					HANDLER_FIRST ), FALSE );
 
 	/* register the channel handlers */
 	CHECK_RET( irc_session_set_channel_handlers( session ), FALSE );
+
+	/* register catch all handler */
+	CHECK_RET( IRC_OK == SET_HANDLER( ANYCMD,				HANDLER_LAST  ), FALSE );
 
 	return TRUE;
 }
@@ -820,30 +841,6 @@ static HANDLER_FN( PING )
 	return IRC_OK;
 }
 
-/* this gets called when we receive a RPL_WELCOME message from the server */
-static HANDLER_FN( RPL_WELCOME )
-{
-	int8_t const * dest;
-	irc_msg_t * pong = NULL;
-
-	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
-
-	/* get a pointer to the last part of the PING message */
-	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
-	DEBUG("received RPL_WELCOME from %s\n", dest);
-
-	/* we have a registered connection to the server, we're now active */
-	session->state = IRC_SESSION_ACTIVE;
-
-	/* call the irc session connected event callback */
-	irc_session_call_handler( session, NULL, SESSION_CONNECTED );
-
-	/* identify with the nickserv */
-	send_nickserv_identify( session );
-	
-	return IRC_OK;
-}
-
 /* this gets called when we receive a RPL_MYINFO message from the server */
 static HANDLER_FN( RPL_MYINFO )
 {
@@ -913,6 +910,143 @@ static HANDLER_FN( MODE )
 
 	/* chain to the next handler */
 	return IRC_OK;
+}
+
+/* this gets called when we receive a RPL_WELCOME message from the server */
+static HANDLER_FN( RPL_WELCOME )
+{
+	irc_ret_t ret = IRC_OK;
+	int8_t const * dest;
+
+	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
+
+	/* get a pointer to the last part of the PING message */
+	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
+	DEBUG("received RPL_WELCOME from %s\n", dest);
+
+	/* we have a registered connection to the server, we're now active */
+	session->state = IRC_SESSION_ACTIVE;
+
+	/* call the irc session connected event callback */
+	ret = irc_session_call_handler( session, NULL, SESSION_CONNECTED );
+
+	/* identify with the nickserv */
+	send_nickserv_identify( session );
+	
+	return ret;
+}
+
+static HANDLER_FN( TOPIC )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == TOPIC), IRC_BADPARAM );
+
+	/* call SESSION_ON_TOPIC handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_TOPIC );
+}
+
+static HANDLER_FN( RPL_TOPIC )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == RPL_TOPIC), IRC_BADPARAM );
+
+	/* call SESSION_ON_CURRENT_TOPIC handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_CURRENT_TOPIC );
+}
+
+static HANDLER_FN( RPL_TOPICINFO )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == RPL_TOPICINFO), IRC_BADPARAM );
+
+	/* call SESSION_ON_TOPIC_INFO handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_TOPIC_INFO );
+}
+
+static HANDLER_FN( JOIN )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == JOIN), IRC_BADPARAM );
+
+	/* call SESSION_ON_JOIN handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_JOIN );
+}
+
+static HANDLER_FN( NICK )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
+
+	/* call SESSION_ON_NICK handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_NICK );
+}
+
+static HANDLER_FN( PART )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == PART), IRC_BADPARAM );
+
+	/* call SESSION_ON_PART handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_PART );
+}
+
+static HANDLER_FN( NOTICE )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == NOTICE), IRC_BADPARAM );
+
+	/* TODO: decide if it is a privnotice or pubnotice and call the
+	 * SESSION_ON_PRIVNOTICE or SESSION_ON_PUBNOTICE handlers */
+	irc_session_call_handler( session, msg, SESSION_ON_PRIVNOTICE );
+	irc_session_call_handler( session, msg, SESSION_ON_PUBNOTICE );
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( PRIVMSG )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
+
+	/* TODO: check for <target> :0x01ACTION <str>0x01 to see if this
+	 * is an ACTION.  if not an action, then decide if it is priv or pub.  
+	 * then call the correct handler:
+	 *		SESSION_ON_PRIVMSG
+	 *		SESSION_ON_PUBMSG
+	 *		SESSION_ON_ACTION
+	 */
+	irc_session_call_handler( session, msg, SESSION_ON_PRIVMSG );
+	irc_session_call_handler( session, msg, SESSION_ON_PUBMSG );
+	irc_session_call_handler( session, msg, SESSION_ON_ACTION );
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( QUIT )
+{
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+
+	CHECK_RET( (msg->cmd == QUIT), IRC_BADPARAM );
+
+	/* call SESSION_ON_QUIT handler */
+	return irc_session_call_handler( session, msg, SESSION_ON_QUIT );
 }
 
 /* this is the catch-all handler that logs all inbound messages */
