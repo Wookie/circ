@@ -39,9 +39,6 @@ typedef enum irc_ret_e
 
 typedef enum irc_command_e
 {
-	/* used to indicate an outbound msg */
-	SEND = -3,
-
 	/* used to indicate any command */
 	ANYCMD = -2,
 
