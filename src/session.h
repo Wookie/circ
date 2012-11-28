@@ -25,6 +25,8 @@
 #include "commands.h"
 #include "modes.h"
 #include "msg.h"
+#include "conn.h"
+#include "channel.h"
 
 #define IRC_PARAM_LEN	(512)
 
@@ -36,17 +38,7 @@ typedef enum irc_session_setting_e
 	USER_NAME			= 0x20d80d65,
 	REAL_NAME			= 0x4215b8fe,
 	SERVER_PASS			= 0x01026017,
-	NICKSERV_PASS		= 0xcfcd5833,
 	QUIT_MSG			= 0xcc785413,
-	HOST_NAME			= 0x42eceb90,
-	USER_MODES			= 0x27d18a34,
-	USER_MODES_PARAM	= 0xdb4324d7,
-	CHANNEL_MODES		= 0x9b5b9912,
-	CHANNEL_MODES_PARAM = 0xff946081,
-	SERVER_MODES		= 0xf4efe58c,
-	SERVER_MODES_PARAM	= 0xc8500f7f,
-	SERVER_VERSION		= 0xa73860b0
-	/*TODO: add RECONNECT_TIMEOUT */
 
 } irc_session_setting_t;
 

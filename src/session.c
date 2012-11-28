@@ -54,48 +54,21 @@ struct irc_session_s
 	void *				user_data;				/* handler context */
 };
 
-/* forward declare the message handlers */
+/* forward declare the PING handler */
 static HANDLER_FN( PING );
-static HANDLER_FN( RPL_MYINFO );
-static HANDLER_FN( MODE );
 
-/* message handlers for firing off session handlers */
-static HANDLER_FN( RPL_WELCOME );
-static HANDLER_FN( TOPIC );
-static HANDLER_FN( RPL_TOPIC );
-static HANDLER_FN( RPL_TOPICINFO );
-static HANDLER_FN( JOIN );
-static HANDLER_FN( NICK );
-static HANDLER_FN( PART );
-static HANDLER_FN( NOTICE );
-static HANDLER_FN( PRIVMSG );
-static HANDLER_FN( QUIT );
-
-/* channel handlers */
-extern HANDLER_FN( RPL_NAMREPLY );
-extern HANDLER_FN( RPL_ENDOFNAMES );
-
-/* catch-all handler */
-static HANDLER_FN( ANYCMD );
-
-#define FNV_PRIME (0x01000193)
-static uint32_t fnv_key_hash(void const * const key)
-{
-    uint32_t hash = 0x811c9dc5;
-	uint8_t const * p = (uint8_t const *)key;
-	while ( (*p) != '\0' )
-	{
-		hash *= FNV_PRIME;
-		hash ^= *p++;
-	}
-	return hash;
-}
-
-static int string_eq( void const * const l, void const * const r )
-{
-	return ( 0 == strcmp(C(l), C(r)) );
-}
-
+/* forward declare the helper functions */
+static uint32_t fnv_key_hash(void const * const key);
+static int string_eq( void const * const l, void const * const r );
+static int int_less( void * l, void * r );
+static uint_t setting_hash_fn( void const * const key );
+static int setting_match_fn( void const * const l, void const * const r );
+static void setting_delete_fn( void * p );
+static uint_t channel_hash_fn( void const * const key );
+static int channel_match_fn( void const * const l, void const * const r );
+static uint_t handler_hash_fn( void const * const key );
+static int handler_match_fn( void const * const l, void const * const r );
+static void handler_delete_fn( void * p );
 
 /* handles calling the handlers associated with the cmd */
 static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
@@ -137,57 +110,6 @@ static irc_ret_t irc_session_call_handler( irc_session_t * const session,
 	}
 
 	return IRC_OK;
-}
-
-
-static void check_umodes( int8_t const * const modes )
-{
-	int i;
-	for ( i = 0; i < IRC_UMODE_COUNT; ++i )
-	{
-		if ( modes[i] == '\0' )
-			break;
-		if ( !IS_UMODE( modes[i] ) )
-			WARN( "unknown user mode: %c\n", modes[i] );
-	}
-}
-
-static void check_cmodes( int8_t const * const modes )
-{
-	int i;
-	for ( i = 0; i < IRC_CMODE_COUNT; ++i )
-	{
-		if ( modes[i] == '\0' )
-			break;
-		if ( !IS_CMODE( modes[i] ) )
-			WARN( "unknown channel mode: %c\n", modes[i] );
-	}
-}
-
-static void check_smodes( int8_t const * const modes )
-{
-	int i;
-	for ( i = 0; i < IRC_SMODE_COUNT; ++i )
-	{
-		if ( modes[i] == '\0' )
-			break;
-		if ( !IS_SMODE( modes[i] ) )
-			WARN( "unknown server mode: %c\n", modes[i] );
-	}
-}
-
-
-
-static int int_less( void * l, void * r )
-{
-	int li = (int)l;
-	int ri = (int)r;
-
-	if ( li < ri )
-		return -1;
-	else if ( li > ri )
-		return 1;
-	return 0;
 }
 
 static void send_pass( irc_session_t * const session )
@@ -237,41 +159,6 @@ static void send_user( irc_session_t * const session )
 
 	/* send the USER command */
 	irc_conn_send_msg( session->conn, user );
-}
-
-static void send_nickserv_identify( irc_session_t * const session )
-{
-	irc_msg_t * privmsg = NULL;
-	int8_t * trailing = NULL;
-	int8_t * nick_name = NULL;
-	int8_t * nickserv_pass = NULL;
-	CHECK_PTR( session );
-
-	nick_name = irc_session_get( session, NICK_NAME );
-	nickserv_pass = irc_session_get( session, NICKSERV_PASS );
-
-	if ( nickserv_pass != NULL )
-	{
-		trailing = CALLOC( 10 + strlen( nick_name ) + 1 + strlen( nickserv_pass ) + 1, sizeof(uint8_t) );
-		CHECK_PTR( trailing );
-		sprintf( trailing, "IDENTIFY %s %s", nick_name, nickserv_pass );
-	}
-	else
-	{
-		trailing = CALLOC( 10 + strlen( nick_name ) + 1, sizeof(uint8_t) );
-		CHECK_PTR( trailing );
-		sprintf( trailing, "IDENTIFY %s", nick_name );
-	}
-
-	/* send the PRIVMSG to NickServ command */
-	privmsg = irc_msg_new();
-	irc_msg_initialize( privmsg, PRIVMSG, NULL, 1, "NickServ" );
-	irc_msg_set_trailing( privmsg, trailing );
-
-	/* send the PRIVMSG command */
-	irc_conn_send_msg( session->conn, privmsg );
-
-	FREE( trailing );
 }
 
 static void send_quit( irc_session_t * const session )
@@ -380,62 +267,6 @@ static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn,
 	return IRC_OK;
 }
 
-static uint_t setting_hash_fn( void const * const key )
-{
-	CHECK_PTR_RET( key, 0 );
-	return (uint_t)pair_first((pair_t*)key);
-}
-
-static int setting_match_fn( void const * const l, void const * const r )
-{
-	CHECK_PTR_RET( l, FALSE );
-	CHECK_PTR_RET( r, FALSE );
-	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
-}
-
-static void setting_delete_fn( void * p )
-{
-	pair_t * pair = (pair_t*)p;
-	CHECK_PTR( pair );
-
-	FREE( pair_second( p ) );
-	pair_delete( p );
-}
-
-static uint_t channel_hash_fn( void const * const key )
-{
-	return fnv_key_hash( irc_channel_get_name( (irc_channel_t*)key ) );
-}
-
-static int channel_match_fn( void const * const l, void const * const r )
-{
-	return (strncmp( irc_channel_get_name( (irc_channel_t*)l ),
-					irc_channel_get_name( (irc_channel_t*)r ),
-					256 ) == 0);
-}
-
-static uint_t handler_hash_fn( void const * const key )
-{
-	CHECK_PTR_RET( key, 0 );
-	return (uint_t)pair_first((pair_t*)key);
-}
-
-static int handler_match_fn( void const * const l, void const * const r )
-{
-	CHECK_PTR_RET( l, FALSE );
-	CHECK_PTR_RET( r, FALSE );
-	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
-}
-
-static void handler_delete_fn( void * p )
-{
-	pair_t * pair = (pair_t*)p;
-	CHECK_PTR( pair );
-
-	bt_delete( pair_second( p ) );
-	pair_delete( p );
-}
-
 irc_ret_t irc_session_join_channel( irc_session_t * const session,
 									uint8_t const * const name,
 									uint8_t const * const pass,
@@ -522,19 +353,6 @@ irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const
 	return irc_conn_send_msg( session->conn, msg );
 }
 
-
-
-static int irc_session_set_channel_handlers( irc_session_t * const session )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-
-	/* register extern channel handlers */
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_NAMREPLY,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_ENDOFNAMES,		HANDLER_FIRST ), FALSE );
-
-	return TRUE;
-}
-
 static int irc_session_initialize( irc_session_t * const session,
 								   evt_loop_t * const el,
 								   void * user_data )
@@ -579,27 +397,8 @@ static int irc_session_initialize( irc_session_t * const session,
 	/* store the handler context */
 	session->user_data = user_data;
 
-	/* register handlers */
-	CHECK_RET( IRC_OK == SET_HANDLER( PING,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_MYINFO,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( MODE,					HANDLER_FIRST ), FALSE );
-
-	/* register handlers for session events */
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_WELCOME,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPIC,			HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( RPL_TOPICINFO,		HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( JOIN,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( NICK,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( PART,					HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( NOTICE,				HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( PRIVMSG,				HANDLER_FIRST ), FALSE );
-	CHECK_RET( IRC_OK == SET_HANDLER( QUIT,					HANDLER_FIRST ), FALSE );
-
-	/* register the channel handlers */
-	CHECK_RET( irc_session_set_channel_handlers( session ), FALSE );
-
-	/* register catch all handler */
-	CHECK_RET( IRC_OK == SET_HANDLER( ANYCMD,				HANDLER_LAST  ), FALSE );
+	/* register PING handler */
+	CHECK_RET( IRC_OK == SET_HANDLER( PING,	HANDLER_FIRST ), FALSE );
 
 	return TRUE;
 }
@@ -810,14 +609,95 @@ irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
 	return IRC_OK;
 }
 
-
-
 /*************************************************/
-/*************************************************/
-/* these are the session specific event handlers */
-/*************************************************/
+/********************** static helper functions **/
 /*************************************************/
 
+#define FNV_PRIME (0x01000193)
+static uint32_t fnv_key_hash(void const * const key)
+{
+    uint32_t hash = 0x811c9dc5;
+	uint8_t const * p = (uint8_t const *)key;
+	while ( (*p) != '\0' )
+	{
+		hash *= FNV_PRIME;
+		hash ^= *p++;
+	}
+	return hash;
+}
+
+static int string_eq( void const * const l, void const * const r )
+{
+	return ( 0 == strcmp(C(l), C(r)) );
+}
+
+static int int_less( void * l, void * r )
+{
+	int li = (int)l;
+	int ri = (int)r;
+
+	if ( li < ri )
+		return -1;
+	else if ( li > ri )
+		return 1;
+	return 0;
+}
+
+static uint_t setting_hash_fn( void const * const key )
+{
+	CHECK_PTR_RET( key, 0 );
+	return (uint_t)pair_first((pair_t*)key);
+}
+
+static int setting_match_fn( void const * const l, void const * const r )
+{
+	CHECK_PTR_RET( l, FALSE );
+	CHECK_PTR_RET( r, FALSE );
+	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
+}
+
+static void setting_delete_fn( void * p )
+{
+	pair_t * pair = (pair_t*)p;
+	CHECK_PTR( pair );
+
+	FREE( pair_second( p ) );
+	pair_delete( p );
+}
+
+static uint_t channel_hash_fn( void const * const key )
+{
+	return fnv_key_hash( irc_channel_get_name( (irc_channel_t*)key ) );
+}
+
+static int channel_match_fn( void const * const l, void const * const r )
+{
+	return (strncmp( irc_channel_get_name( (irc_channel_t*)l ),
+					irc_channel_get_name( (irc_channel_t*)r ),
+					256 ) == 0);
+}
+
+static uint_t handler_hash_fn( void const * const key )
+{
+	CHECK_PTR_RET( key, 0 );
+	return (uint_t)pair_first((pair_t*)key);
+}
+
+static int handler_match_fn( void const * const l, void const * const r )
+{
+	CHECK_PTR_RET( l, FALSE );
+	CHECK_PTR_RET( r, FALSE );
+	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
+}
+
+static void handler_delete_fn( void * p )
+{
+	pair_t * pair = (pair_t*)p;
+	CHECK_PTR( pair );
+
+	bt_delete( pair_second( p ) );
+	pair_delete( p );
+}
 
 /* this gets called when we receive a PING message from the server */
 static HANDLER_FN( PING )
@@ -841,223 +721,6 @@ static HANDLER_FN( PING )
 	return IRC_OK;
 }
 
-/* this gets called when we receive a RPL_MYINFO message from the server */
-static HANDLER_FN( RPL_MYINFO )
-{
-	int8_t const * dest;
-	irc_msg_t * pong = NULL;
-
-	CHECK_RET( (msg->cmd == RPL_MYINFO), IRC_BADPARAM );
-
-	switch( msg->num_params )
-	{
-		case 9: /* KineIRCd */
-
-			/* server modes that take a parameter */
-			irc_session_set( session, 
-							 SERVER_MODES_PARAM,
-							 strdup( msg->parameters[8] ) );
-			check_smodes( msg->parameters[8] );
-
-			/* server modes */
-			irc_session_set( session, 
-							 SERVER_MODES,
-							 strdup( msg->parameters[7] ) );
-			check_smodes( msg->parameters[7] );
-
-			/* user modes that take a parameter */
-			irc_session_set( session, 
-							 USER_MODES_PARAM,
-							 strdup( msg->parameters[6] ) );
-			check_umodes( msg->parameters[6] );
-
-		case 6: /* ircd */
-
-			/* parse the cmodes with a parameter */
-			irc_session_set( session, 
-							 CHANNEL_MODES_PARAM,
-							 strdup( msg->parameters[5] ) );
-			check_cmodes( msg->parameters[5] );
-
-
-		case 5: /* RFC2812 */
-
-			/* channel modes */
-			irc_session_set( session, 
-							 CHANNEL_MODES,
-							 strdup( msg->parameters[4] ) );
-			check_cmodes( msg->parameters[4] );
-
-			/* user modes */
-			irc_session_set( session, 
-							 USER_MODES,
-							 strdup( msg->parameters[3] ) );
-			check_umodes( msg->parameters[3] );
-
-			/* store version */
-			irc_session_set( session,
-							 SERVER_VERSION,
-							 strdup( msg->parameters[2] ) );
-	}
-
-	return IRC_OK;
-}
-
-/* this handles MODE commands from the server */
-static HANDLER_FN( MODE )
-{
-	CHECK_RET( (msg->cmd == MODE), IRC_BADPARAM );
-
-	/* chain to the next handler */
-	return IRC_OK;
-}
-
-/* this gets called when we receive a RPL_WELCOME message from the server */
-static HANDLER_FN( RPL_WELCOME )
-{
-	irc_ret_t ret = IRC_OK;
-	int8_t const * dest;
-
-	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
-
-	/* get a pointer to the last part of the PING message */
-	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
-	DEBUG("received RPL_WELCOME from %s\n", dest);
-
-	/* we have a registered connection to the server, we're now active */
-	session->state = IRC_SESSION_ACTIVE;
-
-	/* call the irc session connected event callback */
-	ret = irc_session_call_handler( session, NULL, SESSION_CONNECTED );
-
-	/* identify with the nickserv */
-	send_nickserv_identify( session );
-	
-	return ret;
-}
-
-static HANDLER_FN( TOPIC )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == TOPIC), IRC_BADPARAM );
-
-	/* call SESSION_ON_TOPIC handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_TOPIC );
-}
-
-static HANDLER_FN( RPL_TOPIC )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == RPL_TOPIC), IRC_BADPARAM );
-
-	/* call SESSION_ON_CURRENT_TOPIC handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_CURRENT_TOPIC );
-}
-
-static HANDLER_FN( RPL_TOPICINFO )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == RPL_TOPICINFO), IRC_BADPARAM );
-
-	/* call SESSION_ON_TOPIC_INFO handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_TOPIC_INFO );
-}
-
-static HANDLER_FN( JOIN )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == JOIN), IRC_BADPARAM );
-
-	/* call SESSION_ON_JOIN handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_JOIN );
-}
-
-static HANDLER_FN( NICK )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
-
-	/* call SESSION_ON_NICK handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_NICK );
-}
-
-static HANDLER_FN( PART )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == PART), IRC_BADPARAM );
-
-	/* call SESSION_ON_PART handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_PART );
-}
-
-static HANDLER_FN( NOTICE )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == NOTICE), IRC_BADPARAM );
-
-	/* TODO: decide if it is a privnotice or pubnotice and call the
-	 * SESSION_ON_PRIVNOTICE or SESSION_ON_PUBNOTICE handlers */
-	irc_session_call_handler( session, msg, SESSION_ON_PRIVNOTICE );
-	irc_session_call_handler( session, msg, SESSION_ON_PUBNOTICE );
-
-	return IRC_OK;
-}
-
-static HANDLER_FN( PRIVMSG )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
-
-	/* TODO: check for <target> :0x01ACTION <str>0x01 to see if this
-	 * is an ACTION.  if not an action, then decide if it is priv or pub.  
-	 * then call the correct handler:
-	 *		SESSION_ON_PRIVMSG
-	 *		SESSION_ON_PUBMSG
-	 *		SESSION_ON_ACTION
-	 */
-	irc_session_call_handler( session, msg, SESSION_ON_PRIVMSG );
-	irc_session_call_handler( session, msg, SESSION_ON_PUBMSG );
-	irc_session_call_handler( session, msg, SESSION_ON_ACTION );
-
-	return IRC_OK;
-}
-
-static HANDLER_FN( QUIT )
-{
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( msg, IRC_BADPARAM );
-
-	CHECK_RET( (msg->cmd == QUIT), IRC_BADPARAM );
-
-	/* call SESSION_ON_QUIT handler */
-	return irc_session_call_handler( session, msg, SESSION_ON_QUIT );
-}
-
-/* this is the catch-all handler that logs all inbound messages */
-static HANDLER_FN( ANYCMD )
-{
-	/* log it */
-	/*irc_msg_log( msg );*/
-
-	/* chain to the next handler */
-	return IRC_OK;
-}
 
 #ifdef UNIT_TESTING
 
