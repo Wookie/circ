@@ -22,72 +22,31 @@
 
 #include "commands.h"
 #include "msg.h"
-#include "conn.h"
-#include "channel.h"
 #include "session.h"
+#include "event_cb.h"
+#include "channel.h"
 
-HANDLER_FN( RPL_NAMREPLY )
+struct irc_channel_s
 {
-	uint8_t * name = NULL;
-	uint8_t * nick = NULL;
-	uint8_t * s = NULL;
-	uint8_t * f = NULL;
-	ht_itr_t itr;
-	irc_channel_t * chan = NULL;
-	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
-	CHECK_PTR_RET( chan, IRC_ERR );
+	int			joining;		/* fully joined? */
+	int			parting;		/* fully pared? */
+    uint8_t*	name;			/* name of the channel */
+    uint8_t*    pass;           /* the channel password */
+    uint8_t*    topic;          /* channel topic */
+	uint8_t*	part_msg;		/* part message */
+    /*int32_t     mode[MODE_WORDS];*//* mode flags */
+    list_t*		clients;        /* list of clients in the channel */
+	list_t*		join_msgs;		/* list of join messages */
+};
 
-	name = msg->parameters[0];
-	if ( (name[0] == '@') || (name[0] == '*') || (name[0] == '=') )
-		name++;
-
-	s = f = msg->trailing;
-	while ( *f != '\0' )
-	{
-		if ( *f == ' ' )
-		{
-			/* trim flag */
-			if ( (*s == '@') || (*s == '+') )
-			{
-				s++;
-			}
-			strncpy( nick, s, (f - s) );
-			f++;
-			s = f;
-			list_push_tail( chan->clients, nick );
-
-			/* TODO: call user hook */
-		}
-		else
-		{
-			f++;
-		}
-	}
-
-	return IRC_OK;
-}
-
-HANDLER_FN( RPL_ENDOFNAMES )
-{
-	ht_itr_t itr;
-	list_itr_t nitr, nend;
-	uint8_t * name = NULL;
-	irc_channel_t * chan = NULL;
-	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
-	CHECK_PTR_RET( chan, IRC_ERR );
-
-	nitr = list_itr_begin( chan->clients );
-	nend = list_itr_end( chan->clients );
-	DEBUG( "Channel %s users:\n", chan->name );
-	for ( ; nitr != nend; nitr = list_itr_next( chan->clients, nitr ) )
-	{
-		name = (uint8_t*)list_get_head( chan->clients );
-		DEBUG( "\t%s\n", name );
-	}
-
-	return IRC_OK;
-}
-
+/* forward declare the callback functions */
+static HANDLER_FN( channel, JOIN );
+static HANDLER_FN( channel, PART );
+static HANDLER_FN( channel, KICK );
+static HANDLER_FN( channel, QUIT );
+static HANDLER_FN( channel, RPL_TOPIC );
+static HANDLER_FN( channel, RPL_NAMREPLY );
+static HANDLER_FN( channel, RPL_ENDOFNAMES );
 
 irc_channel_t * irc_channel_new( uint8_t const * const name, 
 								 uint8_t const * const pass,
@@ -160,16 +119,18 @@ uint8_t * irc_channe_get_topic( irc_channel_t * const c )
 	return c->topic;
 }
 
-irc_ret_t irc_channel_join( irc_channel_t * const c, irc_conn_t * const conn )
+irc_ret_t irc_channel_join( irc_channel_t * const c, irc_session_t * const session )
 {
 	irc_msg_t * join = NULL;
 
 	CHECK_PTR_RET( c, IRC_BADPARAM );
-	CHECK_PTR_RET( conn, IRC_BADPARAM );
-	CHECK_RET( c->pending == FALSE, IRC_BADPARAM );
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_RET( c->joining == FALSE, IRC_BADPARAM );
 
-	/* set the pending flag to TRUE */
-	c->pending = TRUE;
+	/* hook up our callbacks */
+
+	/* set the joining flag to TRUE */
+	c->joining = TRUE;
 
 	/* send the JOIN command */
 	join = irc_msg_new();
@@ -183,17 +144,21 @@ irc_ret_t irc_channel_join( irc_channel_t * const c, irc_conn_t * const conn )
 	}
 
 	/* send the JOIN command */
-	irc_conn_send_msg( conn, join );
+	irc_session_send_msg( session, join );
 
 	return IRC_OK;
 }
 
-irc_ret_t irc_channel_part( irc_channel_t * const c, irc_conn_t * const conn )
+irc_ret_t irc_channel_part( irc_channel_t * const c, irc_session_t * const session )
 {
 	irc_msg_t * part = NULL;
 
 	CHECK_PTR_RET( c, IRC_BADPARAM );
-	CHECK_PTR_RET( conn, IRC_BADPARAM );
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_RET( c->parting == FALSE, IRC_BADPARAM );
+
+	/* set the parting flag to be true */
+	c->parting = TRUE;
 
 	/* send the PART command */
 	part = irc_msg_new();
@@ -204,9 +169,164 @@ irc_ret_t irc_channel_part( irc_channel_t * const c, irc_conn_t * const conn )
 	}
 
 	/* send the PART command */
-	irc_conn_send_msg( conn, part );
+	irc_session_send_msg( session, part );
 
 	return IRC_OK;
 }
+
+/********** handler callbacks **********/
+static HANDLER_FN( channel, JOIN )
+{
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* used to track users joining the channel */
+
+	if ( chan->joining )
+	{
+		DEBUG( "successfully joined channel: %s\n", chan->name );
+		chan->joining = FALSE;
+		return IRC_OK;
+	}
+
+	/* somebody else joined so add them to the list of clients */
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, PART )
+{
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* used to track users leaving the channel */
+
+	if ( chan->parting )
+	{
+		DEBUG( "successfully parted channel: %s\n", chan->name );
+		chan->parting = FALSE;
+
+		/* unhook our callbacks */
+
+		return IRC_OK;
+	}
+
+	/* somebody else parted so remove them from the list of clients */
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, KICK )
+{
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* used to track users being kicked from the channel */
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, QUIT )
+{
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* used to track users quitting the server */
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, RPL_TOPIC )
+{
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* receive the channel topic */
+	if ( chan->topic != NULL )
+	{
+		FREE( chan->topic );
+		chan->topic = NULL;
+	}
+
+	/* copy the topic from the trailing part of the message */
+	chan->topic = strdup( msg->trailing );
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, RPL_NAMREPLY )
+{
+	uint8_t * nick = NULL;
+	uint8_t * s = NULL;
+	uint8_t * f = NULL;
+	ht_itr_t itr;
+	irc_channel_t * chan = (irc_channel_t *)user_data;
+	
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( user_data, IRC_BADPARAM );
+
+	/* this receives the list of names of people already in the
+	 * channel when we join it */
+	s = f = msg->trailing;
+	while ( *f != '\0' )
+	{
+		if ( *f == ' ' )
+		{
+			/* @ == moderator, + == can speak in moderated channel */
+			if ( (*s == '@') || (*s == '+') )
+			{
+				s++;
+			}
+			strncpy( nick, s, (f - s) );
+			f++;
+			s = f;
+			list_push_tail( chan->clients, nick );
+		}
+		else
+		{
+			f++;
+		}
+	}
+
+	return IRC_OK;
+}
+
+static HANDLER_FN( channel, RPL_ENDOFNAMES )
+{
+	ht_itr_t itr;
+	list_itr_t nitr, nend;
+	uint8_t * name = NULL;
+	irc_channel_t * chan = NULL;
+	chan = (irc_channel_t*)irc_session_get_channel( session, msg->parameters[0] );
+	CHECK_PTR_RET( chan, IRC_ERR );
+
+	/* the end of the names list */
+
+	nitr = list_itr_begin( chan->clients );
+	nend = list_itr_end( chan->clients );
+	DEBUG( "Channel %s users:\n", chan->name );
+	for ( ; nitr != nend; nitr = list_itr_next( chan->clients, nitr ) )
+	{
+		name = (uint8_t*)list_get_head( chan->clients );
+		DEBUG( "\t%s\n", name );
+	}
+
+	return IRC_OK;
+}
+
 
 

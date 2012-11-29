@@ -9,8 +9,8 @@ EXTRA_LIBS_ROOT?=/usr/local
 
 SHELL=/bin/sh
 NAME=circ
-SRC=channel.c commands.c conn.c modes.c msg.c session.c
-HDR=channel.h commands.h conn.h modes.h msg.h session.h
+SRC=channel.c commands.c conn.c event_cb.c modes.c msg.c session.c
+HDR=channel.h commands.h conn.h event_cb.h modes.h msg.h session.h
 OBJ=$(SRC:.c=.o)
 OUT=lib$(NAME).a
 GCDA=$(SRC:.c=.gcda)

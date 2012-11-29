@@ -36,7 +36,6 @@
 #include "commands.h"
 #include "msg.h"
 #include "conn.h"
-#include "channel.h"
 #include "session.h"
 
 #define CHECK_HANDLER_PRAMS CHECK_PTR_RET( session, IRC_BADPARAM ); \
@@ -49,13 +48,12 @@ struct irc_session_s
 	irc_conn_t*			conn;					/* irc connection */
 	ht_t*				settings;				/* hashtable of settings */
 	ht_t*				servers;				/* hashtable of servers in the network */
-	ht_t*				channels;				/* hashtable of channels */
 	ht_t*				handlers;				/* hashtable of event handlers */
 	void *				user_data;				/* handler context */
 };
 
 /* forward declare the PING handler */
-static HANDLER_FN( PING );
+static HANDLER_FN( NULL, PING );
 
 /* forward declare the helper functions */
 static uint32_t fnv_key_hash(void const * const key);
@@ -64,49 +62,33 @@ static int int_less( void * l, void * r );
 static uint_t setting_hash_fn( void const * const key );
 static int setting_match_fn( void const * const l, void const * const r );
 static void setting_delete_fn( void * p );
-static uint_t channel_hash_fn( void const * const key );
-static int channel_match_fn( void const * const l, void const * const r );
-static uint_t handler_hash_fn( void const * const key );
-static int handler_match_fn( void const * const l, void const * const r );
-static void handler_delete_fn( void * p );
 
 /* handles calling the handlers associated with the cmd */
 static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
 										   irc_msg_t * const msg,
 										   irc_command_t const cmd )
 {
-	bt_itr_t itr;
-	ht_itr_t htitr;
-	event_handler_fn handler_fn = NULL;
-	pair_t * p = NULL;
-	bt_t * handler_list = NULL;
+	ht_itr_t itr, end;
+	irc_event_cb_t * cb = NULL;
 	
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
 
-	p = pair_new( (void*)cmd, NULL );
-	htitr = ht_find( session->handlers, p );
-	pair_delete( p );
-	p = (pair_t*)ht_get( session->handlers, htitr );
-	handler_list = p ? pair_second( p ) : NULL;
-	CHECK_PTR_RET( handler_list, IRC_ERR );
-
-	/* iterator through the list of handlers calling them until we either run out of
-	 * handlers or one of the handlers returns IRC_DONE. */
-	itr = bt_itr_begin( handler_list );
-	for ( ; itr != bt_itr_end( handler_list ); itr = bt_itr_next( handler_list, itr ) )
+	itr = ht_itr_begin( session->handlers );
+	end = ht_itr_end( session->handlers );
+	for ( ; !ITR_EQ( itr, end ); itr = ht_itr_next( session->handlers, itr ) )
 	{
-		handler_fn = (event_handler_fn)bt_itr_get( handler_list, itr );
+		/* get the next handler */
+		cb = (irc_event_cb_t*)ht_get( session->handlers, itr );
 
-		if ( handler_fn == NULL )
-		{
-			WARN("NULL handler fn pointer!\n");
+		if ( cb == NULL )
 			continue;
-		}
 
-		DEBUG( "Calling handler for %s\n", irc_cmd_get_string( cmd ) );
-		if ( (*handler_fn)( session, msg, session->user_data ) == IRC_DONE )
-			break;
+		if ( irc_event_cb_get_cmd( cb ) != cmd )
+			continue;
+
+		/* call the callback */
+		irc_event_cb_call_fn( cb, msg );
 	}
 
 	return IRC_OK;
@@ -267,84 +249,6 @@ static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn,
 	return IRC_OK;
 }
 
-irc_ret_t irc_session_join_channel( irc_session_t * const session,
-									uint8_t const * const name,
-									uint8_t const * const pass,
-									uint8_t const * const part_msg )
-{
-	irc_channel_t * chan = NULL;
-	ht_itr_t citr, pitr;
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( name, IRC_BADPARAM );
-
-	/* make sure we don't already have a channel record */
-	chan = irc_session_get_channel( session, name );
-	CHECK_RET( chan == NULL, IRC_BADPARAM );
-
-	/* create the new channel */
-	chan = irc_channel_new( name, pass, part_msg );
-	CHECK_PTR_RET( chan, IRC_ERR );
-
-	/* add it to the list of channels */
-	CHECK_GOTO( ht_insert( session->channels, (void*)chan ), join_channel_fail );
-
-	/* join the channel */
-	CHECK_RET( IRC_OK == irc_channel_join( chan, session->conn ), IRC_ERR );
-	return IRC_OK;
-
-join_channel_fail:
-	irc_channel_delete( chan );
-	return IRC_ERR;
-}
-
-static irc_ret_t irc_session_remove_channel( irc_session_t * const session,
-											 uint8_t const * const name )
-{
-	ht_itr_t itr;
-	irc_channel_t lookup;
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( name, IRC_BADPARAM );
-	MEMSET( &lookup, 0, sizeof( irc_channel_t ) );
-	lookup.name = (uint8_t *)name;
-	itr = ht_find( session->channels, (void * const)&lookup );
-	return ( ht_remove( session->channels, itr ) ? IRC_OK : IRC_ERR );
-}
-
-irc_ret_t irc_session_part_channel( irc_session_t * const session, 
-									uint8_t const * const name )
-{
-	ht_itr_t citr, pitr;
-	irc_channel_t * chan = NULL;
-	CHECK_PTR_RET( session, IRC_BADPARAM );
-
-	/* get the channel */
-	chan = irc_session_get_channel( session, name );
-
-	/* remove it from the channel map */
-	irc_session_remove_channel( session, name );
-
-	/* send part message */
-	irc_channel_part( chan, session->conn );
-
-	/* delete the channel */
-	irc_channel_delete( chan );
-
-	return IRC_OK;
-}
-
-irc_channel_t * irc_session_get_channel( irc_session_t * const session,
-										 uint8_t const * const name )
-{
-	ht_itr_t itr;
-	irc_channel_t lookup;
-	CHECK_PTR_RET( session, NULL );
-	CHECK_PTR_RET( name, NULL );
-	MEMSET( &lookup, 0, sizeof( irc_channel_t ) );
-	lookup.name = (uint8_t *)name;
-	itr = ht_find( session->channels, (void * const)&lookup );
-	return (irc_channel_t *)ht_get( session->channels, itr );
-}
-
 /* send the specified IRC command to the server */
 irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg )
 {
@@ -358,6 +262,7 @@ static int irc_session_initialize( irc_session_t * const session,
 								   void * user_data )
 {
 	irc_ret_t ret = IRC_OK;
+	irc_event_cb_t * ping_cb = NULL;
 	static irc_conn_ops_t conn_ops = 
 	{
 		&irc_conn_message_in,
@@ -386,19 +291,16 @@ static int irc_session_initialize( irc_session_t * const session,
 	session->settings = ht_new( 64, &setting_hash_fn, &setting_match_fn, &setting_delete_fn );
 	CHECK_PTR_RET( session->settings, FALSE );
 
-	/* create the channels hashtable */
-	session->channels = ht_new( 128, &channel_hash_fn, &channel_match_fn, &irc_channel_delete );
-	CHECK_PTR_RET( session->channels, FALSE );
-
 	/* create the handlers hashtable */
-	session->handlers = ht_new( 8, &handler_hash_fn, &handler_match_fn, &handler_delete_fn );
+	session->handlers = ht_new( 8, &irc_event_cb_hash, &irc_event_cb_match, &irc_event_cb_delete );
 	CHECK_PTR_RET( session->handlers, FALSE );
 
 	/* store the handler context */
 	session->user_data = user_data;
 
 	/* register PING handler */
-	CHECK_RET( IRC_OK == SET_HANDLER( PING,	HANDLER_FIRST ), FALSE );
+	ping_cb = NEW_HANDLER( PING, session, NULL );
+	irc_session_set_handler( session, ping_cb );
 
 	return TRUE;
 }
@@ -489,53 +391,28 @@ void * irc_session_get( irc_session_t * const session,
 
 
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
-								   irc_command_t const cmd,
-								   event_handler_fn event_handler,
-								   int const priority )
+								   irc_event_cb_t * const cb )
 {
-	int ret = FALSE;
-	ht_itr_t itr;
-	pair_t * p = NULL;
-	bt_t * handler_list = NULL;
-
 	CHECK_PTR_RET( session, IRC_BADPARAM );
-	CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
-	CHECK_RET( IS_VALID_COMMAND( cmd ), IRC_BADPARAM );
-	CHECK_PTR_RET( event_handler, IRC_BADPARAM );
+	CHECK_PTR_RET( cb, IRC_BADPARAM );
 
-	/* look up the btree associated with the specified event name */
-	p = pair_new( (void*)cmd, NULL );
-	itr = ht_find( session->handlers, (void*)p );
-	pair_delete( p );
-	p = ((pair_t*)ht_get( session->handlers, itr ));
-	handler_list = p ? pair_second( p ) : NULL;
+	CHECK_RET( ht_insert( session->handlers, (void*)cb ), IRC_ERR );
 
-	if ( handler_list == NULL )
-	{
-		/* create a new btree to store the handlers in priority order */
-		handler_list = bt_new( 1, &int_less, NULL, NULL );
-		CHECK_PTR_RET( handler_list, IRC_ERR );
+	return IRC_OK;
+}
 
-		/* add the new handler pointer at the specified priority */
-		ret = bt_add( handler_list, (void*)priority, (void*)event_handler );
-		CHECK_RET( ret, IRC_ERR );
+irc_ret_t irc_session_clear_handler( irc_session_t * const session,
+									 uint8_t const * const name )
+{
+	ht_itr_t itr;
+	CHECK_PTR_RET( session, IRC_BADPARAM );
+	CHECK_PTR_RET( name, IRC_BADPARAM );
 
-		/* add the btree to the handlers hashtable under the command */
-		ret = ht_insert( session->handlers, pair_new( (void*)cmd, (void*)handler_list ) );
-		CHECK_RET( ret, IRC_ERR );
-	}
-	else
-	{
-		/* add the new handler pointer at the specified priority */
-		ret = bt_add( handler_list, (void*)priority, (void*)event_handler );
-		CHECK_RET( ret, IRC_ERR );
-	}
+	/* look up the event cb struct */
+	itr = irc_event_cb_ht_find( session->handlers, name );
 
-	if ( bt_find( handler_list, (void*)priority ) != (void*)event_handler )
-	{
-		WARN( "adding event handler to event handler list failed!\n" );
-		return IRC_ERR;
-	}
+	/* try to call the callback */
+	CHECK_RET( ht_remove( session->handlers, itr ), IRC_ERR );
 
 	return IRC_OK;
 }
@@ -665,42 +542,8 @@ static void setting_delete_fn( void * p )
 	pair_delete( p );
 }
 
-static uint_t channel_hash_fn( void const * const key )
-{
-	return fnv_key_hash( irc_channel_get_name( (irc_channel_t*)key ) );
-}
-
-static int channel_match_fn( void const * const l, void const * const r )
-{
-	return (strncmp( irc_channel_get_name( (irc_channel_t*)l ),
-					irc_channel_get_name( (irc_channel_t*)r ),
-					256 ) == 0);
-}
-
-static uint_t handler_hash_fn( void const * const key )
-{
-	CHECK_PTR_RET( key, 0 );
-	return (uint_t)pair_first((pair_t*)key);
-}
-
-static int handler_match_fn( void const * const l, void const * const r )
-{
-	CHECK_PTR_RET( l, FALSE );
-	CHECK_PTR_RET( r, FALSE );
-	return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
-}
-
-static void handler_delete_fn( void * p )
-{
-	pair_t * pair = (pair_t*)p;
-	CHECK_PTR( pair );
-
-	bt_delete( pair_second( p ) );
-	pair_delete( p );
-}
-
 /* this gets called when we receive a PING message from the server */
-static HANDLER_FN( PING )
+static HANDLER_FN( NULL, PING )
 {
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;

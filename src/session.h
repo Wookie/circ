@@ -26,7 +26,6 @@
 #include "modes.h"
 #include "msg.h"
 #include "conn.h"
-#include "channel.h"
 
 #define IRC_PARAM_LEN	(512)
 
@@ -56,16 +55,7 @@ typedef enum irc_session_state_e
 #define HANDLER_LAST (INT_MIN)
 
 typedef struct irc_session_s irc_session_t;
-
-typedef irc_ret_t (*event_handler_fn)(irc_session_t * const session, 
-									  irc_msg_t * const msg, 
-									  void * user_data);
-#define HANDLER_FN(x) irc_ret_t session_##x##_handler( irc_session_t * const session, \
-													   irc_msg_t * const msg, \
-													   void * user_data )
-#define SET_HANDLER(x, y) irc_session_set_handler( session, x, &session_##x##_handler, y )
-
-#define HANDLER(x) session_##x##_handler
+typedef struct irc_event_cb_s irc_event_cb_t;
 
 /* create/destroy session */
 irc_session_t * irc_session_new( evt_loop_t * const evt,
@@ -79,26 +69,15 @@ irc_ret_t irc_session_set( irc_session_t * const session,
 void * irc_session_get( irc_session_t * const session,
 					    irc_session_setting_t const setting );
 
-/* add a handler for an IRC event
- *
- * event_name - a string name for an IRC event, for the full list*/
+/* add a callback function for the given command at a certain priority */
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
-								   irc_command_t const cmd,
-								   event_handler_fn event_handler,
-								   int const priority );
+								   irc_event_cb_t * const cb );
+irc_ret_t irc_session_clear_handler( irc_session_t * const session,
+									 uint8_t const * const name );
 
 /* connect/disconnect from the server */
 irc_ret_t irc_session_connect( irc_session_t * const session );
 irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit );
-
-irc_ret_t irc_session_join_channel( irc_session_t * const session,
-									uint8_t const * const name,
-									uint8_t const * const pass,
-									uint8_t const * const part_msg );
-irc_ret_t irc_session_part_channel( irc_session_t * const session,
-									uint8_t const * const name );
-irc_channel_t * irc_session_get_channel( irc_session_t * const session,
-										 uint8_t const * const name );
 
 /* send the specified IRC command to the server */
 irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg );

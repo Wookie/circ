@@ -96,18 +96,6 @@ int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 {
 	T("CONNECTED"),
 	T("DISCONNECTED"),
-	T("ON_ACTION"),
-	T("ON_TOPIC"),
-	T("ON_CURRENT_TOPIC"),
-	T("ON_TOPIC_INFO"),
-	T("ON_JOIN"),
-	T("ON_NICK"),
-	T("ON_PART"),
-	T("ON_PRIVMSG"),
-	T("ON_PRIVNOTICE"),
-	T("ON_PUBMSG"),
-	T("ON_PUBNOTICE"),
-	T("ON_QUIT"),
 };
 
 int8_t const * const irc_any_cmd = T("ANYCMD");
