@@ -51,9 +51,6 @@ typedef enum irc_session_state_e
 
 } irc_session_state_t;
 
-#define HANDLER_FIRST (INT_MAX)
-#define HANDLER_LAST (INT_MIN)
-
 typedef struct irc_session_s irc_session_t;
 typedef struct irc_event_cb_s irc_event_cb_t;
 

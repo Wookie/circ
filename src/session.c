@@ -53,7 +53,10 @@ struct irc_session_s
 };
 
 /* forward declare the PING handler */
-static HANDLER_FN( NULL, PING );
+/*static HANDLER_FN( NULL, PING );*/
+static irc_ret_t fn_NULL_PING_fn( irc_session_t * const session,
+								  irc_msg_t * const msg,
+								  void * user_data );
 
 /* forward declare the helper functions */
 static uint32_t fnv_key_hash(void const * const key);
@@ -543,7 +546,10 @@ static void setting_delete_fn( void * p )
 }
 
 /* this gets called when we receive a PING message from the server */
-static HANDLER_FN( NULL, PING )
+/*static HANDLER_FN( NULL, PING )*/
+static irc_ret_t fn_NULL_PING_fn( irc_session_t * const session,
+								  irc_msg_t * const msg,
+								  void * user_data );
 {
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;
