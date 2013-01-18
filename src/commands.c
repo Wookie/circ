@@ -95,6 +95,9 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
 int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 {
 	T("CONNECTED"),
+	T("NICK"),
+	T("PRIVMSG"),
+	T("PUBMSG"),
 	T("DISCONNECTED"),
 };
 
