@@ -54,6 +54,9 @@ struct irc_session_s
 
 /* forward declare the PING handler */
 static HANDLER_FN( NULL, PING );
+static HANDLER_FN( NULL, RPL_WELCOME );
+static HANDLER_FN( NULL, NICK );
+static HANDLER_FN( NULL, PRIVMSG );
 
 /* forward declare the helper functions */
 static uint32_t fnv_key_hash(void const * const key);
@@ -263,6 +266,9 @@ static int irc_session_initialize( irc_session_t * const session,
 {
 	irc_ret_t ret = IRC_OK;
 	irc_event_cb_t * ping_cb = NULL;
+	irc_event_cb_t * rpl_welcome_cb = NULL;
+	irc_event_cb_t * nick_cb = NULL;
+	irc_event_cb_t * privmsg_cb = NULL;
 	static irc_conn_ops_t conn_ops = 
 	{
 		&irc_conn_message_in,
@@ -300,7 +306,19 @@ static int irc_session_initialize( irc_session_t * const session,
 
 	/* register PING handler */
 	ping_cb = NEW_HANDLER( PING, session, NULL );
-	irc_session_set_handler( session, ping_cb );
+	CHECK_RET( (IRC_OK == irc_session_set_handler( session, ping_cb )), FALSE );
+
+	/* register RPL_WELCOME handler */
+	rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, NULL );
+	CHECK_RET( (IRC_OK == irc_session_set_handler( session, rpl_welcome_cb )), FALSE );
+
+	/* register NICK handler */
+	nick_cb = NEW_HANDLER( NICK, session, NULL );
+	CHECK_RET( (IRC_OK == irc_session_set_handler( session, nick_cb)), FALSE );
+
+	/* register PRIVMSG handler */
+	privmsg_cb = NEW_HANDLER( PRIVMSG, session, NULL );
+	CHECK_RET( (IRC_OK == irc_session_set_handler( session, privmsg_cb)), FALSE );
 
 	return TRUE;
 }
@@ -560,6 +578,45 @@ static HANDLER_FN( NULL, PING )
 
 	/* send the PONG command */
 	irc_conn_send_msg( session->conn, pong );
+
+	return IRC_OK;
+}
+
+/* this gets called when the connection is fully registered */
+static HANDLER_FN( NULL, RPL_WELCOME )
+{
+	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
+
+	/* call the "connected" event handler */
+	irc_session_call_handler( session, msg, SESSION_CONNECTED );
+
+	return IRC_OK;
+}
+
+/* this gets called when a user changes their nick */
+static HANDLER_FN( NULL, NICK )
+{
+	CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
+
+	/* call the "on_nick" event handler */
+	irc_session_call_handler( session, msg, SESSION_ON_NICK );
+
+	return IRC_OK;
+}
+
+/* this gets called whenever a PRIVMSG comes to us */
+static HANDLER_FN( NULL, PRIVMSG )
+{
+	uint8_t * p = NULL;
+	CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
+
+	/* we need to figure out if this is a private or public message.  if first
+	 * parameter is equal to our current nick, then it is a private message to
+	 * us, otherwise it is public. */
+	CHECK_RET( (msg->num_params > 0), IRC_BADPARAM );
+
+	p = msg->parameter[0];
+	while( *p && ((
 
 	return IRC_OK;
 }

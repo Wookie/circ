@@ -39,6 +39,7 @@ typedef struct irc_msg_s
 {
 	irc_msg_in_buf_t	in;		/* used when reading and parsing messages from stream */
 	irc_msg_out_buf_t	out;	/* the buffer used when building messages from scratch for sending */
+
 	uint8_t * prefix;			/* points to the prefix string in the buffer */
 	uint8_t * command;			/* command part of the message */
 	uint8_t * parameters[IRC_NUM_PARAMS]; /* pointers to each param */
@@ -46,11 +47,11 @@ typedef struct irc_msg_s
 	int32_t  num_params;		/* number of parameters */
 
 	irc_command_t cmd;
-	uint8_t * nick;
-	uint8_t * user;
-	uint8_t * host;
-	uint8_t * ipv4;
-	uint8_t * ipv6;
+	uint8_t * nick;				/* prefix/origin nick */
+	uint8_t * user;				/* prefix/origin user */
+	uint8_t * host;				/* prefix/origin host */
+	uint8_t * ipv4;				/* prefix/origin IPv4 address */
+	uint8_t * ipv6;				/* prefix/origin IPv6 address */
 
 } irc_msg_t;
 
