@@ -21,6 +21,7 @@
 typedef struct msgto_s
 {
 	uint8_t * channel;
+	uint8_t * nick;
 	uint8_t * user;
 	uint8_t * hostname;
 	uint8_t * hostaddr_ipv4;

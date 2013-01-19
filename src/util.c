@@ -57,6 +57,25 @@ static int is_key_octet( uint8_t const c )
 			 ( (c >= 0x21) && (c <= 0x7F) ) );
 }
 
+static int is_chanstart( uint8_t const c )
+{
+	return ( ( c == '#' ) ||
+			 ( c == '+' ) ||
+			 ( c == '!' ) ||
+			 ( c == '&' ) );
+}
+
+static int is_chanstring( uint8_t const c )
+{
+	return ( ( (c >= 0x01) && (c <= 0x07) ) ||
+			 ( (c >= 0x08) && (c <= 0x09) ) ||
+			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
+			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
+			 ( (c >= 0x21) && (c <= 0x2B) ) ||
+			 ( (c >= 0x2D) && (c <= 0x39) ) ||
+			 ( (c >= 0x3B) && (c <= 0xFF) ) );
+}
+
 static int check_ipv4_part( uint8_t * pstart, uint8_t *pend )
 {
 	int value;
@@ -468,10 +487,54 @@ static int parse_host( uint8_t * start, uint8_t ** end, uint8_t ** hostname, uin
 	return FALSE;
 }
 
+static int parse_channel( uint8_t * start, uint8_t ** end, uint8_t ** channel )
+{
+	uint8_t * p = NULL;
+	int first = TRUE;
+	
+	CHECK_PTR_RET( start, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+
+	p = start;
+
+	while ( (*p != '\0') && (*p != ' ') )
+	{
+		if ( first )
+		{
+			if ( !is_chanstart( *p ) )
+			{
+				WARN( "channel name failed to parse at position %d (%#x)\n", (int)((void*)p - (void*)start), *p );
+				return FALSE;
+			}
+			first = FALSE;
+			p++;
+			continue;
+		}
+				
+
+		if ( is_chanstring( *p ) )
+		{
+			p++;
+		}
+
+		if ( ((void*)p - (void*)start) > 50 )
+		{
+			WARN( "invalid channel name is too long > 50 characters" );
+			return FALSE;
+		}
+	}
+
+	(*end) = p;
+
+	if ( channel != NULL )
+		(*channel) = start;
+}
+
 int parse_msgto( uint8_t * start, uint8_t ** end, msgto_t * mt )
 {
 	uint8_t * p = NULL;
 	uint8_t * pend = NULL;
+	uint8_t * usernick = NULL;
 
 	CHECK_PTR_RET( start, FALSE );
 	CHECK_PTR_RET( end, FALSE );
@@ -486,10 +549,15 @@ int parse_msgto( uint8_t * start, uint8_t ** end, msgto_t * mt )
 		(*end) = pend;
 		return TRUE;
 	}
-
-	if ( parse_
-
-
+/*
+	if ( parse_user( p, &pend, &usernick ) )
+	{
+		if ( *p == '%' )
+		{
+		}
+		else if ( *p == '!' )
+*/
+	return FALSE;
 }
 
 int parse_prefix( uint8_t * start, uint8_t ** nick, uint8_t ** user, 
