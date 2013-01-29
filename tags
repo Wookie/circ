@@ -513,7 +513,7 @@ HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, PRIVMSG )$/;"	f	file:
 HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, RPL_WELCOME )$/;"	f	file:
 HANDLER_NAME	src/event_cb.h	32;"	d
 HDR	cutil/src/Makefile	/^HDR=aiofd.h bitset.h btree.h buffer.h child.h daemon.h debug.h events.h hashtable.h list.h log.h macros.h pair.h privileges.h sanitize.h socket.h$/;"	m
-HDR	src/Makefile	/^HDR=channel.h commands.h conn.h event_cb.h modes.h msg.h session.h$/;"	m
+HDR	src/Makefile	/^HDR=channel.h commands.h conn.h event_cb.h modes.h msg.h session.h util.h$/;"	m
 INFO	src/commands.h	/^    INFO,$/;"	e	enum:irc_command_e
 INSTALL	Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
 INSTALL	cutil/Makefile	/^INSTALL=\/usr\/bin\/install$/;"	m
@@ -947,7 +947,7 @@ SQUERY	src/commands.h	/^    SQUERY,$/;"	e	enum:irc_command_e
 SQUIT	src/commands.h	/^    SQUIT,$/;"	e	enum:irc_command_e
 SRC	cutil/src/Makefile	/^SRC=aiofd.c bitset.c btree.c buffer.c child.c daemon.c events.c hashtable.c list.c log.c pair.c privileges.c sanitize.c socket.c$/;"	m
 SRC	cutil/tests/Makefile	/^SRC=test_all.c test_aiofd.c test_bitset.c test_btree.c test_buffer.c test_child.c test_events.c test_flags.c test_hashtable.c test_list.c test_pair.c test_privileges.c test_sanitize.c test_socket.c$/;"	m
-SRC	src/Makefile	/^SRC=channel.c commands.c conn.c event_cb.c modes.c msg.c session.c$/;"	m
+SRC	src/Makefile	/^SRC=channel.c commands.c conn.c event_cb.c modes.c msg.c session.c util.c$/;"	m
 SRC	tests/Makefile	/^SRC=test_all.c test_flags.c test_session.c$/;"	m
 SRCDIR	Makefile	/^SRCDIR = src$/;"	m
 SRCDIR	cutil/Makefile	/^SRCDIR = src$/;"	m
@@ -1664,6 +1664,8 @@ irc_smode_e	src/modes.h	/^typedef enum irc_smode_e$/;"	g
 irc_smode_t	src/modes.h	/^} irc_smode_t;$/;"	t	typeref:enum:irc_smode_e
 irc_umode_e	src/modes.h	/^typedef enum irc_umode_e$/;"	g
 irc_umode_t	src/modes.h	/^} irc_umode_t;$/;"	t	typeref:enum:irc_umode_e
+is_chanstart	src/util.c	/^static int is_chanstart( uint8_t const c )$/;"	f	file:
+is_chanstring	src/util.c	/^static int is_chanstring( uint8_t const c )$/;"	f	file:
 is_digit	src/util.c	/^static int is_digit( uint8_t const c )$/;"	f	file:
 is_hex	src/util.c	/^static int is_hex( uint8_t const c )$/;"	f	file:
 is_key_octet	src/util.c	/^static int is_key_octet( uint8_t const c )$/;"	f	file:
@@ -1742,6 +1744,7 @@ next	cutil/src/btree.c	/^	struct node_s * next;		\/* traversal threading pointer
 next	cutil/src/list.c	/^	int_t	next;	\/* next node in the list *\/$/;"	m	struct:list_item_s	file:
 ngroups	cutil/src/privileges.h	/^	int		ngroups;$/;"	m	struct:priv_state_s
 nick	src/msg.h	/^	uint8_t * nick;				\/* prefix\/origin nick *\/$/;"	m	struct:irc_msg_s
+nick	src/util.h	/^	uint8_t * nick;$/;"	m	struct:msgto_s
 nleft	cutil/src/aiofd.c	/^	size_t nleft;$/;"	m	struct:aiofd_write_s	file:
 node_list	cutil/src/btree.c	/^	node_t**			node_list;	\/* memory for the nodes *\/$/;"	m	struct:bt_s	file:
 node_s	cutil/src/btree.c	/^typedef struct node_s$/;"	s	file:
@@ -1766,6 +1769,7 @@ pair_second	cutil/src/pair.c	/^void * pair_second( pair_t const * const pair )$/
 pair_t	cutil/src/pair.h	/^typedef struct pair_s pair_t;$/;"	t	typeref:struct:pair_s
 parameters	src/msg.h	/^	uint8_t * parameters[IRC_NUM_PARAMS]; \/* pointers to each param *\/$/;"	m	struct:irc_msg_s
 parent	cutil/src/btree.c	/^	struct node_s * parent;		\/* parent pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
+parse_channel	src/util.c	/^static int parse_channel( uint8_t * start, uint8_t ** end, uint8_t ** channel )$/;"	f	file:
 parse_host	src/util.c	/^static int parse_host( uint8_t * start, uint8_t ** end, uint8_t ** hostname, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostaddr	src/util.c	/^static int parse_hostaddr( uint8_t * start, uint8_t ** end, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostname	src/util.c	/^static int parse_hostname( uint8_t * start, uint8_t ** end )$/;"	f	file:

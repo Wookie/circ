@@ -43,8 +43,15 @@ irc_msg_t* irc_msg_new()
 	/* allocate the msg */
 	msg = CALLOC(1, sizeof(irc_msg_t));
 	CHECK_PTR_RET(msg, NULL);
+
+	/* initialize the params list */
+	CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, NULL ), _irc_msg_new_fail );
 	
 	return msg;
+
+_irc_msg_new_fail:
+	irc_msg_delete( msg );
+	return NULL;
 }
 
 
@@ -76,89 +83,164 @@ void irc_msg_delete(void * m)
 	}
 
 	/* free the message memory */
-	FREE(msg);	  
+	FREE(msg);
 }
 
-
-static int parse_prefix( irc_msg_t * const msg )
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * prefix = servername / (nickname [ [ "!" user ] "@" host ] )
+ */
+static int parse_prefix( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
 {
-	int first = TRUE;
-	uint8_t * p = msg->prefix;
+	uint8_t * p = NULL;
+	int bang_or_at = FALSE;
 
 	CHECK_PTR_RET( msg, FALSE );
-	CHECK_PTR_RET( msg->prefix, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
 
-	while ( *p != '\0' )
+	/* if there is a "!" or "@" in the prefix string, then it is NOT a server name */
+	for ( p = *ptr; (p < end) && (*p != ' '); ++p )
 	{
-		if ( first )
+		if ( (*p == '!') || (*p == '@') )
 		{
-			if ( is_special( *p ) )
-			{
-				/* we know it is a nickname */
-				return parse_nickuserhost( msg );
-			}
-			
-			if ( is_digit( *p ) )
-			{
-				/* we know it is a hostname */
-				p = msg->prefix;
-				if ( !parse_hostname( msg, &p ) )
-					return FALSE;
-				msg->host = msg->prefix;
-			}
-
-			if ( is_letter( *p ) )
-			{
-				first = FALSE;
-				p++;
-				continue;
-			}
-
-			WARN( "prefix failed to parse at position %d (%#x)\n", (int)((void*)p - (void*)msg->prefix), *p );
-			return FALSE;
+			bang_or_at = TRUE;
+			break;
 		}
-
-		if ( is_special( *p ) || (*p == '!') || (*p == '@') )
-		{
-			/* we know it is a nickname */
-			return parse_nickuserhost( msg );
-		}
-
-		if ( *p == '.' )
-		{
-			/* we know it is a hostname */
-			p = msg->prefix;
-			if ( !parse_hostname( msg, &p ) )
-				return FALSE;
-			msg->host = msg->prefix;
-			return TRUE;
-		}
-
-		if ( is_letter( *p ) || is_digit( *p ) || (*p == '-') )
-		{
-			p++;
-			continue;
-		}
-
-		WARN( "prefix failed to parse at position %d (%#x)\n", (int)((void*)p - (void*)msg->prefix), *p );
-		return FALSE;
 	}
 
-	/* if we get here, we assume it was a hostname */
-	p = msg->prefix;
-	if ( !parse_hostname( msg, &p ) )
-		return FALSE;
-	msg->host = msg->prefix;
+	if ( !bang_or_at )
+	{
+		/* it must be a servername, so parse it */
+		CHECK_RET( parse_servername( &(msg->origin.servername), ptr, end ), FALSE );
+	}
+	else
+	{
+		/* it must be a nick-user-hostname, so parse it */
+		CHECK_RET( parse_nuh( &(msg->origin.nuh), ptr, end ), FALSE );
+	}
+
+	return TRUE;
 }
 
-
-/* parse the prefix into servername or nick[ [user] host] */
-static irc_ret_t irc_msg_parse_prefix(irc_msg_t* const msg)
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * command = 1*letter / 3digit
+ */
+static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
 {
-	CHECK_PTR_RET(msg, IRC_BADPARAM);
-	CHECK_PTR_RET(msg->prefix, IRC_OK);
+	uint8_t * p = NULL;
 
-	return ( parse_prefix( msg ) ? IRC_OK : IRC_ERR );
+	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	/* find the space at the end */
+	for ( p = *ptr; (p < end) && (*p != ' '); ++p ) 
+	{
+		if ( !(isdigit(*p) || isalpha(*p)) )
+			return FALSE;
+	}
+
+	/* terminate the string */
+	*p = '\0';
+
+	/* get the command from the string */
+	msg->cmd = irc_cmd_get_command_from_string( *ptr );
+
+	/* reset the string to original state */
+	*p = ' ';
+
+	/* move the ptr to the space after the command */
+	*ptr = p;
+
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * params = *14( SPACE middle ) [ SPACE ":" trailing ]
+ *        =/ 14( SPACE middle ) [ SPACE [ ":" ] trailing ]
+ * middle = nospcrlfcl *( ":" / nospcrlfcl )
+ * trailing = *( ":" / " " / nospcrlfcl )
+ * nospcrlfcl = 0x01-0x09 / 0x0B-0x0C / 0x0E-0x1F / 0x21-0x39 / 0x3B-0xFF
+ */
+static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	uint8_t * pstart = NULL;
+	int nparams = 0;
+	int state = 0;
+
+	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	p = *ptr;
+	while( TRUE );
+	{
+		switch ( state )
+		{
+			case 0:  /* SPACE */
+				/* all params start with a space */
+				CHECK_RET( *p == ' ', FALSE );
+				state = 1;
+				p++;
+				break;
+
+			case 1:  /* [ ":" ] */
+				if ( (*p == ':') || (nparams == 14) )
+				{
+					state = 4;
+					p++;
+					pstart = p;
+				}
+				else
+				{
+					state = 2; /* middle first char */
+					pstart = p;
+					p++;
+				}
+				break;
+
+			case 2:  /* middle first char */
+				if ( !is_nospcrlfcl( *p ) )
+					return FALSE;
+				state = 3; /* middle rest */
+				p++;
+				break;
+
+			case 3:  /* middle rest */
+				if ( *p == ' ' )
+				{
+					nparam++;
+					state = 0;
+					/* add param to list */
+				}
+				else if ( (*p == ':') || (is_nospcrlfcl( *p ) ) )
+					p++;
+				else
+					return FALSE;
+				break;
+
+			case 4:  /* trailing */
+				if ( p == end )
+				{
+					/* add param to list */
+					return TRUE;
+				}
+
+	}
+
 }
 
 /* 
@@ -209,8 +291,7 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 	/* reset the msg pointers */
 	msg->prefix = NULL;
 	msg->command = NULL;
-	MEMSET( (void*)msg->parameters, 0, IRC_NUM_PARAMS );
-	msg->trailing = NULL;
+	msg->parameters = NULL;
 		
 	/* start by initializing the ptr to the first byte in the buffer */
 	ptr = &msg->in.data[0];
@@ -220,99 +301,37 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 	 * \r\n at the end of the message
 	 */
 	end = (&msg->in.data[0] + msg->in.size) - 2;
+	CHECK_RET( end[0] == '\r', IRC_ERR );
+	CHECK_RET( end[1] == '\n', IRC_ERR );
 
 	/* zero out the last two bytes so that we end in null byte */
 	end[0] = '\0';
 	end[1] = '\0';
  
-	/**** PREFIX ****/
+	/***** PREFIX *****/
 
 	/* first check for a prefix that start with a ":" */
 	if((*ptr) == ':')
 	{
 		/* move to the first character after the ":" */
 		ptr++;
-		
-		/* parse out the prefix */
-		space = ptr;
-		while(((*space) != ' ') && (space < end))
-			space++;
-			  
+
+		/* parse the prefix and move ptr to the character after the prefix */
+		CHECK_RET( parse_prefix( msg, &ptr, end ), IRC_ERR );
+
 		/* check to see if we ran to the end of the buffer */
 		CHECK_RET((space < end), IRC_BAD_MESSAGE);
-		
-		/* make the ptr point to a valid C string of the prefix */
-		*space = '\0';
-		msg->prefix = ptr;
-		
-		/* move ptr */
-		ptr = space + 1;
 	}
    
-	/**** COMMAND ****/
+	/***** COMMAND *****/
+	CHECK_RET( parse_command( msg, &ptr, end ), IRC_ERR );
 
-	/* now parse out the command */
-	space = ptr;
-	while(((*space) != ' ') && (space < end))
-		space++;
-	
 	/* check to see if we ran to the end of the buffer */
 	CHECK_RET((space < end), IRC_BAD_MESSAGE);
    
-	/* make the command a valid C-string */
-	*space = '\0';
-	msg->command = ptr;
-
-	/* convert the command string to an irc_command_t */
-	msg->cmd = irc_cmd_get_command_from_string( msg->command );
-	
-	/* check the command */
-	if(!IS_VALID_COMMAND(msg->cmd) || (msg->cmd == NOCMD))
-		return IRC_BAD_MESSAGE;
-	
-	/* move ptr */
-	ptr = space + 1;
-   
 	/**** PARAMS ****/
+	CHECK_RET( parse_params( msg, &ptr, end ), IRC_ERR );
 
-	/* lastly parse out all of the parameters */
-	while(ptr < end)
-	{
-		/* check to see if the parameter starts with a ":" */
-		if((*ptr) == ':')
-		{
-			/* move to the first character after the ":" */
-			ptr++;
-			
-			/* the last parameter goes from ptr to end */
-			space = end;
-
-			/* point the trailing pointer to the beginning of trailing string */
-			msg->trailing = ptr;
-		}
-		else
-		{
-			/* parse out the parameter */
-			space = ptr;
-			while(((*space) != ' ') && (space < end))
-				space++;
-
-			*space = '\0';
-
-			/* make the parameter pointer point at the param string */
-			msg->parameters[msg->num_params] = ptr;
-
-			/* increment the number of params */
-			msg->num_params++;
-		}
-		
-		/* move ptr */
-		ptr = space + 1;
-	}
-	
-	/* parse out the prefix */
-	irc_msg_parse_prefix(msg);
-	
 	return IRC_OK;
 }
 

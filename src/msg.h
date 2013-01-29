@@ -23,35 +23,42 @@
 
 typedef struct irc_msg_in_buf_s
 {
-	uint8_t * data;				/* pointer to data buffer */
-	size_t size;				/* number of bytes in buffer */
+	uint8_t			  * data;		/* pointer to data buffer */
+	size_t				size;		/* number of bytes in buffer */
 
 } irc_msg_in_buf_t;
 
 typedef struct irc_msg_out_buf_s
 {
-	struct iovec * iov;			/* list of iovec structures */
-	size_t nvec;				/* number of iovec structures */
+	struct iovec	  * iov;		/* list of iovec structures */
+	size_t				nvec;		/* number of iovec structures */
 
 } irc_msg_out_buf_t;
 
+typedef struct irc_msg_nuh_s		/* (nickname [ [ "!" user ] "@" host ] ) */
+{
+	uint8_t			  * nickname;			
+	uint8_t			  * username;
+	uint8_t			  * host;
+
+} irc_msg_nuh_t;
+
+typedef struct irc_msg_origin_s		/* servername / nuh */
+{
+	uint8_t			  * servername;
+	irc_msg_nuh_t		nuh;
+
+} irc_msg_origin_t;
+
 typedef struct irc_msg_s
 {
-	irc_msg_in_buf_t	in;		/* used when reading and parsing messages from stream */
-	irc_msg_out_buf_t	out;	/* the buffer used when building messages from scratch for sending */
+	irc_msg_in_buf_t	in;			/* used when reading and parsing messages from stream */
+	irc_msg_out_buf_t	out;		/* the buffer used for sending sending */
 
-	uint8_t * prefix;			/* points to the prefix string in the buffer */
-	uint8_t * command;			/* command part of the message */
-	uint8_t * parameters[IRC_NUM_PARAMS]; /* pointers to each param */
-	uint8_t * trailing;			/* trailing part of message */
-	int32_t  num_params;		/* number of parameters */
-
-	irc_command_t cmd;
-	uint8_t * nick;				/* prefix/origin nick */
-	uint8_t * user;				/* prefix/origin user */
-	uint8_t * host;				/* prefix/origin host */
-	uint8_t * ipv4;				/* prefix/origin IPv4 address */
-	uint8_t * ipv6;				/* prefix/origin IPv6 address */
+	/* the second pass is to parse the sub-parts of the major parts */
+	irc_msg_origin_t	origin;		/* origin specified in the prefix */
+	irc_command_t		cmd;		/* the command/reply */
+	list_t				params;		/* list of uint8_t * to each parameter */
 
 } irc_msg_t;
 
