@@ -1162,10 +1162,9 @@ child_process_writev	cutil/src/child.c	/^int child_process_writev( child_process
 clean_environ	cutil/src/sanitize.c	/^static int8_t * clean_environ[] =$/;"	v	file:
 clients	src/channel.c	/^    list_t*		clients;        \/* list of clients in the channel *\/$/;"	m	struct:irc_channel_s	file:
 cmd	src/event_cb.c	/^	irc_command_t		cmd;$/;"	m	struct:irc_event_cb_s	file:
-cmd	src/msg.h	/^	irc_command_t cmd;$/;"	m	struct:irc_msg_s
+cmd	src/msg.h	/^	irc_command_t		cmd;		\/* the command\/reply *\/$/;"	m	struct:irc_msg_s
 cmodes	src/modes.c	/^static int8_t const * const cmodes = "abcdefhijklmnopqrstuvz!ACDGHIJKLMNOQRSV";$/;"	v	file:
 colon	src/msg.c	/^static uint8_t colon = ':';$/;"	v	file:
-command	src/msg.h	/^	uint8_t * command;			\/* command part of the message *\/$/;"	m	struct:irc_msg_s
 conn	src/session.c	/^	irc_conn_t*			conn;					\/* irc connection *\/$/;"	m	struct:irc_session_s	file:
 connect_fn	cutil/src/socket.h	/^	socket_ret_t (*connect_fn)( socket_t * const s, void * user_data );$/;"	m	struct:socket_ops_s
 connect_fn	cutil/tests/test_socket.c	/^static socket_ret_t connect_fn( socket_t * const s, void * user_data )$/;"	f	file:
@@ -1182,7 +1181,7 @@ create_start_file	cutil/src/daemon.c	/^int create_start_file( int8_t const * con
 daemonize	cutil/src/daemon.c	/^void daemonize( int8_t const * const root_dir )$/;"	f
 data	cutil/src/aiofd.c	/^	void * data;$/;"	m	struct:aiofd_write_s	file:
 data	cutil/src/list.c	/^	void *	data;	\/* pointer to the data *\/$/;"	m	struct:list_item_s	file:
-data	src/msg.h	/^	uint8_t * data;				\/* pointer to data buffer *\/$/;"	m	struct:irc_msg_in_buf_s
+data	src/msg.h	/^	uint8_t			  * data;		\/* pointer to data buffer *\/$/;"	m	struct:irc_msg_in_buf_s
 default_key_cmp	cutil/src/btree.c	/^static int default_key_cmp( void * l, void * r )$/;"	f	file:
 default_load_limit	cutil/src/hashtable.c	/^float const default_load_limit = 3.0f;$/;"	v
 deinit_aiofd_suite	cutil/tests/test_aiofd.c	/^static int deinit_aiofd_suite( void )$/;"	f	file:
@@ -1509,7 +1508,7 @@ hash_fn	cutil/tests/test_hashtable.c	/^static uint_t hash_fn( void const * const
 hashtable	cutil/tests/test_all.c	/^SUITE( hashtable );$/;"	v
 hfn	cutil/src/hashtable.h	/^	ht_hash_fn			hfn;				\/* hash function *\/$/;"	m	struct:ht_s
 host	cutil/src/socket.c	/^	int8_t*			host;			\/* host name *\/$/;"	m	struct:socket_s	file:
-host	src/msg.h	/^	uint8_t * host;				\/* prefix\/origin host *\/$/;"	m	struct:irc_msg_s
+host	src/msg.h	/^	uint8_t			  * host;$/;"	m	struct:irc_msg_nuh_s
 hostaddr_ipv4	src/util.h	/^	uint8_t * hostaddr_ipv4;$/;"	m	struct:msgto_s
 hostaddr_ipv6	src/util.h	/^	uint8_t * hostaddr_ipv6;$/;"	m	struct:msgto_s
 hostname	src/util.h	/^	uint8_t * hostname;$/;"	m	struct:msgto_s
@@ -1542,7 +1541,7 @@ ht_remove	cutil/src/hashtable.c	/^int ht_remove( ht_t * const htable, ht_itr_t c
 ht_s	cutil/src/hashtable.h	/^typedef struct ht_s$/;"	s
 ht_t	cutil/src/hashtable.h	/^} ht_t;$/;"	t	typeref:struct:ht_s
 idx	cutil/src/hashtable.h	/^	int_t				idx;				\/* index of the list *\/$/;"	m	struct:ht_itr_s
-in	src/msg.h	/^	irc_msg_in_buf_t	in;		\/* used when reading and parsing messages from stream *\/$/;"	m	struct:irc_msg_s
+in	src/msg.h	/^	irc_msg_in_buf_t	in;			\/* used when reading and parsing messages from stream *\/$/;"	m	struct:irc_msg_s
 init_aiofd_suite	cutil/tests/test_aiofd.c	/^static int init_aiofd_suite( void )$/;"	f	file:
 init_bitset_suite	cutil/tests/test_bitset.c	/^static int init_bitset_suite( void )$/;"	f	file:
 init_btree_suite	cutil/tests/test_btree.c	/^static int init_btree_suite( void )$/;"	f	file:
@@ -1566,9 +1565,7 @@ int_t	cutil/src/macros.h	/^typedef int64_t int_t;$/;"	t
 io	cutil/src/events.h	/^	struct ev_io		io;$/;"	m	union:ev_data_u	typeref:struct:ev_data_u::ev_io
 io_params	cutil/src/events.h	/^	} io_params;$/;"	m	union:evt_params_u	typeref:struct:evt_params_u::__anon3
 iov	cutil/src/aiofd.c	/^	int iov;$/;"	m	struct:aiofd_write_s	file:
-iov	src/msg.h	/^	struct iovec * iov;			\/* list of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s	typeref:struct:irc_msg_out_buf_s::iovec
-ipv4	src/msg.h	/^	uint8_t * ipv4;				\/* prefix\/origin IPv4 address *\/$/;"	m	struct:irc_msg_s
-ipv6	src/msg.h	/^	uint8_t * ipv6;				\/* prefix\/origin IPv6 address *\/$/;"	m	struct:irc_msg_s
+iov	src/msg.h	/^	struct iovec	  * iov;		\/* list of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s	typeref:struct:irc_msg_out_buf_s::iovec
 irc_any_cmd	src/commands.c	/^int8_t const * const irc_any_cmd = T("ANYCMD");$/;"	v
 irc_channe_get_topic	src/channel.c	/^uint8_t * irc_channe_get_topic( irc_channel_t * const c )$/;"	f
 irc_channel_delete	src/channel.c	/^void irc_channel_delete( void * c )$/;"	f
@@ -1617,22 +1614,20 @@ irc_events_200	src/gen_hashes.c	/^int8_t const * const irc_events_200[] =$/;"	v
 irc_events_300	src/gen_hashes.c	/^int8_t const * const irc_events_300[] =$/;"	v
 irc_events_400	src/gen_hashes.c	/^int8_t const * const irc_events_400[] =$/;"	v
 irc_events_500	src/gen_hashes.c	/^int8_t const * const irc_events_500[] =$/;"	v
-irc_msg_add_parameter	src/msg.c	/^irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)$/;"	f
-irc_msg_compile	src/msg.c	/^irc_ret_t irc_msg_compile(irc_msg_t* const msg)$/;"	f
+irc_msg_append	src/msg.c	/^irc_ret_t irc_msg_append(irc_msg_t * const msg, char const * const format, ...)$/;"	f
+irc_msg_copy	src/msg.c	/^void irc_msg_copy(irc_msg_t * const lhs, irc_msg_t const * const rhs)$/;"	f
+irc_msg_deinitialize	src/msg.c	/^irc_ret_t irc_msg_deinitialize(irc_msg_t* const msg)$/;"	f
 irc_msg_delete	src/msg.c	/^void irc_msg_delete(void * m)$/;"	f
-irc_msg_finalize	src/msg.c	/^irc_ret_t irc_msg_finalize( irc_msg_t * const msg )$/;"	f
 irc_msg_in_buf_s	src/msg.h	/^typedef struct irc_msg_in_buf_s$/;"	s
 irc_msg_in_buf_t	src/msg.h	/^} irc_msg_in_buf_t;$/;"	t	typeref:struct:irc_msg_in_buf_s
-irc_msg_initialize	src/msg.c	/^irc_ret_t irc_msg_initialize($/;"	f
-irc_msg_log	src/msg.c	/^void irc_msg_log( irc_msg_t const * const msg )$/;"	f
 irc_msg_new	src/msg.c	/^irc_msg_t* irc_msg_new()$/;"	f
+irc_msg_nuh_s	src/msg.h	/^typedef struct irc_msg_nuh_s		\/* (nickname [ [ "!" user ] "@" host ] ) *\/$/;"	s
+irc_msg_nuh_t	src/msg.h	/^} irc_msg_nuh_t;$/;"	t	typeref:struct:irc_msg_nuh_s
+irc_msg_origin_s	src/msg.h	/^typedef struct irc_msg_origin_s		\/* servername \/ nuh *\/$/;"	s
+irc_msg_origin_t	src/msg.h	/^} irc_msg_origin_t;$/;"	t	typeref:struct:irc_msg_origin_s
 irc_msg_out_buf_s	src/msg.h	/^typedef struct irc_msg_out_buf_s$/;"	s
 irc_msg_out_buf_t	src/msg.h	/^} irc_msg_out_buf_t;$/;"	t	typeref:struct:irc_msg_out_buf_s
-irc_msg_parse	src/msg.c	/^irc_ret_t irc_msg_parse(irc_msg_t* const msg)$/;"	f
-irc_msg_parse_prefix	src/msg.c	/^static irc_ret_t irc_msg_parse_prefix(irc_msg_t* const msg)$/;"	f	file:
 irc_msg_s	src/msg.h	/^typedef struct irc_msg_s$/;"	s
-irc_msg_set_command	src/msg.c	/^irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)$/;"	f
-irc_msg_set_trailing	src/msg.c	/^irc_ret_t irc_msg_set_trailing( irc_msg_t* const msg, uint8_t const * const trailing)$/;"	f
 irc_msg_t	src/msg.h	/^} irc_msg_t;$/;"	t	typeref:struct:irc_msg_s
 irc_no_cmd	src/commands.c	/^int8_t const * const irc_no_cmd = T("NOCMD");$/;"	v
 irc_receive_data	src/conn.c	/^static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread )$/;"	f	file:
@@ -1743,23 +1738,24 @@ name	src/event_cb.c	/^	uint8_t *			name;$/;"	m	struct:irc_event_cb_s	file:
 next	cutil/src/btree.c	/^	struct node_s * next;		\/* traversal threading pointer\/free list pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
 next	cutil/src/list.c	/^	int_t	next;	\/* next node in the list *\/$/;"	m	struct:list_item_s	file:
 ngroups	cutil/src/privileges.h	/^	int		ngroups;$/;"	m	struct:priv_state_s
-nick	src/msg.h	/^	uint8_t * nick;				\/* prefix\/origin nick *\/$/;"	m	struct:irc_msg_s
 nick	src/util.h	/^	uint8_t * nick;$/;"	m	struct:msgto_s
+nickname	src/msg.h	/^	uint8_t			  * nickname;			$/;"	m	struct:irc_msg_nuh_s
 nleft	cutil/src/aiofd.c	/^	size_t nleft;$/;"	m	struct:aiofd_write_s	file:
 node_list	cutil/src/btree.c	/^	node_t**			node_list;	\/* memory for the nodes *\/$/;"	m	struct:bt_s	file:
 node_s	cutil/src/btree.c	/^typedef struct node_s$/;"	s	file:
 node_t	cutil/src/btree.c	/^} node_t;$/;"	t	typeref:struct:node_s	file:
 noop	cutil/src/log.c	/^static int noop( void ) { return 0; }$/;"	f	file:
+nuh	src/msg.h	/^	irc_msg_nuh_t		nuh;$/;"	m	struct:irc_msg_origin_s
 num_bits	cutil/src/bitset.h	/^	size_t num_bits;$/;"	m	struct:bitset_s
 num_lists	cutil/src/btree.c	/^	uint_t				num_lists;	\/* number of blocks allocated *\/$/;"	m	struct:bt_s	file:
-num_params	src/msg.h	/^	int32_t  num_params;		\/* number of parameters *\/$/;"	m	struct:irc_msg_s
-nvec	src/msg.h	/^	size_t nvec;				\/* number of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s
+nvec	src/msg.h	/^	size_t				nvec;		\/* number of iovec structures *\/$/;"	m	struct:irc_msg_out_buf_s
 open_devnull	cutil/src/sanitize.c	/^static int open_devnull( int fd )$/;"	f	file:
 ops	cutil/src/aiofd.h	/^	}			ops;$/;"	m	struct:aiofd_s	typeref:struct:aiofd_s::aiofd_ops_s
 ops	cutil/src/child.c	/^	child_ops_t		ops;			\/* child proces callbacks *\/$/;"	m	struct:child_process_s	file:
 ops	cutil/src/socket.c	/^	socket_ops_t	ops;			\/* socket callbacks *\/$/;"	m	struct:socket_s	file:
 ops	src/conn.c	/^	irc_conn_ops_t	ops;$/;"	m	struct:irc_conn_s	file:
-out	src/msg.h	/^	irc_msg_out_buf_t	out;	\/* the buffer used when building messages from scratch for sending *\/$/;"	m	struct:irc_msg_s
+origin	src/msg.h	/^	irc_msg_origin_t	origin;		\/* origin specified in the prefix *\/$/;"	m	struct:irc_msg_s
+out	src/msg.h	/^	irc_msg_out_buf_t	out;		\/* the buffer used for sending sending *\/$/;"	m	struct:irc_msg_s
 pair	cutil/tests/test_all.c	/^SUITE( pair );$/;"	v
 pair_delete	cutil/src/pair.c	/^void pair_delete( void * p )$/;"	f
 pair_first	cutil/src/pair.c	/^void * pair_first( pair_t const * const pair )$/;"	f
@@ -1767,9 +1763,10 @@ pair_new	cutil/src/pair.c	/^pair_t * pair_new( void * first, void * second )$/;"
 pair_s	cutil/src/pair.c	/^struct pair_s$/;"	s	file:
 pair_second	cutil/src/pair.c	/^void * pair_second( pair_t const * const pair )$/;"	f
 pair_t	cutil/src/pair.h	/^typedef struct pair_s pair_t;$/;"	t	typeref:struct:pair_s
-parameters	src/msg.h	/^	uint8_t * parameters[IRC_NUM_PARAMS]; \/* pointers to each param *\/$/;"	m	struct:irc_msg_s
+params	src/msg.h	/^	list_t				params;		\/* list of uint8_t * to each parameter *\/$/;"	m	struct:irc_msg_s
 parent	cutil/src/btree.c	/^	struct node_s * parent;		\/* parent pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
 parse_channel	src/util.c	/^static int parse_channel( uint8_t * start, uint8_t ** end, uint8_t ** channel )$/;"	f	file:
+parse_command	src/msg.c	/^static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_host	src/util.c	/^static int parse_host( uint8_t * start, uint8_t ** end, uint8_t ** hostname, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostaddr	src/util.c	/^static int parse_hostaddr( uint8_t * start, uint8_t ** end, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostname	src/util.c	/^static int parse_hostname( uint8_t * start, uint8_t ** end )$/;"	f	file:
@@ -1779,7 +1776,8 @@ parse_ipv6	src/util.c	/^static int parse_ipv6( uint8_t * start, uint8_t ** end, 
 parse_msgtarget	src/util.c	/^int parse_msgtarget( uint8_t * start, msgto_t ** msgtos, int * nmsgtos )$/;"	f
 parse_msgto	src/util.c	/^int parse_msgto( uint8_t * start, uint8_t ** end, msgto_t * mt )$/;"	f
 parse_nick	src/util.c	/^static int parse_nick( uint8_t * start, uint8_t ** end, uint8_t ** nick )$/;"	f	file:
-parse_prefix	src/msg.c	/^static int parse_prefix( irc_msg_t * const msg )$/;"	f	file:
+parse_params	src/msg.c	/^static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
+parse_prefix	src/msg.c	/^static int parse_prefix( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_prefix	src/util.c	/^int parse_prefix( uint8_t * start, uint8_t ** nick, uint8_t ** user, $/;"	f
 parse_servername	src/util.c	/^static int parse_servername( uint8_t * start, uint8_t ** end, uint8_t ** servername )$/;"	f	file:
 parse_shortname	src/util.c	/^static int parse_shortname( uint8_t * start, uint8_t ** end, uint8_t ** shortname )$/;"	f	file:
@@ -1792,7 +1790,6 @@ pid	cutil/src/daemon.c	/^pid_t pid, sid;$/;"	v
 pid	cutil/src/events.h	/^		int pid;	\/* pid to watch *\/$/;"	m	struct:evt_params_u::__anon2
 pint_less	cutil/tests/test_btree.c	/^static int pint_less( void * l, void * r )$/;"	f	file:
 port	cutil/src/socket.c	/^	uint16_t		port;			\/* port number *\/$/;"	m	struct:socket_s	file:
-prefix	src/msg.h	/^	uint8_t * prefix;			\/* points to the prefix string in the buffer *\/$/;"	m	struct:irc_msg_s
 preserve_environ	cutil/src/sanitize.c	/^static int8_t * preserve_environ[] =$/;"	v	file:
 preserve_environ	cutil/tests/test_sanitize.c	/^static int8_t * preserve_environ[] =$/;"	v	file:
 prev	cutil/src/btree.c	/^	struct node_s * prev;		\/* traversal threading pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
@@ -1831,6 +1828,7 @@ send_pass	src/session.c	/^static void send_pass( irc_session_t * const session )
 send_quit	src/session.c	/^static void send_quit( irc_session_t * const session )$/;"	f	file:
 send_user	src/session.c	/^static void send_user( irc_session_t * const session )$/;"	f	file:
 server_name	src/util.h	/^	uint8_t * server_name;$/;"	m	struct:msgto_s
+servername	src/msg.h	/^	uint8_t			  * servername;$/;"	m	struct:irc_msg_origin_s
 servers	src/session.c	/^	ht_t*				servers;				\/* hashtable of servers in the network *\/$/;"	m	struct:irc_session_s	file:
 session	src/event_cb.c	/^	irc_session_t *		session;$/;"	m	struct:irc_event_cb_s	file:
 session	tests/test_all.c	/^SUITE( session );$/;"	v
@@ -1849,7 +1847,7 @@ size	cutil/src/btree.c	/^	uint_t				size;		\/* number of nodes in the tree *\/$/
 size	cutil/src/hashtable.h	/^	uint_t				size;				\/* the size of the list array *\/$/;"	m	struct:ht_s
 size	cutil/src/list.h	/^	uint_t			size;					\/* total number of allocated slots in list *\/$/;"	m	struct:list_s
 size	cutil/tests/test_buffer.c	/^size_t const size = 5;$/;"	v
-size	src/msg.h	/^	size_t size;				\/* number of bytes in buffer *\/$/;"	m	struct:irc_msg_in_buf_s
+size	src/msg.h	/^	size_t				size;		\/* number of bytes in buffer *\/$/;"	m	struct:irc_msg_in_buf_s
 smodes	src/modes.c	/^static int8_t const * const smodes = "ahlnsADFHLMT";$/;"	v	file:
 sock_state_s	cutil/tests/test_socket.c	/^typedef struct sock_state_s$/;"	s	file:
 sock_state_t	cutil/tests/test_socket.c	/^} sock_state_t;$/;"	t	typeref:struct:sock_state_s	file:
@@ -2114,7 +2112,6 @@ test_unix_socket	cutil/tests/test_socket.c	/^static void test_unix_socket( void 
 test_write_fn	cutil/src/child.c	/^static int32_t test_write_fn( child_process_t * const cp, uint8_t const * const buffer, void * user_data )$/;"	f	file:
 topic	src/channel.c	/^    uint8_t*    topic;          \/* channel topic *\/$/;"	m	struct:irc_channel_s	file:
 trace	cutil/src/events.h	/^		int trace;	\/* 0 == only signal upon termination, 1 == also signal when stopped\/continued *\/$/;"	m	struct:evt_params_u::__anon2
-trailing	src/msg.h	/^	uint8_t * trailing;			\/* trailing part of message *\/$/;"	m	struct:irc_msg_s
 tree	cutil/src/btree.c	/^	node_t*				tree;		\/* pointer to btree root *\/$/;"	m	struct:bt_s	file:
 type	cutil/src/log.h	/^	log_type_t type;$/;"	m	struct:log_s
 type	cutil/src/socket.c	/^	socket_type_t	type;			\/* type of socket *\/$/;"	m	struct:socket_s	file:
@@ -2125,7 +2122,6 @@ uint_t	cutil/src/macros.h	/^typedef uint64_t uint_t;$/;"	t
 umodes	src/modes.c	/^static int8_t const * const umodes = "abcdfghiklmnopqrstuvwxyzABCGHINORSTVW";$/;"	v	file:
 used	cutil/src/list.c	/^	int_t	used;	\/* bool to mark used nodes *\/$/;"	m	struct:list_item_s	file:
 used_head	cutil/src/list.h	/^	list_itr_t		used_head;				\/* head node of the used circular list *\/$/;"	m	struct:list_s
-user	src/msg.h	/^	uint8_t * user;				\/* prefix\/origin user *\/$/;"	m	struct:irc_msg_s
 user	src/util.h	/^	uint8_t * user;$/;"	m	struct:msgto_s
 user_data	cutil/src/aiofd.h	/^	void *		user_data;		\/* context to pass to callbacks *\/$/;"	m	struct:aiofd_s
 user_data	cutil/src/child.c	/^	void *			user_data;		\/* passed to ops callbacks *\/$/;"	m	struct:child_process_s	file:
@@ -2134,6 +2130,7 @@ user_data	cutil/src/socket.c	/^	void *			user_data;		\/* passed to ops callbacks
 user_data	src/conn.c	/^	void*			user_data;		\/* user data *\/$/;"	m	struct:irc_conn_s	file:
 user_data	src/event_cb.c	/^	void *				user_data;$/;"	m	struct:irc_event_cb_s	file:
 user_data	src/session.c	/^	void *				user_data;				\/* handler context *\/$/;"	m	struct:irc_session_s	file:
+username	src/msg.h	/^	uint8_t			  * username;$/;"	m	struct:irc_msg_nuh_s
 val	cutil/src/btree.c	/^	void * val;					\/* value *\/$/;"	m	struct:node_s	file:
 vdfn	cutil/src/btree.c	/^	bt_delete_fn		vdfn;		\/* value delete function *\/$/;"	m	struct:bt_s	file:
 w	cutil/src/aiofd.c	/^	int r, w, e;$/;"	m	struct:cb_count_s	file:

@@ -15,66 +15,6 @@
  */
 
 
-static int is_letter( uint8_t const c )
-{
-	return ( ( (c >= 'a') && (c <= 'z') ) ||
-			 ( (c >= 'A') && (c <= 'Z') ) );
-}
-
-static int is_digit( uint8_t const c )
-{
-	return ( (c >= '0') && (c <= '9') );
-}
-
-static int is_hex( uint8_t const c )
-{
-	return ( is_digit(c) ||
-			 ( (c >= 'A') && (c <= 'F') ) ||
-			 ( (c >= 'a') && (c <= 'f') ) );
-}
-
-static int is_special( uint8_t const c )
-{
-	return ( ( (c >= 0x5B) && (c <= 0x60) ) ||
-			 ( (c >= 0x7B) && (c <= 0x7D) ) );
-}
-
-static int is_user_octet( uint8_t const c )
-{
-	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
-			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
-			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
-			 ( (c >= 0x21) && (c <= 0x3F) ) ||
-			 ( (c >= 0x41) && (c <= 0xFF) ) );
-}
-
-static int is_key_octet( uint8_t const c )
-{
-	return ( ( (c >= 0x01) && (c <= 0x05) ) ||
-			 ( (c >= 0x07) && (c <= 0x08) ) ||
-			 ( (c == 0x0C)				  ) ||
-			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
-			 ( (c >= 0x21) && (c <= 0x7F) ) );
-}
-
-static int is_chanstart( uint8_t const c )
-{
-	return ( ( c == '#' ) ||
-			 ( c == '+' ) ||
-			 ( c == '!' ) ||
-			 ( c == '&' ) );
-}
-
-static int is_chanstring( uint8_t const c )
-{
-	return ( ( (c >= 0x01) && (c <= 0x07) ) ||
-			 ( (c >= 0x08) && (c <= 0x09) ) ||
-			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
-			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
-			 ( (c >= 0x21) && (c <= 0x2B) ) ||
-			 ( (c >= 0x2D) && (c <= 0x39) ) ||
-			 ( (c >= 0x3B) && (c <= 0xFF) ) );
-}
 
 static int check_ipv4_part( uint8_t * pstart, uint8_t *pend )
 {

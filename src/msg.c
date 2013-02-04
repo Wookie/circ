@@ -86,163 +86,6 @@ void irc_msg_delete(void * m)
 	FREE(msg);
 }
 
-/*
- * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
- *
- * prefix = servername / (nickname [ [ "!" user ] "@" host ] )
- */
-static int parse_prefix( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
-{
-	uint8_t * p = NULL;
-	int bang_or_at = FALSE;
-
-	CHECK_PTR_RET( msg, FALSE );
-	CHECK_PTR_RET( ptr, FALSE );
-	CHECK_PTR_RET( *ptr, FALSE );
-	CHECK_PTR_RET( end, FALSE );
-	CHECK_RET ( *ptr < end, FALSE );
-
-	/* if there is a "!" or "@" in the prefix string, then it is NOT a server name */
-	for ( p = *ptr; (p < end) && (*p != ' '); ++p )
-	{
-		if ( (*p == '!') || (*p == '@') )
-		{
-			bang_or_at = TRUE;
-			break;
-		}
-	}
-
-	if ( !bang_or_at )
-	{
-		/* it must be a servername, so parse it */
-		CHECK_RET( parse_servername( &(msg->origin.servername), ptr, end ), FALSE );
-	}
-	else
-	{
-		/* it must be a nick-user-hostname, so parse it */
-		CHECK_RET( parse_nuh( &(msg->origin.nuh), ptr, end ), FALSE );
-	}
-
-	return TRUE;
-}
-
-/*
- * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
- *
- * command = 1*letter / 3digit
- */
-static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
-{
-	uint8_t * p = NULL;
-
-	CHECK_PTR_RET( msg, FALSE );
-	CHECK_PTR_RET( ptr, FALSE );
-	CHECK_PTR_RET( *ptr, FALSE );
-	CHECK_PTR_RET( end, FALSE );
-	CHECK_RET ( *ptr < end, FALSE );
-
-	/* find the space at the end */
-	for ( p = *ptr; (p < end) && (*p != ' '); ++p ) 
-	{
-		if ( !(isdigit(*p) || isalpha(*p)) )
-			return FALSE;
-	}
-
-	/* terminate the string */
-	*p = '\0';
-
-	/* get the command from the string */
-	msg->cmd = irc_cmd_get_command_from_string( *ptr );
-
-	/* reset the string to original state */
-	*p = ' ';
-
-	/* move the ptr to the space after the command */
-	*ptr = p;
-
-	return TRUE;
-}
-
-/*
- * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
- *
- * params = *14( SPACE middle ) [ SPACE ":" trailing ]
- *        =/ 14( SPACE middle ) [ SPACE [ ":" ] trailing ]
- * middle = nospcrlfcl *( ":" / nospcrlfcl )
- * trailing = *( ":" / " " / nospcrlfcl )
- * nospcrlfcl = 0x01-0x09 / 0x0B-0x0C / 0x0E-0x1F / 0x21-0x39 / 0x3B-0xFF
- */
-static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
-{
-	uint8_t * p = NULL;
-	uint8_t * pstart = NULL;
-	int nparams = 0;
-	int state = 0;
-
-	CHECK_PTR_RET( msg, FALSE );
-	CHECK_PTR_RET( ptr, FALSE );
-	CHECK_PTR_RET( *ptr, FALSE );
-	CHECK_PTR_RET( end, FALSE );
-	CHECK_RET ( *ptr < end, FALSE );
-
-	p = *ptr;
-	while( TRUE );
-	{
-		switch ( state )
-		{
-			case 0:  /* SPACE */
-				/* all params start with a space */
-				CHECK_RET( *p == ' ', FALSE );
-				state = 1;
-				p++;
-				break;
-
-			case 1:  /* [ ":" ] */
-				if ( (*p == ':') || (nparams == 14) )
-				{
-					state = 4;
-					p++;
-					pstart = p;
-				}
-				else
-				{
-					state = 2; /* middle first char */
-					pstart = p;
-					p++;
-				}
-				break;
-
-			case 2:  /* middle first char */
-				if ( !is_nospcrlfcl( *p ) )
-					return FALSE;
-				state = 3; /* middle rest */
-				p++;
-				break;
-
-			case 3:  /* middle rest */
-				if ( *p == ' ' )
-				{
-					nparam++;
-					state = 0;
-					/* add param to list */
-				}
-				else if ( (*p == ':') || (is_nospcrlfcl( *p ) ) )
-					p++;
-				else
-					return FALSE;
-				break;
-
-			case 4:  /* trailing */
-				if ( p == end )
-				{
-					/* add param to list */
-					return TRUE;
-				}
-
-	}
-
-}
-
 /* 
  * RFC 2812, Section 2.3 -- Messages
  *
@@ -596,6 +439,343 @@ irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)
 	
 	return IRC_ERR;
 }
+
+
+
+/*****************************************************************************/
+/********** PRIVATE FUNCTIONS ************************************************/
+/*****************************************************************************/
+
+static int is_letter( uint8_t const c )
+{
+	return ( ( (c >= 'a') && (c <= 'z') ) ||
+			 ( (c >= 'A') && (c <= 'Z') ) );
+}
+
+static int is_digit( uint8_t const c )
+{
+	return ( (c >= '0') && (c <= '9') );
+}
+
+static int is_hex( uint8_t const c )
+{
+	return ( ( (c >= '0') && (c <= '9') ) ||
+			 ( (c >= 'A') && (c <= 'F') ) ||
+			 ( (c >= 'a') && (c <= 'f') ) );
+}
+
+static int is_special( uint8_t const c )
+{
+	return ( ( (c >= 0x5B) && (c <= 0x60) ) ||
+			 ( (c >= 0x7B) && (c <= 0x7D) ) );
+}
+
+static int is_user_octet( uint8_t const c )
+{
+	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
+			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
+			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
+			 ( (c >= 0x21) && (c <= 0x3F) ) ||
+			 ( (c >= 0x41) && (c <= 0xFF) ) );
+}
+
+static int is_key_octet( uint8_t const c )
+{
+	return ( ( (c >= 0x01) && (c <= 0x05) ) ||
+			 ( (c >= 0x07) && (c <= 0x08) ) ||
+			 ( (c == 0x0C)				  ) ||
+			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
+			 ( (c >= 0x21) && (c <= 0x7F) ) );
+}
+
+static int is_chanstart( uint8_t const c )
+{
+	return ( ( c == '#' ) ||
+			 ( c == '+' ) ||
+			 ( c == '!' ) ||
+			 ( c == '&' ) );
+}
+
+static int is_chanstring( uint8_t const c )
+{
+	return ( ( (c >= 0x01) && (c <= 0x07) ) ||
+			 ( (c >= 0x08) && (c <= 0x09) ) ||
+			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
+			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
+			 ( (c >= 0x21) && (c <= 0x2B) ) ||
+			 ( (c >= 0x2D) && (c <= 0x39) ) ||
+			 ( (c >= 0x3B) && (c <= 0xFF) ) );
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * shortname = ( letter / digit ) *( letter / digit / "-" ) *( letter / digit )
+ *
+ */
+static int parse_shortname( uint8_t ** ptr, uint8_t **shortname, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	uint8_t * last = NULL;
+
+	CHECK_PTR_RET( shortname, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	if ( (*ptr == ' ') || (*ptr == '.') )
+		return FALSE;
+
+	for ( p = *ptr; (p < end) && (*p != ' ') && (*p != '.'); ++p )
+	{
+		if ( p == *ptr )
+		{
+			if ( !is_letter(*p) && !is_digit(*p) )
+				return FALSE;
+		}
+		else
+		{
+			last = p;
+			if ( !is_letter(*p) && !is_digit(*p) && (*p != '-') )
+				return FALSE;
+		}
+	}
+
+	if ( !is_letter(*last) && !is_digit(*last) )
+		return FALSE;
+
+	(*shortname) = CALLOC( 1, (p - *ptr) + 1);
+	MEMCPY( (*shortname), *ptr, (p - *ptr) );
+	(*ptr) = p;
+
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * servername = hostname
+ * hostname = shortname *( "." shortname )
+ *
+ * NOTE: severname cannot include IPv4 or IPv6 addresses, it must be a name.
+ */
+static int parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	uint8_t * shortname = NULL;
+	uint8_t * srvrname = NULL;
+
+	CHECK_PTR_RET( servername, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	p = *ptr;
+	while ( parse_shortname( &p, &shortname, end ) )
+	{
+		if ( *p == '.' )
+		{
+			srvrname = REALLOC( srvrname, strlen( srvrname ) + 2 );
+			CHECK_PTR_RET( srvrname, FALSE );
+			srvrname = strcat( srvrname, "." );
+		}
+
+		srvrname = REALLOC( srvrname, strlen( srvrname) + strlen( shortname ) + 1 );
+		CHECK_PTR_RET( srvrname, FALSE );
+		srvrname = strcat( srvrname, shortname );
+	}
+
+	(*servername) = srvrname;
+	(*ptr) = p;
+
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * prefix = servername / (nickname [ [ "!" user ] "@" host ] )
+ */
+static int parse_prefix( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	int bang_or_at = FALSE;
+
+	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	/* if there is a "!" or "@" in the prefix string, then it is NOT a server name */
+	for ( p = *ptr; (p < end) && (*p != ' '); ++p )
+	{
+		if ( (*p == '!') || (*p == '@') )
+		{
+			bang_or_at = TRUE;
+			break;
+		}
+	}
+
+	if ( !bang_or_at )
+	{
+		/* it must be a servername, so parse it */
+		CHECK_RET( parse_servername( &(msg->origin.servername), ptr, end ), FALSE );
+	}
+	else
+	{
+		/* it must be a nick-user-hostname, so parse it */
+		CHECK_RET( parse_nuh( &(msg->origin.nuh), ptr, end ), FALSE );
+	}
+
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * command = 1*letter / 3digit
+ */
+static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+
+	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	/* find the space at the end */
+	for ( p = *ptr; (p < end) && (*p != ' '); ++p ) 
+	{
+		if ( !(isdigit(*p) || isalpha(*p)) )
+			return FALSE;
+	}
+
+	/* terminate the string */
+	*p = '\0';
+
+	/* get the command from the string */
+	msg->cmd = irc_cmd_get_command_from_string( *ptr );
+
+	/* reset the string to original state */
+	*p = ' ';
+
+	/* move the ptr to the space after the command */
+	*ptr = p;
+
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * params = *14( SPACE middle ) [ SPACE ":" trailing ]
+ *        =/ 14( SPACE middle ) [ SPACE [ ":" ] trailing ]
+ * middle = nospcrlfcl *( ":" / nospcrlfcl )
+ * trailing = *( ":" / " " / nospcrlfcl )
+ * nospcrlfcl = 0x01-0x09 / 0x0B-0x0C / 0x0E-0x1F / 0x21-0x39 / 0x3B-0xFF
+ */
+static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	uint8_t * pstart = NULL;
+	int nparams = 0;
+	int state = 0;
+
+	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET ( *ptr < end, FALSE );
+
+	p = *ptr;
+	while( TRUE );
+	{
+		switch ( state )
+		{
+			case 0:  /* SPACE */
+				/* all params start with a space */
+				CHECK_RET( *p == ' ', FALSE );
+				state = 1;
+				p++;
+				break;
+
+			case 1:  /* [ ":" ] */
+				if ( (*p == ':') || (nparams == 14) )
+				{
+					state = 4;
+					p++;
+					pstart = p;
+				}
+				else
+				{
+					state = 2; /* middle first char */
+					pstart = p;
+					p++;
+				}
+				break;
+
+			case 2:  /* middle first char */
+				if ( !is_nospcrlfcl( *p ) )
+					return FALSE;
+				state = 3; /* middle rest */
+				p++;
+				break;
+
+			case 3:  /* middle rest */
+				if ( *p == ' ' )
+				{
+					nparam++;
+					state = 0;
+					/* add param to list */
+				}
+				else if ( (*p == ':') || (is_nospcrlfcl( *p ) ) )
+					p++;
+				else
+					return FALSE;
+				break;
+
+			case 4:  /* trailing */
+				if ( p == end )
+				{
+					/* add param to list */
+					return TRUE;
+				}
+
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #if 0
 
