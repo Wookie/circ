@@ -16,7 +16,6 @@
 
 #include <cutil/debug.h>
 #include <cutil/macros.h>
-#include <cutil/hashtable.h>
 
 /* malloc/calloc/realloc fail switch */
 int fail_alloc = FALSE;
@@ -121,7 +120,6 @@ int fake_ht_deinit_ret = FALSE;
 int fake_ht_grow = FALSE;
 int fake_ht_grow_ret = FALSE;
 int fake_ht_find = FALSE;
-ht_itr_t fake_ht_find_ret;
 
 /* list */
 int fake_list_count = FALSE;

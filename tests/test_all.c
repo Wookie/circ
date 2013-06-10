@@ -31,7 +31,7 @@
 #include "test_macros.h"
 #include "test_flags.h"
 
-SUITE( session );
+SUITE( msg );
 
 evt_loop_t * el = NULL;
 
@@ -42,7 +42,7 @@ int main()
 		return CU_get_error();
 
 	/* add each suite of tests */
-	ADD_SUITE( session );
+	ADD_SUITE( msg );
 
 	/* set up the event loop */
 	el = evt_new();

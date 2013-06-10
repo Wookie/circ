@@ -26,7 +26,7 @@
 
 struct irc_event_cb_s
 {
-	uint8_t *			name;
+	uint8_t const *		name;
 	irc_session_t *		session;
 	irc_command_t		cmd;
 	event_cb_fn			fn;

@@ -31,9 +31,39 @@
 #include "commands.h"
 #include "msg.h"
 
-static uint8_t colon = ':';
-static uint8_t space = ' ';
-static uint8_t const * const msgend = "\r\n";
+static uint8_t COLON = ':';
+static uint8_t SPACE = ' ';
+static uint8_t DOT = '.';
+static uint8_t AT = '@';
+static uint8_t BANG = '!';
+static uint8_t const * const MSGEND = "\r\n";
+
+/* forward declaration of private functions */
+static inline int_t is_letter( uint8_t const c );
+static inline int_t is_digit( uint8_t const c );
+static inline int_t is_hex( uint8_t const c );
+static inline int_t is_special( uint8_t const c );
+static inline int_t is_user_octet( uint8_t const c );
+static inline int_t is_key_octet( uint8_t const c );
+static inline int_t is_nospcrlfcl_octet( uint8_t const c );
+static inline int_t is_chanstart( uint8_t const c );
+static inline int_t is_chanstring( uint8_t const c );
+static int_t parse_shortname( uint8_t **shortname, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * const end );
+static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_user( uint8_t ** user, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end );
+
+
+/*****************************************************************************/
+/********** PRIVATE FUNCTIONS ************************************************/
+/*****************************************************************************/
 
 /* create a new message */
 irc_msg_t* irc_msg_new()
@@ -54,6 +84,36 @@ _irc_msg_new_fail:
 	return NULL;
 }
 
+/* create a new message from a buffer */
+irc_msg_t* irc_msg_new_from_data( uint8_t const * const data, size_t const size )
+{
+	irc_msg_t* msg = NULL;
+	
+	/* allocate the msg */
+	msg = CALLOC(1, sizeof(irc_msg_t));
+	CHECK_PTR_RET(msg, NULL);
+
+	/* initialize the params list */
+	CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, NULL ), _irc_msg_new_fail );
+
+	/* allocate memory for the data */
+	msg->in.data = CALLOC( 1, size );
+	CHECK_PTR_GOTO( msg->in.data, _irc_msg_new_fail );
+	msg->in.size = size;
+
+	/* copy the data into the in buffer */
+	MEMCPY( msg->in.data, data, size );
+
+	/* now try to parse it */
+	CHECK_GOTO( (IRC_OK == irc_msg_parse( msg )), _irc_msg_new_fail );
+	
+	return msg;
+
+_irc_msg_new_fail:
+	irc_msg_delete( msg );
+	return NULL;
+}
+
 
 /* function for deleting irc messages */
 void irc_msg_delete(void * m)
@@ -62,25 +122,20 @@ void irc_msg_delete(void * m)
 	irc_msg_t* msg = (irc_msg_t*)m;
 	CHECK_PTR(msg);
 
-	/* was this a message that was compiled? */
-	if ( msg->out.iov != NULL )
-	{
-		if ( msg->prefix != NULL )
-			FREE( msg->prefix );
+	/* clean up the params list */
+	list_deinitialize( &(msg->params) );
 
-		if ( msg->num_params > 0 )
-		{
-			for ( i = 0; i < msg->num_params; ++i )
-			{
-				FREE( msg->parameters[i] );
-			}
-		}
+	/* delete the array of iovec structs */
+	FREE( msg->out.iov );
 
-		if ( msg->trailing != NULL )
-			FREE( msg->trailing );
+	/* delete the data buffer */
+	FREE( msg->in.data );
 
-		FREE( msg->out.iov );
-	}
+	/* clean up the origin */
+	FREE( msg->origin.servername );
+	FREE( msg->origin.nuh.nickname );
+	FREE( msg->origin.nuh.user );
+	FREE( msg->origin.nuh.host.hostname );
 
 	/* free the message memory */
 	FREE(msg);
@@ -125,24 +180,16 @@ void irc_msg_delete(void * m)
 irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 {
 	uint8_t* ptr = NULL;
-	uint8_t* space = NULL;
 	uint8_t* end = NULL;
-	uint8_t* cmd = NULL;
 	
-	CHECK_PTR_RET(msg, IRC_BADPARAM);
+	CHECK_PTR_RET( msg, IRC_BADPARAM );
+	CHECK_PTR_RET( msg->in.data, IRC_ERR );
+	CHECK_RET( (msg->in.size > 0), IRC_ERR );
 
-	/* reset the msg pointers */
-	msg->prefix = NULL;
-	msg->command = NULL;
-	msg->parameters = NULL;
-		
-	/* start by initializing the ptr to the first byte in the buffer */
-	ptr = &msg->in.data[0];
+	/* start by initializing the ptr to the first octet in the buffer */
+	ptr = &(msg->in.data[0]);
 	
-	/* 
-	 * figure out where the end of the buffer is, the - 2 cuts off the
-	 * \r\n at the end of the message
-	 */
+	/* double check that the message buffer ends in \r\n */
 	end = (&msg->in.data[0] + msg->in.size) - 2;
 	CHECK_RET( end[0] == '\r', IRC_ERR );
 	CHECK_RET( end[1] == '\n', IRC_ERR );
@@ -152,28 +199,22 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 	end[1] = '\0';
  
 	/***** PREFIX *****/
+	CHECK_RET( parse_prefix( &(msg->origin), &ptr, end ), IRC_ERR );
 
-	/* first check for a prefix that start with a ":" */
-	if((*ptr) == ':')
-	{
-		/* move to the first character after the ":" */
-		ptr++;
-
-		/* parse the prefix and move ptr to the character after the prefix */
-		CHECK_RET( parse_prefix( msg, &ptr, end ), IRC_ERR );
-
-		/* check to see if we ran to the end of the buffer */
-		CHECK_RET((space < end), IRC_BAD_MESSAGE);
-	}
+	/* check to see if we ran to the end of the buffer */
+	CHECK_RET( (ptr < end), IRC_BAD_MESSAGE);
    
 	/***** COMMAND *****/
 	CHECK_RET( parse_command( msg, &ptr, end ), IRC_ERR );
 
 	/* check to see if we ran to the end of the buffer */
-	CHECK_RET((space < end), IRC_BAD_MESSAGE);
+	CHECK_RET( (ptr < end), IRC_BAD_MESSAGE);
    
 	/**** PARAMS ****/
 	CHECK_RET( parse_params( msg, &ptr, end ), IRC_ERR );
+
+	/* check to see if we consumed the whole message */
+	CHECK_RET( (ptr == end), IRC_ERR );
 
 	return IRC_OK;
 }
@@ -183,65 +224,102 @@ irc_ret_t irc_msg_compile(irc_msg_t* const msg)
 	CHECK_PTR_RET(msg, IRC_BADPARAM);
 	return IRC_OK;
 }
-	
+
+#define IP_LOG_BUF_SIZE (128)
+static void irc_msg_log_prefix( irc_msg_origin_t const * const origin )
+{
+	static uint8_t buf[IP_LOG_BUF_SIZE];
+	switch( origin->kind )
+	{
+		case CONN_ORIGIN:
+		case SERVERNAME_ORIGIN:
+			LOG( "  (%s)\n", origin->servername );
+			break;
+		case NUH_ORIGIN:
+			switch( origin->nuh.host.kind )
+			{
+				case NO_HOST:
+					LOG( " (%s)\n", origin->nuh.nickname );
+					break;
+				case V4_HOSTADDR:
+					/* convert IPv4 address to dotted quad string */
+					MEMSET( buf, 0, IP_LOG_BUF_SIZE );
+					inet_ntop( AF_INET, &(origin->nuh.host.v4), buf, IP_LOG_BUF_SIZE );
+
+					if ( origin->nuh.user != NULL )
+					{
+						/* we have nick!user@host */
+						LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, buf);
+					}
+					else
+					{
+						/* we have nick@host */
+						LOG( "  (%s @ %s)\n", origin->nuh.nickname, buf );
+					}
+					break;
+				case V6_HOSTADDR:
+					/* convert IPv6 address to dotted quad string */
+					MEMSET( buf, 0, IP_LOG_BUF_SIZE );
+					inet_ntop( AF_INET6, &(origin->nuh.host.v6), buf, IP_LOG_BUF_SIZE );
+
+					if ( origin->nuh.user != NULL )
+					{
+						/* we have nick!user@host */
+						LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, buf);
+					}
+					else
+					{
+						/* we have nick@host */
+						LOG( "  (%s @ %s)\n", origin->nuh.nickname, buf );
+					}
+					break;
+				case HOSTNAME:
+					if ( origin->nuh.user != NULL )
+					{
+						/* we have nick!user@host */
+						LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, origin->nuh.host.hostname );
+					}
+					else
+					{
+						/* we have nick@host */
+						LOG( "  (%s @ %s)\n", origin->nuh.nickname, origin->nuh.host.hostname);
+					}
+					break;
+			}
+			break;
+	}
+}
+
 void irc_msg_log( irc_msg_t const * const msg )
 {
-	int i;
+	list_itr_t itr, end;
+
 	LOG( "(%s\n", irc_cmd_get_type_string( msg->cmd ) );
-	if ( msg->prefix != NULL )
+
+	/* PREFIX */
+	irc_msg_log_prefix( &(msg->origin) );
+	
+	/* command */
+	LOG( "  (%s\n", irc_cmd_get_string( msg->cmd ) );
+
+	if ( list_count( &(msg->params) ) > 0 )
 	{
-		/* prefix can be nick!user@host */
-		if ( (msg->nick != NULL) && (msg->user != NULL) && (msg->host != NULL) )
-		{
-			LOG( "  (%s ! %s @ %s) %s\n", msg->nick, msg->user, msg->host, msg->command );
-		}
+		itr = list_itr_begin( &(msg->params) );
+		end = list_itr_end( &(msg->params) );
 
-		/* or it can be just user@host */
-		else if ( (msg->user != NULL) && (msg->host != NULL) )
-		{
-			LOG( "  (%s @ %s) %s\n", msg->user, msg->host, msg->command );
-		}
-
-		/* or just nick */
-		else if ( msg->nick != NULL )
-		{
-			LOG( "  (%s) %s\n", msg->nick, msg->command );
-		}
-
-		/* or just host */
-		else if ( msg->host != NULL )
-		{
-			LOG( "  (%s) %s\n", msg->host, msg->command );
-		}
-
-		/* or an error */
-		else
-		{
-			LOG( "  (ERR!) %s\n", msg->command );
-		}
-	}
-	else
-	{
-		LOG( "  (%s\n", msg->command );
-	}
-
-	if ( msg->num_params > 0 )
-	{
 		LOG("  (\n");
-		for ( i = 0; i < msg->num_params; i++ )
+		for ( ; itr != end; itr = list_itr_next( &(msg->params), itr ) )
 		{
-			LOG( "    %s\n", msg->parameters[i] );
+			LOG( "    %s\n", C(list_get( &(msg->params), itr )) );
 		}
 		LOG("  )\n");
 	}
 	
-	if ( msg->trailing != NULL )
-	{
-		LOG( "  (%s)\n", msg->trailing );
-	}
 	LOG(")\n");
 }
 
+
+#if 0
 /* initialize the message in one pass */
 irc_ret_t irc_msg_initialize(
 	irc_msg_t* const msg,
@@ -361,7 +439,7 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 	if ( msg->prefix != NULL )
 	{
 		/* add colon */
-		vec->iov_base = &colon;
+		vec->iov_base = &COLON;
 		vec->iov_len = 1;
 		vec++;
 
@@ -371,7 +449,7 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 		vec++;
 
 		/* add space */
-		vec->iov_base = &space;
+		vec->iov_base = &SPACE;
 		vec->iov_len = 1;
 		vec++;
 	}
@@ -385,7 +463,7 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 	for( i = 0; i < msg->num_params; i++ )
 	{
 		/* add space */
-		vec->iov_base = &space;
+		vec->iov_base = &SPACE;
 		vec->iov_len = 1;
 		vec++;
 
@@ -398,12 +476,12 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 	if ( msg->trailing != NULL )
 	{
 		/* add space */
-		vec->iov_base = &space;
+		vec->iov_base = &SPACE;
 		vec->iov_len = 1;
 		vec++;
 
 		/* add colon */
-		vec->iov_base = &colon;
+		vec->iov_base = &COLON;
 		vec->iov_len = 1;
 		vec++;
 
@@ -414,7 +492,7 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 	}
 
 	/* finish with \r\n */
-	vec->iov_base = (void*)msgend;
+	vec->iov_base = (void*)MSGEND;
 	vec->iov_len = 2;
 
 	return IRC_OK;
@@ -439,38 +517,38 @@ irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)
 	
 	return IRC_ERR;
 }
-
+#endif
 
 
 /*****************************************************************************/
 /********** PRIVATE FUNCTIONS ************************************************/
 /*****************************************************************************/
 
-static int is_letter( uint8_t const c )
+static inline int_t is_letter( uint8_t const c )
 {
 	return ( ( (c >= 'a') && (c <= 'z') ) ||
 			 ( (c >= 'A') && (c <= 'Z') ) );
 }
 
-static int is_digit( uint8_t const c )
+static inline int_t is_digit( uint8_t const c )
 {
 	return ( (c >= '0') && (c <= '9') );
 }
 
-static int is_hex( uint8_t const c )
+static inline int_t is_hex( uint8_t const c )
 {
 	return ( ( (c >= '0') && (c <= '9') ) ||
 			 ( (c >= 'A') && (c <= 'F') ) ||
 			 ( (c >= 'a') && (c <= 'f') ) );
 }
 
-static int is_special( uint8_t const c )
+static inline int_t is_special( uint8_t const c )
 {
 	return ( ( (c >= 0x5B) && (c <= 0x60) ) ||
 			 ( (c >= 0x7B) && (c <= 0x7D) ) );
 }
 
-static int is_user_octet( uint8_t const c )
+static inline int_t is_user_octet( uint8_t const c )
 {
 	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
 			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
@@ -479,7 +557,7 @@ static int is_user_octet( uint8_t const c )
 			 ( (c >= 0x41) && (c <= 0xFF) ) );
 }
 
-static int is_key_octet( uint8_t const c )
+static inline int_t is_key_octet( uint8_t const c )
 {
 	return ( ( (c >= 0x01) && (c <= 0x05) ) ||
 			 ( (c >= 0x07) && (c <= 0x08) ) ||
@@ -488,18 +566,26 @@ static int is_key_octet( uint8_t const c )
 			 ( (c >= 0x21) && (c <= 0x7F) ) );
 }
 
-static int is_chanstart( uint8_t const c )
+static inline int_t is_nospcrlfcl_octet( uint8_t const c )
 {
-	return ( ( c == '#' ) ||
-			 ( c == '+' ) ||
-			 ( c == '!' ) ||
-			 ( c == '&' ) );
+	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
+			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
+			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
+			 ( (c >= 0x21) && (c <= 0x39) ) ||
+			 ( (c >= 0x3B) && (c <= 0xFF) ) );
 }
 
-static int is_chanstring( uint8_t const c )
+static inline int_t is_chanstart( uint8_t const c )
 {
-	return ( ( (c >= 0x01) && (c <= 0x07) ) ||
-			 ( (c >= 0x08) && (c <= 0x09) ) ||
+	return ( ( c == '!' ) ||	/* 0x21 */
+			 ( c == '#' ) ||	/* 0x23 */
+			 ( c == '&' ) ||	/* 0x26 */
+			 ( c == '+' ) );	/* 0x2B */
+}
+
+static inline int_t is_chanstring( uint8_t const c )
+{
+	return ( ( (c >= 0x01) && (c <= 0x09) ) ||
 			 ( (c >= 0x0B) && (c <= 0x0C) ) ||
 			 ( (c >= 0x0E) && (c <= 0x1F) ) ||
 			 ( (c >= 0x21) && (c <= 0x2B) ) ||
@@ -513,7 +599,7 @@ static int is_chanstring( uint8_t const c )
  * shortname = ( letter / digit ) *( letter / digit / "-" ) *( letter / digit )
  *
  */
-static int parse_shortname( uint8_t ** ptr, uint8_t **shortname, uint8_t * const end )
+static int_t parse_shortname( uint8_t **shortname, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
 	uint8_t * last = NULL;
@@ -524,30 +610,74 @@ static int parse_shortname( uint8_t ** ptr, uint8_t **shortname, uint8_t * const
 	CHECK_PTR_RET( end, FALSE );
 	CHECK_RET ( *ptr < end, FALSE );
 
-	if ( (*ptr == ' ') || (*ptr == '.') )
+	p = *ptr;
+
+	if ( (*p == SPACE) || (*p == DOT) )
 		return FALSE;
 
-	for ( p = *ptr; (p < end) && (*p != ' ') && (*p != '.'); ++p )
+	for ( ; (p < end) && (*p != SPACE) && (*p != DOT); ++p )
 	{
 		if ( p == *ptr )
 		{
+			/* first octet must be letter or digit */
 			if ( !is_letter(*p) && !is_digit(*p) )
 				return FALSE;
 		}
 		else
 		{
+			/* remember this octet as possibly the last one */
 			last = p;
+
+			/* middle octets must be letter or digit or hyphen */
 			if ( !is_letter(*p) && !is_digit(*p) && (*p != '-') )
 				return FALSE;
 		}
 	}
 
+	/* check that the last octet we saw is a letter or digit */
 	if ( !is_letter(*last) && !is_digit(*last) )
 		return FALSE;
 
-	(*shortname) = CALLOC( 1, (p - *ptr) + 1);
-	MEMCPY( (*shortname), *ptr, (p - *ptr) );
-	(*ptr) = p;
+	return TRUE;
+}
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * hostname = shortname *( "." shortname )
+ */
+static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	uint8_t * shortname = NULL;
+
+	CHECK_PTR_RET( hostname, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	p = *ptr;
+	while ( parse_shortname( &shortname, &p, end ) )
+	{
+		if ( *p == DOT )
+		{
+			++p;
+		}
+	}
+
+	/* should have consumed all the way to end pointer */
+	CHECK_RET( (p == end), FALSE );
+
+	/* should be pointing at a SPACE octet since hostnames only occur at the end
+	 * of prefixes */
+	CHECK_RET( (*p == SPACE), FALSE );
+
+	/* store hostname pointer */
+	*hostname = *ptr;
+
+	/* update ptr to the first non-hostname octet */
+	*ptr = p;
 
 	return TRUE;
 }
@@ -556,91 +686,306 @@ static int parse_shortname( uint8_t ** ptr, uint8_t **shortname, uint8_t * const
  * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
  *
  * servername = hostname
- * hostname = shortname *( "." shortname )
  *
  * NOTE: severname cannot include IPv4 or IPv6 addresses, it must be a name.
  */
-static int parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * const end )
+static int_t parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * const end )
 {
-	uint8_t * p = NULL;
-	uint8_t * shortname = NULL;
-	uint8_t * srvrname = NULL;
-
 	CHECK_PTR_RET( servername, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
 	CHECK_PTR_RET( *ptr, FALSE );
 	CHECK_PTR_RET( end, FALSE );
 	CHECK_RET ( *ptr < end, FALSE );
 
-	p = *ptr;
-	while ( parse_shortname( &p, &shortname, end ) )
-	{
-		if ( *p == '.' )
-		{
-			srvrname = REALLOC( srvrname, strlen( srvrname ) + 2 );
-			CHECK_PTR_RET( srvrname, FALSE );
-			srvrname = strcat( srvrname, "." );
-		}
+	return parse_hostname( servername, ptr, end );
+}
 
-		srvrname = REALLOC( srvrname, strlen( srvrname) + strlen( shortname ) + 1 );
-		CHECK_PTR_RET( srvrname, FALSE );
-		srvrname = strcat( srvrname, shortname );
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * nickname = ( letter / special ) *8( letter / digit / special / "-" )
+ */
+static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+
+	CHECK_PTR_RET( nickname, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	for ( p = *ptr; ((p - *ptr) < IRC_NICKNAME_MAX) && (p < end); ++p )
+	{
+		if ( p == *ptr )
+		{
+			/* first character of nickname MUST be letter or special */
+			if ( !is_letter(*p) && !is_special(*p) )
+				return FALSE;
+		}
+		else
+		{
+			/* zero to eight letters, digits, special, or "-" */
+			if ( !is_letter(*p) && !is_digit(*p) && !is_special(*p) && (*p != '-') )
+				return FALSE;
+		}
 	}
 
-	(*servername) = srvrname;
-	(*ptr) = p;
+	/* set nickname pointer */
+	*nickname = *ptr;
+
+	/* update ptr to first octet after nickname */
+	*ptr = p;
 
 	return TRUE;
 }
+
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * user = 1*( %x01-09 / %x0B-0C / %x0E-1F / %x21-3F / %x41-FF )
+ *
+ * user is one or more of any octet excep NUL, CR, LF, " " and "@"
+ */
+static int_t parse_user( uint8_t ** user, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+
+	CHECK_PTR_RET( user, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	for ( p = *ptr; (p < end); ++p )
+	{
+		if ( !is_user_octet(*p) )
+			return FALSE;
+	}
+
+	/* make sure we saw at least one octet */
+	CHECK_RET( (p > *ptr), FALSE );
+
+	/* set user pointer */
+	*user = *ptr;
+
+	/* update ptr to first octet after user */
+	*ptr = p;
+
+	return TRUE;
+}
+
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * hostaddr = ip4addr / ip6addr
+ */
+static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end )
+{
+	CHECK_PTR_RET( host, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	/* first try to parse an IPv6 address */
+	if ( inet_pton( AF_INET6, *ptr, &(host->v6) ) )
+	{
+		/* remember that it is an IPv6 address */
+		host->kind = V6_HOSTADDR;
+		return TRUE;
+	}
+
+	/* if that didn't work, try to parse an IPv4 address */
+	if ( inet_pton( AF_INET, *ptr, &(host->v4) ) )
+	{
+		/* remember that it is a IPv4 address */
+		host->kind = V4_HOSTADDR;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * host = hostname / hostaddr
+ */
+static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end )
+{
+	CHECK_PTR_RET( host, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	/* first try to parse a hostaddr */
+	if ( parse_hostaddr( host, ptr, end ) )
+	{
+		/* we assume that the hostaddr goes from *ptr to end */
+		*ptr = end;
+		return TRUE;
+	}
+
+	/* if that didn't work, then it must be a hostname */
+	CHECK_RET( parse_hostname( &(host->hostname), ptr, end ), FALSE );
+
+	/* should have consumed all the way to the end */
+	CHECK_RET( (*ptr == end), FALSE );
+
+	/* remember that it is a hostname */
+	host->kind = HOSTNAME;
+
+	return TRUE;
+}
+
+
+/*
+ * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
+ *
+ * nuh = ( nickname [ [ "!" user ] "@" host ] )
+ */
+static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end )
+{
+	uint8_t * p = NULL;
+	CHECK_PTR_RET( nuh, FALSE );
+	CHECK_PTR_RET( ptr, FALSE );
+	CHECK_PTR_RET( *ptr, FALSE );
+	CHECK_PTR_RET( end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+
+	p = *ptr;
+
+	/* there is always at least a nickname */
+	CHECK_RET( parse_nickname( &(nuh->nickname), &p, end ), FALSE );
+
+	/* make sure p is pointing at one of these three characters */
+	CHECK_RET( ((*p == SPACE) || (*p == BANG) || (*p == AT)), FALSE );
+
+	if ( *p == SPACE )
+	{
+		/* just a nickname */
+		*ptr = p;
+		return TRUE;
+	}
+
+	/* user if we're at a '!' */
+	if ( *p == BANG )
+	{
+		/* terminate nickname string and move to first octet of user */
+		*p = '\0';
+		++p;
+
+		/* parse user */
+		CHECK_RET( parse_user( &(nuh->user), &p, end ), FALSE );
+	}
+
+	/* host if we're at a '@' */
+	if ( *p == AT )
+	{
+		/* terminate nickname or user string and move to first octet of host */
+		*p = '\0';
+		++p;
+
+		/* parse host */
+		CHECK_RET( parse_host( &(nuh->host), &p, end ), FALSE );
+
+		/* make sure we got a valid hostname or hostaddr */
+		CHECK_RET( (nuh->host.kind != NO_HOST), FALSE );
+	}
+
+	/* make sure we consumed to the end */
+	CHECK_RET( (p == end), FALSE );
+
+	/* move ptr up to the next octet after nuh */
+	*ptr = p;
+
+	return TRUE;
+}
+
 
 /*
  * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
  *
  * prefix = servername / (nickname [ [ "!" user ] "@" host ] )
+ *
+ * NOTE: this is an ambiguous grammar because the prefix could contain
+ * just a sequence of letters (a-z, A-Z) and there is no way to tell if
+ * it is just a server name without any dotted parts or just a nickname
+ * with no user or host parts.  when parsing an ambiguous message, it
+ * assumes the prefix specifies a server name.
  */
-static int parse_prefix( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
+	uint8_t * space = NULL;
 	int bang_or_at = FALSE;
 
-	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( origin, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
 	CHECK_PTR_RET( *ptr, FALSE );
 	CHECK_PTR_RET( end, FALSE );
-	CHECK_RET ( *ptr < end, FALSE );
+	CHECK_RET( *ptr < end, FALSE );
+	
+	p = *ptr;
 
-	/* if there is a "!" or "@" in the prefix string, then it is NOT a server name */
-	for ( p = *ptr; (p < end) && (*p != ' '); ++p )
+	/* if the first octet isn't ':' return TRUE, there's no prefix */
+	CHECK_RET( (*p) == COLON, TRUE );
+
+	/* find the trailing space, and remember if we see a bang or at sign */
+	for( space = p; (*space != SPACE) && (space < end); ++space )
 	{
-		if ( (*p == '!') || (*p == '@') )
-		{
-			bang_or_at = TRUE;
-			break;
-		}
+		bang_or_at = ((*space == BANG) || (*space == AT));
 	}
+
+	/* check to see if we ran to the end of the buffer */
+	CHECK_RET( (space < end), IRC_BAD_MESSAGE );
 
 	if ( !bang_or_at )
 	{
 		/* it must be a servername, so parse it */
-		CHECK_RET( parse_servername( &(msg->origin.servername), ptr, end ), FALSE );
+		CHECK_RET( parse_servername( &(origin->servername), &p, space ), FALSE );
+
+		/* origin was a server name */
+		origin->kind = SERVERNAME_ORIGIN;
 	}
 	else
 	{
 		/* it must be a nick-user-hostname, so parse it */
-		CHECK_RET( parse_nuh( &(msg->origin.nuh), ptr, end ), FALSE );
+		CHECK_RET( parse_nuh( &(origin->nuh), &p, space ), FALSE );
+
+		/* origin was an nuh */
+		origin->kind = NUH_ORIGIN;
 	}
+
+	/* make sure we consumed everything up to the space */
+	CHECK_RET( (p == space), FALSE );
+
+	/* terminate the prefix with null */
+	*p = '\0';
+	p++;
+
+	/* move ptr to the first octet of the command */
+	*ptr = p;
 
 	return TRUE;
 }
+
 
 /*
  * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
  *
  * command = 1*letter / 3digit
  */
-static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
+	int_t space = FALSE;
 
 	CHECK_PTR_RET( msg, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
@@ -649,22 +994,31 @@ static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const
 	CHECK_RET ( *ptr < end, FALSE );
 
 	/* find the space at the end */
-	for ( p = *ptr; (p < end) && (*p != ' '); ++p ) 
+	for ( p = *ptr; (p < end) && (*p != SPACE); ++p ) 
 	{
-		if ( !(isdigit(*p) || isalpha(*p)) )
+		if ( !isdigit(*p) && !isalpha(*p) )
 			return FALSE;
 	}
 
-	/* terminate the string */
-	*p = '\0';
+	/* temporarily terminate the command string so we can convert it
+	 * to the proper irc_command_t value */
+	if ( *p == SPACE )
+	{
+		space = TRUE;
+		*p = '\0';
+	}
 
 	/* get the command from the string */
 	msg->cmd = irc_cmd_get_command_from_string( *ptr );
 
-	/* reset the string to original state */
-	*p = ' ';
+	/* make sure we got a valid command */
+	CHECK_RET( (msg->cmd != NOCMD), FALSE );
 
-	/* move the ptr to the space after the command */
+	/* reset the string to original state */
+	if ( space )
+		*p = SPACE;
+
+	/* move the ptr to the octet after the command string */
 	*ptr = p;
 
 	return TRUE;
@@ -679,7 +1033,7 @@ static int parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const
  * trailing = *( ":" / " " / nospcrlfcl )
  * nospcrlfcl = 0x01-0x09 / 0x0B-0x0C / 0x0E-0x1F / 0x21-0x39 / 0x3B-0xFF
  */
-static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
 	uint8_t * pstart = NULL;
@@ -693,62 +1047,284 @@ static int parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const 
 	CHECK_RET ( *ptr < end, FALSE );
 
 	p = *ptr;
-	while( TRUE );
+	while( p < end )
 	{
 		switch ( state )
 		{
 			case 0:  /* SPACE */
 				/* all params start with a space */
-				CHECK_RET( *p == ' ', FALSE );
+				CHECK_RET( *p == SPACE, FALSE );
 				state = 1;
-				p++;
+
+				/* terminate previous string */
+				*p = '\0';
+
+				/* move to first octet of param */
+				++p;
 				break;
 
 			case 1:  /* [ ":" ] */
-				if ( (*p == ':') || (nparams == 14) )
+				if ( *p == ':' )
 				{
+					/* zero out ':' */
+					*p = '\0';
+
+					/* move to first octet of param */
+					++p;
+
 					state = 4;
-					p++;
-					pstart = p;
+				}
+				else if (nparams == 14)
+				{
+					/* 15th param with no ':' */
+					state = 4;
 				}
 				else
 				{
 					state = 2; /* middle first char */
-					pstart = p;
-					p++;
 				}
+
+				/* remember where the param started */
+				pstart = p;
 				break;
 
 			case 2:  /* middle first char */
-				if ( !is_nospcrlfcl( *p ) )
-					return FALSE;
+				CHECK_RET( is_nospcrlfcl_octet( *p ), FALSE );
 				state = 3; /* middle rest */
-				p++;
+				++p;
 				break;
 
 			case 3:  /* middle rest */
-				if ( *p == ' ' )
+				if ( *p == SPACE )
 				{
-					nparam++;
-					state = 0;
-					/* add param to list */
+					/* end of param */
+					nparams++;
+
+					/* add pointer to param start to list */
+					CHECK_RET( list_push_tail( &(msg->params), pstart ), FALSE );
+
+					state = 0; /* space between params */
 				}
-				else if ( (*p == ':') || (is_nospcrlfcl( *p ) ) )
+				else if ( (*p == ':') || (is_nospcrlfcl_octet( *p ) ) )
+				{
+					/* just a middle character of a param */
 					p++;
+				}
 				else
+				{
+					/* anything else is a malformed param */
 					return FALSE;
+				}
 				break;
 
 			case 4:  /* trailing */
-				if ( p == end )
+				if ( (*p == ':') || (*p == SPACE) || (is_nospcrlfcl_octet( *p ) ) )
 				{
-					/* add param to list */
-					return TRUE;
+					/* valid middle char of trailing, move to the next octet */
+					++p;
 				}
-
+				else
+				{
+					/* anything else is a malformed trailing param */
+					return FALSE;
+				}
+				break;
+		}
 	}
 
+	/* add the pointer to the start of the last param to the list */
+	CHECK_RET( list_push_tail( &(msg->params), pstart ), FALSE );
+
+	/* move ptr to first octet after params */
+	*ptr = p;
+
+	return TRUE;
 }
+
+
+#if defined(UNIT_TESTING)
+
+#include <CUnit/Basic.h>
+
+static void test_msg_is_letter( void )
+{
+	CU_ASSERT_FALSE( is_letter( '@' ) );
+	CU_ASSERT_TRUE( is_letter( 'A' ) );
+	CU_ASSERT_FALSE( is_letter( '[' ) );
+	CU_ASSERT_TRUE( is_letter( 'a' ) );
+	CU_ASSERT_FALSE( is_letter( '{' ) );
+}
+
+static void test_msg_is_digit( void )
+{
+	CU_ASSERT_FALSE( is_digit( '/' ) );
+	CU_ASSERT_TRUE( is_digit( '0' ) );
+	CU_ASSERT_FALSE( is_digit( '@' ) );
+}
+
+static void test_msg_is_hex( void )
+{
+	CU_ASSERT_FALSE( is_hex('/') );
+	CU_ASSERT_TRUE( is_hex('0') );
+	CU_ASSERT_FALSE( is_hex(':') );
+	CU_ASSERT_TRUE( is_hex('A') );
+	CU_ASSERT_FALSE( is_hex('G') );
+	CU_ASSERT_TRUE( is_hex('a') );
+	CU_ASSERT_FALSE( is_hex('g') );
+}
+
+static void test_msg_is_special( void )
+{
+	CU_ASSERT_FALSE( is_special('Z') );
+	CU_ASSERT_TRUE( is_special('[') );
+	CU_ASSERT_FALSE( is_special('a') );
+	CU_ASSERT_TRUE( is_special('{') );
+	CU_ASSERT_FALSE( is_special('~') );
+}
+
+static void test_msg_is_user_octet( void )
+{
+	CU_ASSERT_FALSE( is_user_octet( '\x00' ) );
+	CU_ASSERT_TRUE( is_user_octet( '\x01' ) );
+	CU_ASSERT_FALSE( is_user_octet( '\x0A' ) );
+	CU_ASSERT_TRUE( is_user_octet( '\x0B' ) );
+	CU_ASSERT_FALSE( is_user_octet( '\x0D' ) );
+	CU_ASSERT_TRUE( is_user_octet( '\x0E' ) );
+	CU_ASSERT_FALSE( is_user_octet( '\x20' ) );
+	CU_ASSERT_TRUE( is_user_octet( '\x21' ) );
+	CU_ASSERT_FALSE( is_user_octet( '\x40' ) );
+	CU_ASSERT_TRUE( is_user_octet( '\x41' ) );
+}
+
+static void test_msg_is_key_octet( void )
+{
+	CU_ASSERT_FALSE( is_key_octet( '\x00' ) );
+	CU_ASSERT_TRUE( is_key_octet( '\x01' ) );
+	CU_ASSERT_FALSE( is_key_octet( '\x06' ) );
+	CU_ASSERT_TRUE( is_key_octet( '\x07' ) );
+	CU_ASSERT_FALSE( is_key_octet( '\x09' ) );
+	CU_ASSERT_TRUE( is_key_octet( '\x0C' ) );
+	CU_ASSERT_FALSE( is_key_octet( '\x0D' ) );
+	CU_ASSERT_TRUE( is_key_octet( '\x0E' ) );
+	CU_ASSERT_FALSE( is_key_octet( '\x20' ) );
+	CU_ASSERT_TRUE( is_key_octet( '\x21' ) );
+	CU_ASSERT_FALSE( is_key_octet( '\x80' ) );
+}
+
+static void test_msg_is_nospcrlfcl_octet( void )
+{
+	CU_ASSERT_FALSE( is_nospcrlfcl_octet( '\x00' ) );
+	CU_ASSERT_TRUE( is_nospcrlfcl_octet( '\x01' ) );
+	CU_ASSERT_FALSE( is_nospcrlfcl_octet( '\x0A' ) );
+	CU_ASSERT_TRUE( is_nospcrlfcl_octet( '\x0B' ) );
+	CU_ASSERT_FALSE( is_nospcrlfcl_octet( '\x0D' ) );
+	CU_ASSERT_TRUE( is_nospcrlfcl_octet( '\x0E' ) );
+	CU_ASSERT_FALSE( is_nospcrlfcl_octet( '\x20' ) );
+	CU_ASSERT_TRUE( is_nospcrlfcl_octet( '\x21' ) );
+	CU_ASSERT_FALSE( is_nospcrlfcl_octet( '\x3A' ) );
+	CU_ASSERT_TRUE( is_nospcrlfcl_octet( '\x3B' ) );
+}
+
+static void test_msg_is_chanstart( void )
+{
+	CU_ASSERT_FALSE( is_chanstart( '\x20' ) );
+	CU_ASSERT_TRUE( is_chanstart( '!' ) );
+	CU_ASSERT_FALSE( is_chanstart( '\x22' ) );
+	CU_ASSERT_TRUE( is_chanstart( '#' ) );
+	CU_ASSERT_FALSE( is_chanstart( '\x24' ) );
+	CU_ASSERT_TRUE( is_chanstart( '&' ) );
+	CU_ASSERT_FALSE( is_chanstart( '\x27' ) );
+	CU_ASSERT_TRUE( is_chanstart( '+' ) );
+	CU_ASSERT_FALSE( is_chanstart( '\x2C' ) );
+}
+
+static void test_msg_is_chanstring( void )
+{
+	CU_ASSERT_FALSE( is_chanstring( '\x00' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x01' ) );
+	CU_ASSERT_FALSE( is_chanstring( '\x0A' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x0B' ) );
+	CU_ASSERT_FALSE( is_chanstring( '\x0D' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x0E' ) );
+	CU_ASSERT_FALSE( is_chanstring( '\x20' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x21' ) );
+	CU_ASSERT_FALSE( is_chanstring( '\x2C' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x2D' ) );
+	CU_ASSERT_FALSE( is_chanstring( '\x3A' ) );
+	CU_ASSERT_TRUE( is_chanstring( '\x3B' ) );
+}
+
+static void test_msg_parse_shortname( void )
+{
+	static uint8_t * shortname = NULL;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "www";
+	static uint8_t * ptr_2 = " www";
+	static uint8_t * ptr_3 = ".www";
+	static uint8_t * ptr_4 = "ww w";
+	static uint8_t * ptr_5 = "ww.w";
+
+	CU_ASSERT_FALSE( parse_shortname( NULL, NULL, NULL ) );
+	CU_ASSERT_FALSE( parse_shortname( &shortname, NULL, NULL ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_0, NULL ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_1, NULL ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_1, &(ptr_1[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &p, &(ptr_1[0]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_2, &(ptr_2[4]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_3, &(ptr_3[4]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_4, &(ptr_4[4]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_5, &(ptr_5[4]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+}
+
+
+void test_msg_private_functions( void )
+{
+	test_msg_is_letter();
+	test_msg_is_digit();
+	test_msg_is_hex();
+	test_msg_is_special();
+	test_msg_is_user_octet();
+	test_msg_is_key_octet();
+	test_msg_is_nospcrlfcl_octet();
+	test_msg_is_chanstart();
+	test_msg_is_chanstring();
+
+	test_msg_parse_shortname();
+}
+
+#endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

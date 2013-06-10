@@ -135,12 +135,20 @@ static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread
 
 	/* how many more bytes will get us to the 512 max? */
 	nspace = ( IRC_MSG_SIZE - (conn->inp - conn->startp) );
-	DEBUG( "%d bytes of unscanned, %d space\n", (conn->inp - conn->startp), nspace );
+#if defined(PORTABLE_64_BIT)
+	DEBUG( "%ld bytes of unscanned, %ld space\n", (int_t)(conn->inp - conn->startp), nspace );
+#else
+	DEBUG( "%d bytes of unscanned, %d space\n", (int_t)(conn->inp - conn->startp), nspace );
+#endif
 
 	/* we're going to try to read up to 512 boundary or what is available */
 	nleft = min( nspace, (*nread) );
 
+#if defined(PORTABLE_64_BIT)
+	DEBUG( "nread = %ld, going to read %ld\n", (*nread), nleft );
+#else
 	DEBUG( "nread = %d, going to read %d\n", (*nread), nleft );
+#endif
 
 	while ( nleft > 0 )
 	{
@@ -155,7 +163,11 @@ static irc_ret_t irc_receive_data( irc_conn_t * const conn, size_t * const nread
 		(*nread) -= nr;
 	}
 
+#if defined(PORTABLE_64_BIT)
+	DEBUG( "read %ld bytes from socket\n", recvd );
+#else
 	DEBUG( "read %d bytes from socket\n", recvd );
+#endif
 
 	return IRC_OK;
 }
@@ -185,7 +197,11 @@ static irc_ret_t irc_scan_for_msg( irc_conn_t * const conn )
 
 				/* update the irc conn state */
 				conn->startp = p;
-				DEBUG("scanned %d bytes, found full message, %d left to scan\n", (p - conn->scanp), (conn->inp - p));
+#if defined(PORTABLE_64_BIT)
+				DEBUG("scanned %ld bytes, found full message, %ld left to scan\n", (int_t)(p - conn->scanp), (int_t)(conn->inp - p));
+#else
+				DEBUG("scanned %d bytes, found full message, %d left to scan\n", (int_t)(p - conn->scanp), (int_t)(conn->inp - p));
+#endif
 				conn->scanp = p;
 			
 				/* we have found a full message...if we haven't scanned
@@ -209,7 +225,11 @@ static irc_ret_t irc_scan_for_msg( irc_conn_t * const conn )
 		++p;
 	}
 
-	DEBUG("scanned %d bytes, didn't see full message, %d left to scan\n", (p - conn->scanp), (conn->inp - p));
+#if defined(PORTABLE_64_BIT)
+	DEBUG("scanned %ld bytes, didn't see full message, %ld left to scan\n", (int_t)(p - conn->scanp), (int_t)(conn->inp - p));
+#else
+	DEBUG("scanned %d bytes, didn't see full message, %d left to scan\n", (int_t)(p - conn->scanp), (int_t)(conn->inp - p));
+#endif
 
 	/* store where we are stopping the scan */
 	conn->scanp = p;
@@ -261,7 +281,11 @@ static irc_ret_t irc_receive_msg( irc_conn_t* const conn, size_t * const nread )
 		remsize = (conn->inp - conn->startp);
 		scansize = (conn->scanp - conn->startp);
 
+#if defined(PORTABLE_64_BIT)
+		DEBUG("XXX copying %ld bytes to the start of buffer\n", remsize);
+#else
 		DEBUG("XXX copying %d bytes to the start of buffer\n", remsize);
+#endif
 		/* copy the remainder data to the start of the buffer */
 		MEMCPY( (void*)conn->buf, conn->startp, remsize );
 
@@ -282,7 +306,11 @@ static int32_t socket_read_fn( socket_t * const s,
 	irc_conn_t * conn = (irc_conn_t*)user_data;
 	size_t ntmp = nread;
 
+#if defined(PORTABLE_64_BIT)
+	DEBUG( "irc read %ld callback\n", nread );
+#else
 	DEBUG( "irc read %d callback\n", nread );
+#endif
 
 	if ( conn->disconnect )
 	{

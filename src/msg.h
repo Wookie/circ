@@ -17,9 +17,41 @@
 #ifndef __IRC_MSG_H__
 #define __IRC_MSG_H__
 
+#include <netinet/in.h>
+#include <cutil/list.h>
+
 #define IRC_MSG_SIZE (512)
 #define IRC_NUM_PARAMS (15)
+#define IRC_NICKNAME_MAX (9)
 
+typedef enum irc_host_type_e
+{
+	NO_HOST = 0,
+	V4_HOSTADDR = 1,
+	V6_HOSTADDR = 2,
+	HOSTNAME = 3,
+
+	LAST_MSG_HOST,
+	FIRST_MSG_HOST = NO_HOST,
+	NUM_MSG_HOST = LAST_MSG_HOST - FIRST_MSG_HOST
+
+} irc_host_type_t;
+
+#define IS_VALID_MSG_HOST(x)  ((x >= FIRST_MSG_HOST) && (x < LAST_MSG_HOST))
+
+typedef enum irc_origin_type_e
+{
+	CONN_ORIGIN = 0,				/* no prefix in message, origin from connection */
+	SERVERNAME_ORIGIN = 1,			/* prefix is server name */
+	NUH_ORIGIN = 2,					/* prefix is name [ [ '!' user] '@' host ] */
+
+	LAST_ORIGIN,
+	FIRST_ORIGIN = CONN_ORIGIN,
+	NUM_ORIGIN = LAST_ORIGIN - FIRST_ORIGIN
+
+} irc_origin_type_t;
+
+#define IS_VALID_ORIGIN(x) ((x >= FIRST_ORIGIN) && (x < LAST_ORIGIN))
 
 typedef struct irc_msg_in_buf_s
 {
@@ -35,16 +67,26 @@ typedef struct irc_msg_out_buf_s
 
 } irc_msg_out_buf_t;
 
+typedef struct irc_msg_h_s			/* host */
+{
+	irc_host_type_t		kind;		/* kind of host field */
+	struct in_addr		v4;			/* IPv4 address */
+	struct in6_addr		v6;			/* IPv6 address */
+	uint8_t			  * hostname;	/* DNS hostname */
+
+} irc_msg_h_t;
+
 typedef struct irc_msg_nuh_s		/* (nickname [ [ "!" user ] "@" host ] ) */
 {
 	uint8_t			  * nickname;			
-	uint8_t			  * username;
-	uint8_t			  * host;
+	uint8_t			  * user;
+	irc_msg_h_t			host;
 
 } irc_msg_nuh_t;
 
 typedef struct irc_msg_origin_s		/* servername / nuh */
 {
+	irc_origin_type_t	kind;		/* kind of msg origin */
 	uint8_t			  * servername;
 	irc_msg_nuh_t		nuh;
 
@@ -65,6 +107,9 @@ typedef struct irc_msg_s
 /* create a new message */
 irc_msg_t * irc_msg_new();
 
+/* create a new message from buffer */
+irc_msg_t * irc_msg_new_from_data( uint8_t const * const data, size_t const size );
+
 /* free a message */
 void irc_msg_delete( void * m );
 
@@ -76,6 +121,7 @@ irc_ret_t irc_msg_compile( irc_msg_t * const msg );
 
 void irc_msg_log( irc_msg_t const * const msg );
 
+#if 0
 /* initialize the message in one pass */
 irc_ret_t irc_msg_initialize(irc_msg_t* const msg,
 							 irc_command_t const cmd,
@@ -94,6 +140,9 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg );
 
 /* set the command */
 irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd);
+
+#endif
+
 
 
 #if 0

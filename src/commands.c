@@ -90,7 +90,7 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
     T("USERHOST"),
     T("ISON")
 };
-
+#if 0
 /* session event strings */
 int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 {
@@ -100,6 +100,7 @@ int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 	T("PUBMSG"),
 	T("DISCONNECTED"),
 };
+#endif
 
 int8_t const * const irc_any_cmd = T("ANYCMD");
 int8_t const * const irc_no_cmd = T("NOCMD");
@@ -113,10 +114,12 @@ int8_t const * irc_cmd_get_string(irc_command_t const cmd)
     {
         return irc_commands[cmd - CMD_BASE];   
     }
+/*
 	else if (IS_SESSION_EVENT(cmd))
 	{
 		return irc_session_events[cmd - SESSION_BASE];
 	}
+*/
 	else if ( cmd == ANYCMD )
 	{
 		return irc_any_cmd;
@@ -139,7 +142,7 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )
 	static int8_t const * const ERROR = T("ERROR");
 	static int8_t const * const REPLY = T("REPLY");
 	static int8_t const * const COMMAND = T("COMMAND");
-	static int8_t const * const SESSION_EVENT = T("SESSION_EVENT");
+	/*static int8_t const * const SESSION_EVENT = T("SESSION_EVENT");*/
 	static int8_t const * const RESERVED = T("RESERVED");
 	static int8_t const * const UNKNOWN = T("UNKNOWN");
 
@@ -155,10 +158,12 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )
 	{
 		return COMMAND;
 	}
+/*
 	else if ( IS_SESSION_EVENT( cmd ) )
 	{
 		return SESSION_EVENT;
 	}
+*/
 	else if ( IS_RESERVED( cmd ) )
 	{
 		return RESERVED;
@@ -186,13 +191,14 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
             if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
                 return cmd;
         }
-		
+#if 0	
 		/* scan through the session event strings looking for a match */
 		for(cmd = FIRST_SESSION_EVENT; cmd < LAST_SESSION_EVENT; cmd++)
 		{
 			if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
 				return cmd;
 		}
+#endif
 	}
         
     /* no match so return no command */
