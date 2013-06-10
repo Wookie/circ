@@ -1,4 +1,4 @@
-This LLSD C library depends on the cutil library (https://bitbucket.org/wookie/cutil)
+This IRC C library depends on the cutil library (https://bitbucket.org/wookie/cutil)
 and optionally it depends on the CUnit library if you wish to run the unit tests.
 
 The Makefile is sensitive to the PREFIX environment variable.  If you set it
