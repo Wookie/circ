@@ -1612,6 +1612,7 @@ static void test_msg_parse_nuh( void )
 		FALSE
 	};
 
+
 	MEMSET( &nuh, 0, sizeof( irc_msg_h_t ) );
 
 	/* test the pre-conditions */
