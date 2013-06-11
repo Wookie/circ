@@ -635,8 +635,14 @@ static int_t parse_shortname( uint8_t **shortname, uint8_t ** ptr, uint8_t * con
 	}
 
 	/* check that the last octet we saw is a letter or digit */
-	if ( !is_letter(*last) && !is_digit(*last) )
+	if ( (last != NULL) && !is_letter(*last) && !is_digit(*last) )
 		return FALSE;
+
+	/* set shortname to point to start of shortname */
+	*shortname = *ptr;
+
+	/* update ptr */
+	*ptr = p;
 
 	return TRUE;
 }
@@ -668,10 +674,6 @@ static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * cons
 
 	/* should have consumed all the way to end pointer */
 	CHECK_RET( (p == end), FALSE );
-
-	/* should be pointing at a SPACE octet since hostnames only occur at the end
-	 * of prefixes */
-	CHECK_RET( (*p == SPACE), FALSE );
 
 	/* store hostname pointer */
 	*hostname = *ptr;
@@ -705,6 +707,8 @@ static int_t parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * c
  * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
  *
  * nickname = ( letter / special ) *8( letter / digit / special / "-" )
+ *
+ * special = '[' / '\' / ']' / '^' / '_' / '`' / '{' / '|' / '}'
  */
 static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * const end )
 {
@@ -716,7 +720,7 @@ static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * cons
 	CHECK_PTR_RET( end, FALSE );
 	CHECK_RET( *ptr < end, FALSE );
 
-	for ( p = *ptr; ((p - *ptr) < IRC_NICKNAME_MAX) && (p < end); ++p )
+	for ( p = *ptr; p < end; ++p )
 	{
 		if ( p == *ptr )
 		{
@@ -730,6 +734,9 @@ static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * cons
 			if ( !is_letter(*p) && !is_digit(*p) && !is_special(*p) && (*p != '-') )
 				return FALSE;
 		}
+
+		if ( (p - *ptr) >= IRC_NICKNAME_MAX )
+			return FALSE;
 	}
 
 	/* set nickname pointer */
@@ -764,9 +771,6 @@ static int_t parse_user( uint8_t ** user, uint8_t ** ptr, uint8_t * const end )
 		if ( !is_user_octet(*p) )
 			return FALSE;
 	}
-
-	/* make sure we saw at least one octet */
-	CHECK_RET( (p > *ptr), FALSE );
 
 	/* set user pointer */
 	*user = *ptr;
@@ -835,9 +839,6 @@ static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end
 	/* if that didn't work, then it must be a hostname */
 	CHECK_RET( parse_hostname( &(host->hostname), ptr, end ), FALSE );
 
-	/* should have consumed all the way to the end */
-	CHECK_RET( (*ptr == end), FALSE );
-
 	/* remember that it is a hostname */
 	host->kind = HOSTNAME;
 
@@ -853,6 +854,7 @@ static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end
 static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
+	uint8_t * pend = NULL;
 	CHECK_PTR_RET( nuh, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
 	CHECK_PTR_RET( *ptr, FALSE );
@@ -860,33 +862,24 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
 	CHECK_RET( *ptr < end, FALSE );
 
 	p = *ptr;
+	for ( pend = p; (pend < end) && (*pend != '!') && (*pend != '@'); ++pend ) {}
 
 	/* there is always at least a nickname */
-	CHECK_RET( parse_nickname( &(nuh->nickname), &p, end ), FALSE );
+	CHECK_RET( parse_nickname( &(nuh->nickname), &p, pend ), FALSE );
 
-	/* make sure p is pointing at one of these three characters */
-	CHECK_RET( ((*p == SPACE) || (*p == BANG) || (*p == AT)), FALSE );
-
-	if ( *p == SPACE )
-	{
-		/* just a nickname */
-		*ptr = p;
-		return TRUE;
-	}
-
-	/* user if we're at a '!' */
-	if ( *p == BANG )
+	if ( *p == BANG ) /* user if we're at a '!' */
 	{
 		/* terminate nickname string and move to first octet of user */
 		*p = '\0';
 		++p;
+	
+		for ( pend = p; (pend < end) && (*pend != '@'); ++pend ) {}
 
 		/* parse user */
-		CHECK_RET( parse_user( &(nuh->user), &p, end ), FALSE );
+		CHECK_RET( parse_user( &(nuh->user), &p, pend ), FALSE );
 	}
-
-	/* host if we're at a '@' */
-	if ( *p == AT )
+	
+	if ( *p == AT ) /* host if we're at a '@' */
 	{
 		/* terminate nickname or user string and move to first octet of host */
 		*p = '\0';
@@ -894,9 +887,6 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
 
 		/* parse host */
 		CHECK_RET( parse_host( &(nuh->host), &p, end ), FALSE );
-
-		/* make sure we got a valid hostname or hostaddr */
-		CHECK_RET( (nuh->host.kind != NO_HOST), FALSE );
 	}
 
 	/* make sure we consumed to the end */
@@ -1264,30 +1254,437 @@ static void test_msg_parse_shortname( void )
 	static uint8_t * ptr_3 = ".www";
 	static uint8_t * ptr_4 = "ww w";
 	static uint8_t * ptr_5 = "ww.w";
+	static uint8_t * ptr_6 = "9ww";
+	static uint8_t * ptr_7 = "#ww";
+	static uint8_t * ptr_8 = "w-ww";
+	static uint8_t * ptr_9 = "ww-";
+	static uint8_t * ptr_10 = "w#w";
+	static uint8_t * ptr_11 = "ww9";
+	static uint8_t * ptr_12 = "ww#";
 
 	CU_ASSERT_FALSE( parse_shortname( NULL, NULL, NULL ) );
+
 	CU_ASSERT_FALSE( parse_shortname( &shortname, NULL, NULL ) );
 	CU_ASSERT_PTR_NULL( shortname );
+
 	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_0, NULL ) );
 	CU_ASSERT_PTR_NULL( shortname );
+
 	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_1, NULL ) );
 	CU_ASSERT_PTR_NULL( shortname );
+
 	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_1, &(ptr_1[3]) ) );
 	CU_ASSERT_PTR_NOT_NULL( shortname );
 	shortname = NULL;
+
 	p = &(ptr_1[1]);
 	CU_ASSERT_FALSE( parse_shortname( &shortname, &p, &(ptr_1[0]) ) );
 	CU_ASSERT_PTR_NULL( shortname );
+
 	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_2, &(ptr_2[4]) ) );
 	CU_ASSERT_PTR_NULL( shortname );
+
 	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_3, &(ptr_3[4]) ) );
 	CU_ASSERT_PTR_NULL( shortname );
+	
 	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_4, &(ptr_4[4]) ) );
 	CU_ASSERT_PTR_NOT_NULL( shortname );
 	shortname = NULL;
+
 	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_5, &(ptr_5[4]) ) );
 	CU_ASSERT_PTR_NOT_NULL( shortname );
 	shortname = NULL;
+
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_6, &(ptr_6[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_7, &(ptr_7[3]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_8, &(ptr_8[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_9, &(ptr_9[3]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_10, &(ptr_10[3]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+
+	CU_ASSERT_TRUE( parse_shortname( &shortname, &ptr_11, &(ptr_11[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( shortname );
+	shortname = NULL;
+
+	CU_ASSERT_FALSE( parse_shortname( &shortname, &ptr_12, &(ptr_12[3]) ) );
+	CU_ASSERT_PTR_NULL( shortname );
+}
+
+static void test_msg_parse_hostname( void )
+{
+	static uint8_t * hostname = NULL;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "www";
+	static uint8_t * ptr_2 = "w.w";
+
+	CU_ASSERT_FALSE( parse_hostname( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_hostname( &hostname, NULL, NULL ) );
+	CU_ASSERT_PTR_NULL( hostname );
+
+	CU_ASSERT_FALSE( parse_hostname( &hostname, &ptr_0, NULL ) );
+	CU_ASSERT_PTR_NULL( hostname );
+
+	CU_ASSERT_FALSE( parse_hostname( &hostname, &ptr_1, NULL ) );
+	CU_ASSERT_PTR_NULL( hostname );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_hostname( &hostname, &p, &(ptr_1[0]) ) );
+	CU_ASSERT_PTR_NULL( hostname );
+
+	CU_ASSERT_TRUE( parse_hostname( &hostname, &ptr_1, &(ptr_1[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( hostname );
+	hostname = NULL;
+
+	CU_ASSERT_TRUE( parse_hostname( &hostname, &ptr_2, &(ptr_2[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( hostname );
+	hostname = NULL;
+}
+
+static void test_msg_parse_servername( void )
+{
+	static uint8_t * servername = NULL;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "www";
+	static uint8_t * ptr_2 = "w.w";
+
+	CU_ASSERT_FALSE( parse_servername( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_servername( &servername, NULL, NULL ) );
+	CU_ASSERT_PTR_NULL( servername );
+
+	CU_ASSERT_FALSE( parse_servername( &servername, &ptr_0, NULL ) );
+	CU_ASSERT_PTR_NULL( servername );
+
+	CU_ASSERT_FALSE( parse_servername( &servername, &ptr_1, NULL ) );
+	CU_ASSERT_PTR_NULL( servername );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_servername( &servername, &p, &(ptr_1[0]) ) );
+	CU_ASSERT_PTR_NULL( servername );
+
+	CU_ASSERT_TRUE( parse_servername( &servername, &ptr_1, &(ptr_1[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( servername );
+	servername = NULL;
+
+	CU_ASSERT_TRUE( parse_servername( &servername, &ptr_2, &(ptr_2[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( servername );
+	servername = NULL;
+}
+
+static void test_msg_parse_nickname( void )
+{
+	static uint8_t * nickname = NULL;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "nik";
+	static uint8_t * ptr_2 = "{ik";
+	static uint8_t * ptr_3 = "9ik";
+	static uint8_t * ptr_4 = "n-k";
+	static uint8_t * ptr_5 = "n9k";
+	static uint8_t * ptr_6 = "n}k";
+	static uint8_t * ptr_7 = "ni-";
+	static uint8_t * ptr_8 = "ni~";
+	static uint8_t * ptr_9 = "nicktoolong";
+
+	CU_ASSERT_FALSE( parse_nickname( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, NULL, NULL ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &ptr_0, NULL ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &ptr_1, NULL ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &p, &(ptr_1[0]) ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_1, &(ptr_1[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_2, &(ptr_2[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &ptr_3, &(ptr_3[3]) ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_4, &(ptr_4[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_5, &(ptr_5[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_6, &(ptr_6[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_TRUE( parse_nickname( &nickname, &ptr_7, &(ptr_7[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nickname );
+	nickname = NULL;
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &ptr_8, &(ptr_8[3]) ) );
+	CU_ASSERT_PTR_NULL( nickname );
+
+	CU_ASSERT_FALSE( parse_nickname( &nickname, &ptr_9, &(ptr_9[12]) ) );
+	CU_ASSERT_PTR_NULL( nickname );
+}
+
+static void test_msg_parse_user( void )
+{
+	static uint8_t * user = NULL;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "usr";
+	static uint8_t * ptr_2 = "us\n";
+	static uint8_t * ptr_3 = "";
+
+	CU_ASSERT_FALSE( parse_user( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_user( &user, NULL, NULL ) );
+	CU_ASSERT_PTR_NULL( user );
+
+	CU_ASSERT_FALSE( parse_user( &user, &ptr_0, NULL ) );
+	CU_ASSERT_PTR_NULL( user );
+
+	CU_ASSERT_FALSE( parse_user( &user, &ptr_1, NULL ) );
+	CU_ASSERT_PTR_NULL( user );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_user( &user, &p, &(ptr_1[0]) ) );
+	CU_ASSERT_PTR_NULL( user );
+
+	CU_ASSERT_TRUE( parse_user( &user, &ptr_1, &(ptr_1[3]) ) );
+	CU_ASSERT_PTR_NOT_NULL( user );
+	user = NULL;
+
+	CU_ASSERT_FALSE( parse_user( &user, &ptr_2, &(ptr_2[3]) ) );
+	CU_ASSERT_PTR_NULL( user );
+
+	CU_ASSERT_FALSE( parse_user( &user, &ptr_3, &(ptr_3[0]) ) );
+	CU_ASSERT_PTR_NULL( user );
+}
+
+static void test_msg_parse_hostaddr( void )
+{
+	static irc_msg_h_t host;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "::1";
+	static uint8_t * ptr_2 = "127.0.0.1";
+	static uint8_t * ptr_3 = "foo";
+
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_hostaddr( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_hostaddr( &host, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_hostaddr( &host, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_hostaddr( &host, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_hostaddr( &host, &p, &(ptr_1[0]) ) );
+
+	CU_ASSERT_TRUE( parse_hostaddr( &host, &ptr_1, &(ptr_1[3] ) ) );
+	CU_ASSERT_EQUAL( host.kind, V6_HOSTADDR );
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	CU_ASSERT_TRUE( parse_hostaddr( &host, &ptr_2, &(ptr_2[10] ) ) );
+	CU_ASSERT_EQUAL( host.kind, V4_HOSTADDR );
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	CU_ASSERT_FALSE( parse_hostaddr( &host, &ptr_3, &(ptr_3[3] ) ) );
+}
+
+static void test_msg_parse_host( void )
+{
+	static irc_msg_h_t host;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "::1";
+	static uint8_t * ptr_2 = "127.0.0.1";
+	static uint8_t * ptr_3 = "foo";
+	static uint8_t * ptr_4 = "~";
+
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_host( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_host( &host, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_host( &host, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_host( &host, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_host( &host, &p, &(ptr_1[0]) ) );
+
+	CU_ASSERT_TRUE( parse_host( &host, &ptr_1, &(ptr_1[3] ) ) );
+	CU_ASSERT_EQUAL( host.kind, V6_HOSTADDR );
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	CU_ASSERT_TRUE( parse_host( &host, &ptr_2, &(ptr_2[10] ) ) );
+	CU_ASSERT_EQUAL( host.kind, V4_HOSTADDR );
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	CU_ASSERT_TRUE( parse_host( &host, &ptr_3, &(ptr_3[3] ) ) );
+	CU_ASSERT_EQUAL( host.kind, HOSTNAME );
+	MEMSET( &host, 0, sizeof( irc_msg_h_t ) );
+
+	CU_ASSERT_FALSE( parse_host( &host, &ptr_4, &(ptr_4[3]) ) );
+}
+
+static void test_msg_parse_nuh( void )
+{
+	static irc_msg_nuh_t nuh;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "nick";
+
+	static int_t i;
+	static uint8_t buf[32];
+	static int_t const NUM_CASES = 11;
+	static uint8_t nuhs[][32] =
+	{
+		"nick",
+		"9ick",
+		"nick@"
+		"nick@::1",
+		"nick@127.0.0.1",
+		"nick@www.com",
+		"nick!user@::1",
+		"nick!user@127.0.0.1",
+		"nick!user@www.com",
+		"nick!user",
+		"nick!use\n",
+		"nick "
+	};
+	static size_t sizes[] = 
+	{ 
+		5, 
+		5,
+		6,
+		9, 
+		15, 
+		13, 
+		14, 
+		20, 
+		18, 
+		10, 
+		10,
+		6
+	};
+	static size_t expected[] = 
+	{ 
+		TRUE, 
+		FALSE, 
+		FALSE,
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		FALSE, 
+		FALSE,
+		FALSE
+	};
+
+	MEMSET( &nuh, 0, sizeof( irc_msg_h_t ) );
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_nuh( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_nuh( &nuh, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_nuh( &nuh, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_nuh( &nuh, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_nuh( &nuh, &p, &(ptr_1[0]) ) );
+
+	for ( i = 0; i < NUM_CASES; ++i )
+	{
+		MEMSET( &nuh, 0, sizeof( irc_msg_h_t ) );
+		MEMSET( buf, 0, 32 );
+		MEMCPY( buf, nuhs[i], sizes[i] );
+		p = &(buf[0]);
+		if ( expected[i] )
+		{
+			CU_ASSERT_TRUE( parse_nuh( &nuh, &p, &(p[sizes[i] - 1]) ) );
+		}
+		else
+		{
+			CU_ASSERT_FALSE( parse_nuh( &nuh, &p, &(p[sizes[i] - 1]) ) );
+		}
+	}
+
+	/*
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_1, &(ptr_1[4]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, NO_HOST );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_2, &(ptr_2[8]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, V6_HOSTADDR );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_3, &(ptr_3[14]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, V4_HOSTADDR );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_4, &(ptr_4[12]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, HOSTNAME );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_5, &(ptr_5[13]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NOT_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, V6_HOSTADDR );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_6, &(ptr_6[19]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NOT_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, V4_HOSTADDR );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+
+	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_7, &(ptr_7[17]) ) );
+	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
+	CU_ASSERT_PTR_NOT_NULL( nuh.user );
+	CU_ASSERT_EQUAL( nuh.host.kind, HOSTNAME );
+	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
+	*/
 }
 
 
@@ -1304,6 +1701,13 @@ void test_msg_private_functions( void )
 	test_msg_is_chanstring();
 
 	test_msg_parse_shortname();
+	test_msg_parse_hostname();
+	test_msg_parse_servername();
+	test_msg_parse_nickname();
+	test_msg_parse_user();
+	test_msg_parse_hostaddr();
+	test_msg_parse_host();
+	test_msg_parse_nuh();
 }
 
 #endif
