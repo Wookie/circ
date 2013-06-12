@@ -49,6 +49,19 @@ static void test_msg_parse_ping( void )
 	irc_msg_delete( msg );
 }
 
+static void test_msg_parse_prefix( void )
+{
+	static uint8_t const * data = ":qeed!~qeed@adsl-98-85-45-93.mco.bellsouth.net QUIT :Quit: qeed\r\n";
+	irc_msg_t * msg = NULL;
+
+	msg = irc_msg_new_from_data( data, strlen( data ) );
+	CU_ASSERT_PTR_NOT_NULL( msg );
+	CU_ASSERT_EQUAL( msg->cmd, QUIT );
+
+	irc_msg_delete( msg );
+}
+
+
 static int init_msg_suite( void )
 {
 	srand(0xDEADBEEF);
@@ -66,6 +79,7 @@ static CU_pSuite add_msg_tests( CU_pSuite pSuite )
 {
 	ADD_TEST( "new/delete of msg", test_msg_newdel );
 	ADD_TEST( "parse ping", test_msg_parse_ping );
+	ADD_TEST( "parse prefix", test_msg_parse_prefix );
 
 	ADD_TEST( "msg private functions", test_msg_private_functions );
 	

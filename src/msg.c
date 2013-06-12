@@ -57,8 +57,8 @@ static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const
 static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end );
-static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end );
-static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_command( irc_command_t * const cmd, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * const end );
 
 
 /*****************************************************************************/
@@ -131,12 +131,6 @@ void irc_msg_delete(void * m)
 	/* delete the data buffer */
 	FREE( msg->in.data );
 
-	/* clean up the origin */
-	FREE( msg->origin.servername );
-	FREE( msg->origin.nuh.nickname );
-	FREE( msg->origin.nuh.user );
-	FREE( msg->origin.nuh.host.hostname );
-
 	/* free the message memory */
 	FREE(msg);
 }
@@ -199,19 +193,25 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 	end[1] = '\0';
  
 	/***** PREFIX *****/
-	CHECK_RET( parse_prefix( &(msg->origin), &ptr, end ), IRC_ERR );
+	if ( ptr[0] == ':' )
+	{
+		/* skip over the leading ':' */
+		++ptr;
 
-	/* check to see if we ran to the end of the buffer */
-	CHECK_RET( (ptr < end), IRC_BAD_MESSAGE);
+		CHECK_RET( parse_prefix( &(msg->origin), &ptr, end ), IRC_ERR );
+
+		/* check to see if we ran to the end of the buffer */
+		CHECK_RET( (ptr < end), IRC_BAD_MESSAGE);
+	}
    
 	/***** COMMAND *****/
-	CHECK_RET( parse_command( msg, &ptr, end ), IRC_ERR );
+	CHECK_RET( parse_command( &(msg->cmd), &ptr, end ), IRC_ERR );
 
 	/* check to see if we ran to the end of the buffer */
 	CHECK_RET( (ptr < end), IRC_BAD_MESSAGE);
    
 	/**** PARAMS ****/
-	CHECK_RET( parse_params( msg, &ptr, end ), IRC_ERR );
+	CHECK_RET( parse_params( &(msg->params), &ptr, end ), IRC_ERR );
 
 	/* check to see if we consumed the whole message */
 	CHECK_RET( (ptr == end), IRC_ERR );
@@ -651,11 +651,14 @@ static int_t parse_shortname( uint8_t **shortname, uint8_t ** ptr, uint8_t * con
  * RFC 2812, Section 2.3.1 -- Message format in Augmented BNF
  *
  * hostname = shortname *( "." shortname )
+ *
+ * NOTE: CANNOT BE AN IPv4 DOTTED QUAD IP ADDRESS
  */
 static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
 	uint8_t * shortname = NULL;
+	struct in_addr dummy;
 
 	CHECK_PTR_RET( hostname, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
@@ -674,6 +677,9 @@ static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * cons
 
 	/* should have consumed all the way to end pointer */
 	CHECK_RET( (p == end), FALSE );
+
+	/* make sure it isn't an IPv4 dotted quad */
+	CHECK_RET( (inet_pton( AF_INET, *ptr, &dummy ) != TRUE), FALSE );
 
 	/* store hostname pointer */
 	*hostname = *ptr;
@@ -875,6 +881,9 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
 	
 		for ( pend = p; (pend < end) && (*pend != '@'); ++pend ) {}
 
+		/* if we got a user part, there must be a trailing '@' before the host part */
+		CHECK_RET( (*pend == '@'), FALSE );
+
 		/* parse user */
 		CHECK_RET( parse_user( &(nuh->user), &p, pend ), FALSE );
 	}
@@ -888,9 +897,6 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
 		/* parse host */
 		CHECK_RET( parse_host( &(nuh->host), &p, end ), FALSE );
 	}
-
-	/* make sure we consumed to the end */
-	CHECK_RET( (p == end), FALSE );
 
 	/* move ptr up to the next octet after nuh */
 	*ptr = p;
@@ -924,17 +930,17 @@ static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint
 	
 	p = *ptr;
 
-	/* if the first octet isn't ':' return TRUE, there's no prefix */
-	CHECK_RET( (*p) == COLON, TRUE );
-
 	/* find the trailing space, and remember if we see a bang or at sign */
 	for( space = p; (*space != SPACE) && (space < end); ++space )
 	{
-		bang_or_at = ((*space == BANG) || (*space == AT));
+		bang_or_at |= ((*space == BANG) || (*space == AT));
 	}
 
 	/* check to see if we ran to the end of the buffer */
 	CHECK_RET( (space < end), IRC_BAD_MESSAGE );
+
+	/* terminate the prefix */
+	*space = '\0';
 
 	if ( !bang_or_at )
 	{
@@ -953,14 +959,8 @@ static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint
 		origin->kind = NUH_ORIGIN;
 	}
 
-	/* make sure we consumed everything up to the space */
-	CHECK_RET( (p == space), FALSE );
-
-	/* terminate the prefix with null */
-	*p = '\0';
-	p++;
-
 	/* move ptr to the first octet of the command */
+	++p;
 	*ptr = p;
 
 	return TRUE;
@@ -972,12 +972,12 @@ static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint
  *
  * command = 1*letter / 3digit
  */
-static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_command( irc_command_t * const cmd, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
 	int_t space = FALSE;
 
-	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( cmd, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
 	CHECK_PTR_RET( *ptr, FALSE );
 	CHECK_PTR_RET( end, FALSE );
@@ -999,10 +999,10 @@ static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * con
 	}
 
 	/* get the command from the string */
-	msg->cmd = irc_cmd_get_command_from_string( *ptr );
+	(*cmd) = irc_cmd_get_command_from_string( *ptr );
 
 	/* make sure we got a valid command */
-	CHECK_RET( (msg->cmd != NOCMD), FALSE );
+	CHECK_RET( ((*cmd) != NOCMD), FALSE );
 
 	/* reset the string to original state */
 	if ( space )
@@ -1023,14 +1023,14 @@ static int_t parse_command( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * con
  * trailing = *( ":" / " " / nospcrlfcl )
  * nospcrlfcl = 0x01-0x09 / 0x0B-0x0C / 0x0E-0x1F / 0x21-0x39 / 0x3B-0xFF
  */
-static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * const end )
 {
 	uint8_t * p = NULL;
 	uint8_t * pstart = NULL;
 	int nparams = 0;
 	int state = 0;
 
-	CHECK_PTR_RET( msg, FALSE );
+	CHECK_PTR_RET( params, FALSE );
 	CHECK_PTR_RET( ptr, FALSE );
 	CHECK_PTR_RET( *ptr, FALSE );
 	CHECK_PTR_RET( end, FALSE );
@@ -1091,7 +1091,7 @@ static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * cons
 					nparams++;
 
 					/* add pointer to param start to list */
-					CHECK_RET( list_push_tail( &(msg->params), pstart ), FALSE );
+					CHECK_RET( list_push_tail( params, pstart ), FALSE );
 
 					state = 0; /* space between params */
 				}
@@ -1123,7 +1123,7 @@ static int_t parse_params( irc_msg_t * const msg, uint8_t ** ptr, uint8_t * cons
 	}
 
 	/* add the pointer to the start of the last param to the list */
-	CHECK_RET( list_push_tail( &(msg->params), pstart ), FALSE );
+	CHECK_RET( list_push_tail( params, pstart ), FALSE );
 
 	/* move ptr to first octet after params */
 	*ptr = p;
@@ -1327,6 +1327,7 @@ static void test_msg_parse_hostname( void )
 	static uint8_t * ptr_0 = NULL;
 	static uint8_t * ptr_1 = "www";
 	static uint8_t * ptr_2 = "w.w";
+	static uint8_t * ptr_3 = "127.0.0.1";
 
 	CU_ASSERT_FALSE( parse_hostname( NULL, NULL, NULL ) );
 
@@ -1350,6 +1351,9 @@ static void test_msg_parse_hostname( void )
 	CU_ASSERT_TRUE( parse_hostname( &hostname, &ptr_2, &(ptr_2[3]) ) );
 	CU_ASSERT_PTR_NOT_NULL( hostname );
 	hostname = NULL;
+
+	CU_ASSERT_FALSE( parse_hostname( &hostname, &ptr_3, &(ptr_3[9]) ) );
+	CU_ASSERT_PTR_NULL( hostname );
 }
 
 static void test_msg_parse_servername( void )
@@ -1556,6 +1560,7 @@ static void test_msg_parse_host( void )
 	CU_ASSERT_FALSE( parse_host( &host, &ptr_4, &(ptr_4[3]) ) );
 }
 
+#define NUM_MSG_PARSE_NUH_CASES (14)
 static void test_msg_parse_nuh( void )
 {
 	static irc_msg_nuh_t nuh;
@@ -1563,14 +1568,14 @@ static void test_msg_parse_nuh( void )
 	static uint8_t * ptr_0 = NULL;
 	static uint8_t * ptr_1 = "nick";
 
-	static int_t i;
+	static int_t i, j;
 	static uint8_t buf[32];
-	static int_t const NUM_CASES = 11;
-	static uint8_t nuhs[][32] =
+	static uint8_t const * const nuhs[NUM_MSG_PARSE_NUH_CASES] =
 	{
+		"nick!user@host  ",
 		"nick",
 		"9ick",
-		"nick@"
+		"nick@",
 		"nick@::1",
 		"nick@127.0.0.1",
 		"nick@www.com",
@@ -1579,10 +1584,12 @@ static void test_msg_parse_nuh( void )
 		"nick!user@www.com",
 		"nick!user",
 		"nick!use\n",
-		"nick "
+		"nick!use\n@",
+		"nick ",
 	};
-	static size_t sizes[] = 
+	static size_t sizes[NUM_MSG_PARSE_NUH_CASES] = 
 	{ 
+		17,
 		5, 
 		5,
 		6,
@@ -1594,10 +1601,12 @@ static void test_msg_parse_nuh( void )
 		18, 
 		10, 
 		10,
+		11,
 		6
 	};
-	static size_t expected[] = 
+	static int_t expected[NUM_MSG_PARSE_NUH_CASES] = 
 	{ 
+		FALSE,
 		TRUE, 
 		FALSE, 
 		FALSE,
@@ -1608,10 +1617,10 @@ static void test_msg_parse_nuh( void )
 		TRUE, 
 		TRUE, 
 		FALSE, 
+		FALSE,
 		FALSE,
 		FALSE
 	};
-
 
 	MEMSET( &nuh, 0, sizeof( irc_msg_h_t ) );
 
@@ -1627,67 +1636,251 @@ static void test_msg_parse_nuh( void )
 	p = &(ptr_1[1]);
 	CU_ASSERT_FALSE( parse_nuh( &nuh, &p, &(ptr_1[0]) ) );
 
-	for ( i = 0; i < NUM_CASES; ++i )
+	for ( i = 0; i < NUM_MSG_PARSE_NUH_CASES; ++i )
 	{
 		MEMSET( &nuh, 0, sizeof( irc_msg_h_t ) );
 		MEMSET( buf, 0, 32 );
 		MEMCPY( buf, nuhs[i], sizes[i] );
 		p = &(buf[0]);
-		if ( expected[i] )
-		{
-			CU_ASSERT_TRUE( parse_nuh( &nuh, &p, &(p[sizes[i] - 1]) ) );
-		}
-		else
-		{
-			CU_ASSERT_FALSE( parse_nuh( &nuh, &p, &(p[sizes[i] - 1]) ) );
-		}
+		j = parse_nuh( &nuh, &p, &(p[sizes[i] - 1]) );
+		CU_ASSERT_EQUAL( j, expected[i] );
 	}
-
-	/*
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_1, &(ptr_1[4]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, NO_HOST );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_2, &(ptr_2[8]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, V6_HOSTADDR );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_3, &(ptr_3[14]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, V4_HOSTADDR );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_4, &(ptr_4[12]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, HOSTNAME );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_5, &(ptr_5[13]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NOT_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, V6_HOSTADDR );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_6, &(ptr_6[19]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NOT_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, V4_HOSTADDR );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-
-	CU_ASSERT_TRUE( parse_nuh( &nuh, &ptr_7, &(ptr_7[17]) ) );
-	CU_ASSERT_PTR_NOT_NULL( nuh.nickname );
-	CU_ASSERT_PTR_NOT_NULL( nuh.user );
-	CU_ASSERT_EQUAL( nuh.host.kind, HOSTNAME );
-	MEMSET( &nuh, 0, sizeof( irc_msg_nuh_t ) );
-	*/
 }
 
+#define NUM_MSG_PARSE_PREFIX_CASES (19)
+static void test_msg_parse_prefix( void )
+{
+	static irc_msg_origin_t pfx;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "nick";
+
+	static int_t i, j;
+	static uint8_t buf[32];
+	static uint8_t const * const pfxs[NUM_MSG_PARSE_PREFIX_CASES] =
+	{
+		"::1 ",
+		"127.0.0.1 ",
+		"www.com ",
+		"blah ",
+		"blah",
+		"nick!user@host  ", /* extra spaces shouldn't cause prefix parse to fail */
+		"nick ",
+		"9ick ", /* in prefix conext, valid servername */
+		"nick@ ",
+		"nick@::1 ",
+		"nick@127.0.0.1 ",
+		"nick@www.com ",
+		"nick!user@::1 ",
+		"nick!user@127.0.0.1 ",
+		"nick!user@www.com ",
+		"nick!user ",
+		"nick!use\n ",
+		"nick!use\n@ ",
+		"nick ",
+	};
+	static size_t sizes[NUM_MSG_PARSE_PREFIX_CASES] = 
+	{ 
+		5,
+		11,
+		9,
+		6,
+		5,
+		17,
+		6, 
+		6,
+		7,
+		10, 
+		16, 
+		14, 
+		15, 
+		21, 
+		19, 
+		11, 
+		11,
+		12,
+		7
+	};
+	static int_t expected[NUM_MSG_PARSE_PREFIX_CASES] = 
+	{ 
+		FALSE,
+		FALSE,
+		TRUE,
+		TRUE,
+		IRC_BAD_MESSAGE,
+		TRUE,
+		TRUE, 
+		TRUE, 
+		FALSE,
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		TRUE, 
+		FALSE, 
+		FALSE,
+		FALSE,
+		TRUE
+	};
+
+	MEMSET( &pfx, 0, sizeof( irc_msg_origin_t ) );
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_prefix( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_prefix( &pfx, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_prefix( &pfx, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_prefix( &pfx, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_prefix( &pfx, &p, &(ptr_1[0]) ) );
+
+	for ( i = 0; i < NUM_MSG_PARSE_PREFIX_CASES; ++i )
+	{
+		MEMSET( &pfx, 0, sizeof( irc_msg_origin_t ) );
+		MEMSET( buf, 0, 32 );
+		MEMCPY( buf, pfxs[i], sizes[i] );
+		p = &(buf[0]);
+		j = parse_prefix( &pfx, &p, &(p[sizes[i] - 1]) );
+		CU_ASSERT_EQUAL( j, expected[i] );
+	}
+}
+
+#define NUM_MSG_PARSE_CMD_CASES (4)
+static void test_msg_parse_cmd( void )
+{
+	static irc_command_t cmd;;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = "PING ";
+
+	static int_t i, j;
+	static uint8_t buf[32];
+	static uint8_t const * const cmds[NUM_MSG_PARSE_CMD_CASES] =
+	{
+		"PING",
+		"|ING",
+		"200",
+		"FOO"
+	};
+	static size_t sizes[NUM_MSG_PARSE_CMD_CASES] = 
+	{ 
+		5,
+		5,
+		4,
+		4
+	};
+	static int_t expected[NUM_MSG_PARSE_CMD_CASES] = 
+	{ 
+		TRUE,
+		FALSE,
+		TRUE,
+		FALSE
+	};
+
+	cmd = NOCMD;
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_command( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_command( &cmd, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_command( &cmd, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_command( &cmd, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_command( &cmd, &p, &(ptr_1[0]) ) );
+
+	for ( i = 0; i < NUM_MSG_PARSE_CMD_CASES; ++i )
+	{
+		cmd = NOCMD;
+		MEMSET( buf, 0, 32 );
+		MEMCPY( buf, cmds[i], sizes[i] );
+		p = &(buf[0]);
+		j = parse_command( &cmd, &p, &(p[sizes[i] - 1]) );
+		CU_ASSERT_EQUAL( j, expected[i] );
+	}
+}
+
+#define NUM_MSG_PARSE_PARAMS_CASES (10)
+static void test_msg_parse_params( void )
+{
+	static list_t params;
+	static uint8_t * p = NULL;
+	static uint8_t * ptr_0 = NULL;
+	static uint8_t * ptr_1 = " blah";
+
+	static int_t i, j;
+	static uint8_t buf[32];
+	static uint8_t const * const pms[NUM_MSG_PARSE_PARAMS_CASES] =
+	{
+		" hello",
+		" hello world",
+		" :hello world",
+		" 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20",
+		"bad",
+		" b" "\x0a" "d",
+		" \x0a" "ad",
+		" fun:ky",
+		" 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 :0",
+		" 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 " "\x0a" "0"
+	};
+	static size_t sizes[NUM_MSG_PARSE_PARAMS_CASES] = 
+	{ 
+		7,
+		13,
+		14,
+		54,
+		4,
+		5,
+		5,
+		8,
+		54,
+		54
+	};
+	static int_t expected[NUM_MSG_PARSE_PARAMS_CASES] = 
+	{ 
+		TRUE,
+		TRUE,
+		TRUE,
+		TRUE,
+		FALSE,
+		FALSE,
+		FALSE,
+		TRUE,
+		TRUE,
+		FALSE
+	};
+
+	list_initialize( &params, IRC_NUM_PARAMS, NULL );
+
+	/* test the pre-conditions */
+	CU_ASSERT_FALSE( parse_params( NULL, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_params( &params, NULL, NULL ) );
+
+	CU_ASSERT_FALSE( parse_params( &params, &ptr_0, NULL ) );
+
+	CU_ASSERT_FALSE( parse_params( &params, &ptr_1, NULL ) );
+
+	p = &(ptr_1[1]);
+	CU_ASSERT_FALSE( parse_params( &params, &p, &(ptr_1[0]) ) );
+
+	for ( i = 0; i < NUM_MSG_PARSE_PARAMS_CASES; ++i )
+	{
+		list_deinitialize( &params );
+		list_initialize( &params, IRC_NUM_PARAMS, NULL );
+		MEMSET( buf, 0, 32 );
+		MEMCPY( buf, pms[i], sizes[i] );
+		p = &(buf[0]);
+		j = parse_params( &params, &p, &(p[sizes[i] - 1]) );
+		CU_ASSERT_EQUAL( j, expected[i] );
+	}
+}
 
 void test_msg_private_functions( void )
 {
@@ -1709,6 +1902,9 @@ void test_msg_private_functions( void )
 	test_msg_parse_hostaddr();
 	test_msg_parse_host();
 	test_msg_parse_nuh();
+	test_msg_parse_prefix();
+	test_msg_parse_cmd();
+	test_msg_parse_params();
 }
 
 #endif
