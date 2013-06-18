@@ -155,6 +155,11 @@ int fake_socket_lookup_host_ret = FALSE;
 int fake_socket_bind = FALSE;
 int fake_socket_bind_ret = FALSE;
 
+/* irc_msg */
+int fake_irc_msg_parse = FALSE;
+int fake_irc_msg_parse_ret = FALSE;
+int fail_irc_msg_new_data_alloc = FALSE;
+
 void reset_test_flags( void )
 {
 	/* malloc/calloc/realloc fail switch */
@@ -294,5 +299,10 @@ void reset_test_flags( void )
 	fake_socket_lookup_host_ret = FALSE;
 	fake_socket_bind = FALSE;
 	fake_socket_bind_ret = FALSE;
+
+    /* irc_msg */
+    fake_irc_msg_parse = FALSE;
+    fake_irc_msg_parse_ret = FALSE;
+    fail_irc_msg_new_data_alloc = FALSE;
 }
 

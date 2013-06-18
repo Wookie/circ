@@ -31,27 +31,27 @@
             <td class="headerValue">circ test coverage</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntry">14</td>
+            <td class="headerCovTableEntry">20</td>
             <td class="headerCovTableEntry">29</td>
-            <td class="headerCovTableEntryLo">48.3 %</td>
+            <td class="headerCovTableEntryLo">69.0 %</td>
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2013-06-12</td>
+            <td class="headerValue">2013-06-18</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntry">2</td>
             <td class="headerCovTableEntry">3</td>
-            <td class="headerCovTableEntryLo">66.7 %</td>
+            <td class="headerCovTableEntry">3</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
           </tr>
           <tr>
             <td></td>
             <td></td>
             <td></td>
             <td class="headerItem">Branches:</td>
-            <td class="headerCovTableEntry">15</td>
+            <td class="headerCovTableEntry">21</td>
             <td class="headerCovTableEntry">90</td>
-            <td class="headerCovTableEntryLo">16.7 %</td>
+            <td class="headerCovTableEntryLo">23.3 %</td>
           </tr>
           <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
         </table>
@@ -177,16 +177,16 @@
 <span class="lineNum">     106 </span>                :            : int8_t const * const irc_no_cmd = T(&quot;NOCMD&quot;);
 <a name="107"><span class="lineNum">     107 </span>                :            : </a>
 <span class="lineNum">     108 </span>                :            : /* translate a command into a string */
-<span class="lineNum">     109 </span>                :<span class="lineCov">        120 : int8_t const * irc_cmd_get_string(irc_command_t const cmd)</span>
+<span class="lineNum">     109 </span>                :<span class="lineCov">        503 : int8_t const * irc_cmd_get_string(irc_command_t const cmd)</span>
 <span class="lineNum">     110 </span>                :            : {
 <span class="lineNum">     111 </span>                :            :     static int8_t code[4];
-<span class="lineNum">     112 </span>[<span class="branchCov" title="Branch 0 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchCov" title="Branch 2 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 3 was not taken"> - </span>]:<span class="lineCov">        120 :     CHECK_RET(IS_VALID_COMMAND(cmd), NULL);</span>
-<span class="lineNum">         </span>[<span class="branchCov" title="Branch 4 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 5 was not taken"> - </span>][<span class="branchCov" title="Branch 6 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 7 was not taken"> - </span>]
-<span class="lineNum">         </span>[<span class="branchCov" title="Branch 8 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 9 was not taken"> - </span>][<span class="branchNoCov" title="Branch 10 was not taken"> - </span><span class="branchCov" title="Branch 11 was taken 120 times"> + </span>]
+<span class="lineNum">     112 </span>[<span class="branchCov" title="Branch 0 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchCov" title="Branch 2 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 3 was not taken"> - </span>]:<span class="lineCov">        503 :     CHECK_RET(IS_VALID_COMMAND(cmd), NULL);</span>
+<span class="lineNum">         </span>[<span class="branchCov" title="Branch 4 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 5 was not taken"> - </span>][<span class="branchCov" title="Branch 6 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 7 was not taken"> - </span>]
+<span class="lineNum">         </span>[<span class="branchCov" title="Branch 8 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 9 was not taken"> - </span>][<span class="branchNoCov" title="Branch 10 was not taken"> - </span><span class="branchCov" title="Branch 11 was taken 503 times"> + </span>]
 <span class="lineNum">         </span>[<span class="branchNoExec" title="Branch 12 was not executed"> # </span><span class="branchNoExec" title="Branch 13 was not executed"> # </span>][<span class="branchNoExec" title="Branch 14 was not executed"> # </span><span class="branchNoExec" title="Branch 15 was not executed"> # </span>]
-<span class="lineNum">     113 </span>[<span class="branchCov" title="Branch 0 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchCov" title="Branch 2 was taken 120 times"> + </span><span class="branchNoCov" title="Branch 3 was not taken"> - </span>]:<span class="lineCov">        120 :     if(IS_COMMAND(cmd))</span>
+<span class="lineNum">     113 </span>[<span class="branchCov" title="Branch 0 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchCov" title="Branch 2 was taken 503 times"> + </span><span class="branchNoCov" title="Branch 3 was not taken"> - </span>]:<span class="lineCov">        503 :     if(IS_COMMAND(cmd))</span>
 <span class="lineNum">     114 </span>                :            :     {
-<span class="lineNum">     115 </span>                :<span class="lineCov">        120 :         return irc_commands[cmd - CMD_BASE];   </span>
+<span class="lineNum">     115 </span>                :<span class="lineCov">        503 :         return irc_commands[cmd - CMD_BASE];   </span>
 <span class="lineNum">     116 </span>                :            :     }
 <span class="lineNum">     117 </span>                :            : /*
 <span class="lineNum">     118 </span>                :            :     else if (IS_SESSION_EVENT(cmd))
@@ -205,13 +205,13 @@
 <span class="lineNum">     131 </span>                :            :     else
 <span class="lineNum">     132 </span>                :            :     {
 <span class="lineNum">     133 </span>                :<span class="lineNoCov">          0 :         sprintf(C(code), &quot;%03d&quot;, cmd);</span>
-<span class="lineNum">     134 </span>                :<span class="lineCov">        120 :         return code;</span>
+<span class="lineNum">     134 </span>                :<span class="lineCov">        503 :         return code;</span>
 <span class="lineNum">     135 </span>                :            :     }
 <span class="lineNum">     136 </span>                :            :     
 <span class="lineNum">     137 </span>                :            :     return NULL;
 <a name="138"><span class="lineNum">     138 </span>                :            : }</a>
 <span class="lineNum">     139 </span>                :            : 
-<span class="lineNum">     140 </span>                :<span class="lineNoCov">          0 : int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )</span>
+<span class="lineNum">     140 </span>                :<span class="lineCov">         10 : int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )</span>
 <span class="lineNum">     141 </span>                :            : {
 <span class="lineNum">     142 </span>                :            :     static int8_t const * const ERROR = T(&quot;ERROR&quot;);
 <span class="lineNum">     143 </span>                :            :     static int8_t const * const REPLY = T(&quot;REPLY&quot;);
@@ -220,17 +220,17 @@
 <span class="lineNum">     146 </span>                :            :     static int8_t const * const RESERVED = T(&quot;RESERVED&quot;);
 <span class="lineNum">     147 </span>                :            :     static int8_t const * const UNKNOWN = T(&quot;UNKNOWN&quot;);
 <span class="lineNum">     148 </span>                :            : 
-<span class="lineNum">     149 </span>[<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>][<span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( IS_ERROR( cmd ) )</span>
+<span class="lineNum">     149 </span>[<span class="branchCov" title="Branch 0 was taken 10 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchNoCov" title="Branch 2 was not taken"> - </span><span class="branchCov" title="Branch 3 was taken 10 times"> + </span>]:<span class="lineCov">         10 :     if ( IS_ERROR( cmd ) )</span>
 <span class="lineNum">     150 </span>                :            :     {
 <span class="lineNum">     151 </span>                :<span class="lineNoCov">          0 :         return ERROR;</span>
 <span class="lineNum">     152 </span>                :            :     }
-<span class="lineNum">     153 </span>[<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>][<span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :     else if ( IS_REPLY( cmd ) )</span>
+<span class="lineNum">     153 </span>[<span class="branchCov" title="Branch 0 was taken 10 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchNoCov" title="Branch 2 was not taken"> - </span><span class="branchCov" title="Branch 3 was taken 10 times"> + </span>]:<span class="lineCov">         10 :     else if ( IS_REPLY( cmd ) )</span>
 <span class="lineNum">     154 </span>                :            :     {
 <span class="lineNum">     155 </span>                :<span class="lineNoCov">          0 :         return REPLY;</span>
 <span class="lineNum">     156 </span>                :            :     }
-<span class="lineNum">     157 </span>[<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>][<span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :     else if ( IS_COMMAND( cmd ) )</span>
+<span class="lineNum">     157 </span>[<span class="branchCov" title="Branch 0 was taken 10 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>][<span class="branchCov" title="Branch 2 was taken 10 times"> + </span><span class="branchNoCov" title="Branch 3 was not taken"> - </span>]:<span class="lineCov">         10 :     else if ( IS_COMMAND( cmd ) )</span>
 <span class="lineNum">     158 </span>                :            :     {
-<span class="lineNum">     159 </span>                :<span class="lineNoCov">          0 :         return COMMAND;</span>
+<span class="lineNum">     159 </span>                :<span class="lineCov">         10 :         return COMMAND;</span>
 <span class="lineNum">     160 </span>                :            :     }
 <span class="lineNum">     161 </span>                :            : /*
 <span class="lineNum">     162 </span>                :            :     else if ( IS_SESSION_EVENT( cmd ) )
@@ -254,27 +254,27 @@
 <span class="lineNum">     169 </span>                :<span class="lineNoCov">          0 :         return RESERVED;</span>
 <span class="lineNum">     170 </span>                :            :     }
 <span class="lineNum">     171 </span>                :            :     
-<span class="lineNum">     172 </span>                :<span class="lineNoCov">          0 :     return UNKNOWN;</span>
+<span class="lineNum">     172 </span>                :<span class="lineCov">         10 :     return UNKNOWN;</span>
 <span class="lineNum">     173 </span>                :            : }
 <a name="174"><span class="lineNum">     174 </span>                :            : </a>
 <span class="lineNum">     175 </span>                :            : /* get the command in the message */
-<span class="lineNum">     176 </span>                :<span class="lineCov">          5 : irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)</span>
+<span class="lineNum">     176 </span>                :<span class="lineCov">         17 : irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)</span>
 <span class="lineNum">     177 </span>                :            : {
-<span class="lineNum">     178 </span>                :<span class="lineCov">          5 :     irc_command_t cmd = NOCMD;</span>
-<span class="lineNum">     179 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 5 times"> + </span>]:<span class="lineCov">          5 :     CHECK_PTR_RET(str, IRC_BADPARAM);</span>
+<span class="lineNum">     178 </span>                :<span class="lineCov">         17 :     irc_command_t cmd = NOCMD;</span>
+<span class="lineNum">     179 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 17 times"> + </span>]:<span class="lineCov">         17 :     CHECK_PTR_RET(str, IRC_BADPARAM);</span>
 <span class="lineNum">     180 </span>                :            :     
 <span class="lineNum">     181 </span>                :            :     /* check for numeric response code instead of command */
-<span class="lineNum">     182 </span>        [<span class="branchCov" title="Branch 1 was taken 1 time"> + </span><span class="branchCov" title="Branch 2 was taken 4 times"> + </span>]:<span class="lineCov">          5 :     if(isdigit(str[0]))</span>
+<span class="lineNum">     182 </span>        [<span class="branchCov" title="Branch 1 was taken 1 time"> + </span><span class="branchCov" title="Branch 2 was taken 16 times"> + </span>]:<span class="lineCov">         17 :     if(isdigit(str[0]))</span>
 <span class="lineNum">     183 </span>                :            :     {
 <span class="lineNum">     184 </span>                :<span class="lineCov">          1 :         return atoi(C(str));</span>
 <span class="lineNum">     185 </span>                :            :     }
 <span class="lineNum">     186 </span>                :            :     else
 <span class="lineNum">     187 </span>                :            :     {
 <span class="lineNum">     188 </span>                :            :         /* scan through the command strings looking for a match */
-<span class="lineNum">     189 </span>        [<span class="branchCov" title="Branch 0 was taken 120 times"> + </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">        121 :         for(cmd = FIRST_COMMAND; cmd &lt; LAST_COMMAND; cmd++)</span>
+<span class="lineNum">     189 </span>        [<span class="branchCov" title="Branch 0 was taken 493 times"> + </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">        495 :         for(cmd = FIRST_COMMAND; cmd &lt; LAST_COMMAND; cmd++)</span>
 <span class="lineNum">     190 </span>                :            :         {
-<span class="lineNum">     191 </span>        [<span class="branchCov" title="Branch 1 was taken 3 times"> + </span><span class="branchCov" title="Branch 2 was taken 117 times"> + </span>]:<span class="lineCov">        120 :             if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)</span>
-<span class="lineNum">     192 </span>                :<span class="lineCov">          3 :                 return cmd;</span>
+<span class="lineNum">     191 </span>        [<span class="branchCov" title="Branch 1 was taken 14 times"> + </span><span class="branchCov" title="Branch 2 was taken 479 times"> + </span>]:<span class="lineCov">        493 :             if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)</span>
+<span class="lineNum">     192 </span>                :<span class="lineCov">         14 :                 return cmd;</span>
 <span class="lineNum">     193 </span>                :            :         }
 <span class="lineNum">     194 </span>                :            : #if 0   
 <span class="lineNum">     195 </span>                :            :         /* scan through the session event strings looking for a match */
@@ -287,7 +287,7 @@
 <span class="lineNum">     202 </span>                :            :     }
 <span class="lineNum">     203 </span>                :            :         
 <span class="lineNum">     204 </span>                :            :     /* no match so return no command */
-<span class="lineNum">     205 </span>                :<span class="lineCov">          5 :     return NOCMD;</span>
+<span class="lineNum">     205 </span>                :<span class="lineCov">         17 :     return NOCMD;</span>
 <span class="lineNum">     206 </span>                :            : }
 <span class="lineNum">     207 </span>                :            : 
 </pre>

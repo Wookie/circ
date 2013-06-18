@@ -154,6 +154,11 @@ extern int fake_socket_lookup_host_ret;
 extern int fake_socket_bind;
 extern int fake_socket_bind_ret;
 
+/* irc_msg */
+extern int fake_irc_msg_parse;
+extern int fake_irc_msg_parse_ret;
+extern int fail_irc_msg_new_data_alloc;
+
 void reset_test_flags( void );
 
 #endif/*__TEST_FLAGS_H__*/
