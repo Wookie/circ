@@ -19,6 +19,7 @@
 
 #include <netinet/in.h>
 #include <cutil/list.h>
+#include <cutil/socket.h>
 
 #define IRC_MSG_SIZE (512)
 #define IRC_NUM_PARAMS (15)
@@ -70,8 +71,8 @@ typedef struct irc_msg_out_buf_s
 typedef struct irc_msg_h_s			/* host */
 {
 	irc_host_type_t		kind;		/* kind of host field */
-	struct in_addr		v4;			/* IPv4 address */
-	struct in6_addr		v6;			/* IPv6 address */
+	IPv4        		v4;			/* IPv4 address */
+	IPv6        		v6;			/* IPv6 address */
 	uint8_t			  * hostname;	/* DNS hostname */
 
 } irc_msg_h_t;

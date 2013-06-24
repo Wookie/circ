@@ -329,13 +329,6 @@ void irc_msg_log( irc_msg_t const * const msg )
 }
 
 
-#if 0
-irc_ret_t irc_msg_compile(irc_msg_t* const msg)
-{
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    return IRC_OK;
-}
-
 /* initialize the message in one pass */
 irc_ret_t irc_msg_initialize(
     irc_msg_t* const msg,
@@ -393,6 +386,13 @@ irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const para
     /* increment the number of params */
     msg->num_params++;
 
+    return IRC_OK;
+}
+
+#if 0
+irc_ret_t irc_msg_compile(irc_msg_t* const msg)
+{
+    CHECK_PTR_RET(msg, IRC_BADPARAM);
     return IRC_OK;
 }
 
