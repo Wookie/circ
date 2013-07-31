@@ -29,8 +29,8 @@
 1037	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1037"><span class="lineNum">    1037 <\/span>                :            : <\/a>$/;"	a
 1048	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1048"><span class="lineNum">    1048 <\/span>                :            : <\/a>$/;"	a
 1054	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1054"><span class="lineNum">    1054 <\/span>                :            : <\/a>$/;"	a
+106	coverage/circ/src/commands.c.gcov.html	/^<a name="106"><span class="lineNum">     106 <\/span>                :            : <\/a>$/;"	a
 1062	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1062"><span class="lineNum">    1062 <\/span>                :            : <\/a>$/;"	a
-107	coverage/circ/src/commands.c.gcov.html	/^<a name="107"><span class="lineNum">     107 <\/span>                :            : <\/a>$/;"	a
 1073	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1073"><span class="lineNum">    1073 <\/span>                :            : <\/a>$/;"	a
 1079	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1079"><span class="lineNum">    1079 <\/span>                :            : <\/a>$/;"	a
 1088	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="1088"><span class="lineNum">    1088 <\/span>                :            : }<\/a>$/;"	a
@@ -68,8 +68,8 @@
 134	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="134"><span class="lineNum">     134 <\/span>                :            : <\/a>$/;"	a
 1351	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="1351"><span class="lineNum">    1351 <\/span>                :            : }<\/a>$/;"	a
 1368	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="1368"><span class="lineNum">    1368 <\/span>                :            : }<\/a>$/;"	a
+137	coverage/circ/src/commands.c.gcov.html	/^<a name="137"><span class="lineNum">     137 <\/span>                :            : }<\/a>$/;"	a
 1371	coverage/circ/src/msg.c.gcov.html	/^<a name="1371"><span class="lineNum">    1371 <\/span>                :<span class="lineCov">          1 : }<\/span><\/a>$/;"	a
-138	coverage/circ/src/commands.c.gcov.html	/^<a name="138"><span class="lineNum">     138 <\/span>                :            : }<\/a>$/;"	a
 138	coverage/circ/src/msg.c.gcov.html	/^<a name="138"><span class="lineNum">     138 <\/span>                :            : <\/a>$/;"	a
 138	cutil/coverage/cutil/src/sanitize.c.gcov.html	/^<a name="138"><span class="lineNum">     138 <\/span>                :            : };<\/a>$/;"	a
 1381	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="1381"><span class="lineNum">    1381 <\/span>                :            : }<\/a>$/;"	a
@@ -99,8 +99,8 @@
 167	cutil/coverage/cutil/src/list.c.gcov.html	/^<a name="167"><span class="lineNum">     167 <\/span>                :            : }<\/a>$/;"	a
 169	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="169"><span class="lineNum">     169 <\/span>                :            : }<\/a>$/;"	a
 172	cutil/coverage/cutil/src/list.c.gcov.html	/^<a name="172"><span class="lineNum">     172 <\/span>                :            : }<\/a>$/;"	a
+173	coverage/circ/src/commands.c.gcov.html	/^<a name="173"><span class="lineNum">     173 <\/span>                :            : <\/a>$/;"	a
 173	cutil/coverage/cutil/src/hashtable.c.gcov.html	/^<a name="173"><span class="lineNum">     173 <\/span>                :            : }<\/a>$/;"	a
-174	coverage/circ/src/commands.c.gcov.html	/^<a name="174"><span class="lineNum">     174 <\/span>                :            : <\/a>$/;"	a
 1765	coverage/circ/src/msg.c.gcov.html	/^<a name="1765"><span class="lineNum">    1765 <\/span>                :            : <\/a>$/;"	a
 177	cutil/coverage/cutil/src/btree.c.gcov.html	/^<a name="177"><span class="lineNum">     177 <\/span>                :            : \/* NOTE: If NULL is passed in for the bt_key_cmp_fn function, the default<\/a>$/;"	a
 179	cutil/coverage/cutil/src/aiofd.c.gcov.html	/^<a name="179"><span class="lineNum">     179 <\/span>                :            : <\/a>$/;"	a
@@ -322,7 +322,7 @@ CFLAGS	tests/Makefile	/^CFLAGS=-O0 -gstabs+ -I$(CIRC_ROOT)\/include -I$(CUTIL_RO
 CHECK	cutil/src/macros.h	103;"	d
 CHECK_ERR_STR	cutil/src/macros.h	100;"	d
 CHECK_GOTO	cutil/src/macros.h	107;"	d
-CHECK_HANDLER_PRAMS	src/session.c	41;"	d	file:
+CHECK_HANDLER_PRAMS	src/session.c	42;"	d	file:
 CHECK_MSG	cutil/src/macros.h	104;"	d
 CHECK_PTR	cutil/src/macros.h	108;"	d
 CHECK_PTR_GOTO	cutil/src/macros.h	112;"	d
@@ -464,9 +464,9 @@ FIRST_ERR	src/commands.h	/^	FIRST_ERR = ERR_NOSUCHNCK,$/;"	e	enum:irc_command_e
 FIRST_MSG_HOST	src/msg.h	/^	FIRST_MSG_HOST = NO_HOST,$/;"	e	enum:irc_host_type_e
 FIRST_ORIGIN	src/msg.h	/^	FIRST_ORIGIN = CONN_ORIGIN,$/;"	e	enum:irc_origin_type_e
 FIRST_RPL	src/commands.h	/^	FIRST_RPL = RPL_WELCOME,$/;"	e	enum:irc_command_e
+FIRST_SESSION_EVENT	src/commands.h	/^	FIRST_SESSION_EVENT = SESSION_CONNECTED,$/;"	e	enum:irc_command_e
 FNV_PRIME	src/event_cb.c	103;"	d	file:
 FNV_PRIME	src/gen_hashes.c	391;"	d	file:
-FNV_PRIME	src/session.c	511;"	d	file:
 FORK	cutil/src/macros.h	151;"	d
 FORK	cutil/src/macros.h	322;"	d
 FREE	cutil/src/macros.h	124;"	d
@@ -512,10 +512,10 @@ HANDLER_FN	src/channel.c	/^static HANDLER_FN( channel, RPL_ENDOFNAMES )$/;"	f	fi
 HANDLER_FN	src/channel.c	/^static HANDLER_FN( channel, RPL_NAMREPLY )$/;"	f	file:
 HANDLER_FN	src/channel.c	/^static HANDLER_FN( channel, RPL_TOPIC )$/;"	f	file:
 HANDLER_FN	src/event_cb.h	28;"	d
-HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, NICK )$/;"	f	file:
-HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, PING )$/;"	f	file:
-HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, PRIVMSG )$/;"	f	file:
-HANDLER_FN	src/session.c	/^static HANDLER_FN( NULL, RPL_WELCOME )$/;"	f	file:
+HANDLER_FN	src/session.c	/^static HANDLER_FN( session, NICK )$/;"	f	file:
+HANDLER_FN	src/session.c	/^static HANDLER_FN( session, PING )$/;"	f	file:
+HANDLER_FN	src/session.c	/^static HANDLER_FN( session, PRIVMSG )$/;"	f	file:
+HANDLER_FN	src/session.c	/^static HANDLER_FN( session, RPL_WELCOME )$/;"	f	file:
 HANDLER_NAME	src/event_cb.h	32;"	d
 HDR	cutil/src/Makefile	/^HDR=aiofd.h bitset.h btree.h buffer.h child.h daemon.h debug.h events.h hashtable.h list.h log.h macros.h pair.h privileges.h sanitize.h socket.h$/;"	m
 HDR	src/Makefile	/^HDR=commands.h conn.h event_cb.h modes.h msg.h session.h$/;"	m
@@ -660,13 +660,13 @@ IRC_UMODE_z	src/modes.h	/^	IRC_UMODE_z,$/;"	e	enum:irc_umode_e
 IRC_UTIL_H	src/util.h	19;"	d
 ISON	src/commands.h	/^    ISON,$/;"	e	enum:irc_command_e
 IS_CMODE	src/modes.h	161;"	d
-IS_COMMAND	src/commands.h	340;"	d
-IS_ERROR	src/commands.h	338;"	d
-IS_REPLY	src/commands.h	339;"	d
-IS_RESERVED	src/commands.h	342;"	d
+IS_COMMAND	src/commands.h	338;"	d
+IS_ERROR	src/commands.h	336;"	d
+IS_REPLY	src/commands.h	337;"	d
+IS_RESERVED	src/commands.h	340;"	d
 IS_SMODE	src/modes.h	178;"	d
 IS_UMODE	src/modes.h	143;"	d
-IS_VALID_COMMAND	src/commands.h	366;"	d
+IS_VALID_COMMAND	src/commands.h	364;"	d
 IS_VALID_MSG_HOST	src/msg.h	41;"	d
 IS_VALID_ORIGIN	src/msg.h	55;"	d
 ITEM_AT	cutil/src/hashtable.c	34;"	d	file:
@@ -680,13 +680,14 @@ LAST_ERR	src/commands.h	/^	LAST_ERR,$/;"	e	enum:irc_command_e
 LAST_MSG_HOST	src/msg.h	/^	LAST_MSG_HOST,$/;"	e	enum:irc_host_type_e
 LAST_ORIGIN	src/msg.h	/^	LAST_ORIGIN,$/;"	e	enum:irc_origin_type_e
 LAST_RPL	src/commands.h	/^	LAST_RPL,$/;"	e	enum:irc_command_e
+LAST_SESSION_EVENT	src/commands.h	/^	LAST_SESSION_EVENT,$/;"	e	enum:irc_command_e
 LDFLAGS	cutil/tests/Makefile	/^LDFLAGS=-O0 -gstabs+ -L$(CUTIL_ROOT)\/lib -L$(EXTRA_LIBS_ROOT)\/lib$/;"	m
 LDFLAGS	cutil/tests/Makefile	/^coverage: LDFLAGS=-fprofile-arcs -O0 -gstabs+ -L$(CUTIL_ROOT)\/lib -L$(EXTRA_LIBS_ROOT)\/lib$/;"	m
 LDFLAGS	tests/Makefile	/^LDFLAGS=-gstabs+ -L$(CIRC_ROOT)\/lib -L$(CUTIL_ROOT)\/lib$/;"	m
 LDFLAGS	tests/Makefile	/^coverage: LDFLAGS=-fprofile-arcs -O0 -gstabs+ -L$(CIRC_ROOT)\/lib -L$(CUTIL_ROOT)\/lib -L$(EXTRA_LIBS_ROOT)\/lib$/;"	m
 LEAVE_UNCHANGED	cutil/src/privileges.h	25;"	d
 LIBS	cutil/tests/Makefile	/^LIBS=-lcutil -lcunit -lev -lm -lpthread$/;"	m
-LIBS	tests/Makefile	/^LIBS=-lcirc -lcutil -lcunit -lev$/;"	m
+LIBS	tests/Makefile	/^LIBS=-lcirc -lcutil -lcunit -lev -lm$/;"	m
 LINKS	src/commands.h	/^    LINKS,$/;"	e	enum:irc_command_e
 LIST	src/commands.h	/^    LIST,$/;"	e	enum:irc_command_e
 LISTEN	cutil/src/macros.h	195;"	d
@@ -740,6 +741,7 @@ NUM_MSG_PARSE_PREFIX_CASES	src/msg.c	1664;"	d	file:
 NUM_ORIGIN	src/msg.h	/^	NUM_ORIGIN = LAST_ORIGIN - FIRST_ORIGIN$/;"	e	enum:irc_origin_type_e
 NUM_PRIMES	cutil/src/hashtable.c	/^uint_t const NUM_PRIMES = 30;$/;"	v
 NUM_RPLS	src/commands.h	/^	NUM_RPLS = LAST_RPL - FIRST_RPL,$/;"	e	enum:irc_command_e
+NUM_SESSION_EVENTS	src/commands.h	/^	NUM_SESSION_EVENTS = LAST_SESSION_EVENT - FIRST_SESSION_EVENT,$/;"	e	enum:irc_command_e
 OBJ	cutil/src/Makefile	/^OBJ=$(SRC:.c=.o)$/;"	m
 OBJ	cutil/tests/Makefile	/^OBJ=$(SRC:.c=.o)$/;"	m
 OBJ	src/Makefile	/^OBJ=$(SRC:.c=.o)$/;"	m
@@ -931,6 +933,11 @@ SERVER_PORT	src/session.h	/^	SERVER_PORT			= 0xea1146cd,$/;"	e	enum:irc_session_
 SERVICE	src/commands.h	/^    SERVICE,$/;"	e	enum:irc_command_e
 SERVLIST	src/commands.h	/^    SERVLIST,$/;"	e	enum:irc_command_e
 SESSION_BASE	src/commands.h	38;"	d
+SESSION_CONNECTED	src/commands.h	/^	SESSION_CONNECTED = SESSION_BASE,$/;"	e	enum:irc_command_e
+SESSION_DISCONNECTED	src/commands.h	/^	SESSION_DISCONNECTED,$/;"	e	enum:irc_command_e
+SESSION_ON_NICK	src/commands.h	/^	SESSION_ON_NICK,$/;"	e	enum:irc_command_e
+SESSION_ON_PRIVMSG	src/commands.h	/^	SESSION_ON_PRIVMSG,$/;"	e	enum:irc_command_e
+SESSION_ON_PUBMSG	src/commands.h	/^	SESSION_ON_PUBMSG,$/;"	e	enum:irc_command_e
 SETEGID	cutil/src/macros.h	235;"	d
 SETEGID	cutil/src/macros.h	426;"	d
 SETEUID	cutil/src/macros.h	239;"	d
@@ -986,7 +993,7 @@ SQUIT	src/commands.h	/^    SQUIT,$/;"	e	enum:irc_command_e
 SRC	cutil/src/Makefile	/^SRC=aiofd.c bitset.c btree.c buffer.c child.c daemon.c events.c hashtable.c list.c log.c pair.c privileges.c sanitize.c socket.c$/;"	m
 SRC	cutil/tests/Makefile	/^SRC=test_all.c test_aiofd.c test_bitset.c test_btree.c test_buffer.c test_child.c test_events.c test_flags.c test_hashtable.c test_list.c test_pair.c test_privileges.c test_sanitize.c test_socket.c$/;"	m
 SRC	src/Makefile	/^SRC=commands.c conn.c event_cb.c modes.c msg.c session.c$/;"	m
-SRC	tests/Makefile	/^SRC=test_all.c test_flags.c test_msg.c$/;"	m
+SRC	tests/Makefile	/^SRC=test_all.c test_flags.c test_msg.c ..\/cutil\/tests\/test_flags.c$/;"	m
 SRCDIR	Makefile	/^SRCDIR = src$/;"	m
 SRCDIR	cutil/Makefile	/^SRCDIR = src$/;"	m
 STAT	cutil/src/macros.h	263;"	d
@@ -1099,6 +1106,7 @@ add_socket_tests	cutil/tests/test_socket.c	/^static CU_pSuite add_socket_tests( 
 added_tz	cutil/tests/test_sanitize.c	/^static int added_tz = FALSE;$/;"	v	file:
 addr	cutil/src/socket.c	/^    sockaddr_t      addr;           \/* place to stash the sockaddr_storage data *\/$/;"	m	struct:socket_s	file:
 addr	cutil/src/socket.c	/^    sockaddr_t addr;$/;"	m	struct:write_dst_s	file:
+addr	src/msg.h	/^    sockaddr_t          addr;       \/* address *\/$/;"	m	struct:irc_msg_h_s
 addrinfo_t	cutil/src/socket.c	/^typedef struct addrinfo addrinfo_t;$/;"	t	typeref:struct:addrinfo	file:
 addrlen	cutil/src/socket.c	/^    socklen_t       addrlen;        \/* length of addr *\/$/;"	m	struct:socket_s	file:
 addrlen	cutil/src/socket.c	/^    socklen_t addrlen;$/;"	m	struct:write_dst_s	file:
@@ -1324,187 +1332,102 @@ exit_evt_fn	cutil/tests/test_child.c	/^static int_t exit_evt_fn( child_process_t
 exit_pid_evt_fn	cutil/tests/test_child.c	/^static int_t exit_pid_evt_fn( child_process_t * const cp, int rpid, int rstatus, void * user_data )$/;"	f	file:
 exited	cutil/src/child.c	/^    int_t           exited;         \/* have we received the SIGCHLD signal? *\/$/;"	m	struct:child_process_s	file:
 fail_alloc	cutil/tests/test_flags.c	/^int_t fail_alloc = FALSE;$/;"	v
-fail_alloc	tests/test_flags.c	/^int fail_alloc = FALSE;$/;"	v
 fail_alloc_bak	cutil/src/buffer.c	/^int_t fail_alloc_bak = FALSE;$/;"	v
 fail_alloc_bak	src/msg.c	/^static int fail_alloc_bak = FALSE;$/;"	v	file:
 fail_bitset_deinit	cutil/tests/test_flags.c	/^int_t fail_bitset_deinit = FALSE;$/;"	v
-fail_bitset_deinit	tests/test_flags.c	/^int fail_bitset_deinit = FALSE;$/;"	v
 fail_bitset_init	cutil/tests/test_flags.c	/^int_t fail_bitset_init = FALSE;$/;"	v
-fail_bitset_init	tests/test_flags.c	/^int fail_bitset_init = FALSE;$/;"	v
 fail_buffer_deinit	cutil/tests/test_flags.c	/^int_t fail_buffer_deinit = FALSE;$/;"	v
-fail_buffer_deinit	tests/test_flags.c	/^int fail_buffer_deinit = FALSE;$/;"	v
 fail_buffer_init	cutil/tests/test_flags.c	/^int_t fail_buffer_init = FALSE;$/;"	v
-fail_buffer_init	tests/test_flags.c	/^int fail_buffer_init = FALSE;$/;"	v
 fail_buffer_init_alloc	cutil/tests/test_flags.c	/^int_t fail_buffer_init_alloc = FALSE;$/;"	v
-fail_buffer_init_alloc	tests/test_flags.c	/^int fail_buffer_init_alloc = FALSE;$/;"	v
 fail_irc_msg_new_data_alloc	tests/test_flags.c	/^int fail_irc_msg_new_data_alloc = FALSE;$/;"	v
 fail_socket_initialize	cutil/tests/test_flags.c	/^int_t fail_socket_initialize = FALSE;$/;"	v
-fail_socket_initialize	tests/test_flags.c	/^int fail_socket_initialize = FALSE;$/;"	v
 fake_accept	cutil/tests/test_flags.c	/^int_t fake_accept = FALSE;$/;"	v
-fake_accept	tests/test_flags.c	/^int fake_accept = FALSE;$/;"	v
 fake_accept_ret	cutil/tests/test_flags.c	/^int fake_accept_ret = -1;$/;"	v
-fake_accept_ret	tests/test_flags.c	/^int fake_accept_ret = -1;$/;"	v
 fake_aiofd_enable_read_evt	cutil/tests/test_flags.c	/^int_t fake_aiofd_enable_read_evt = FALSE;$/;"	v
-fake_aiofd_enable_read_evt	tests/test_flags.c	/^int fake_aiofd_enable_read_evt = FALSE;$/;"	v
 fake_aiofd_enable_read_evt_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_enable_read_evt_ret = FALSE;$/;"	v
-fake_aiofd_enable_read_evt_ret	tests/test_flags.c	/^int fake_aiofd_enable_read_evt_ret = FALSE;$/;"	v
 fake_aiofd_flush	cutil/tests/test_flags.c	/^int_t fake_aiofd_flush = FALSE;$/;"	v
-fake_aiofd_flush	tests/test_flags.c	/^int fake_aiofd_flush = FALSE;$/;"	v
 fake_aiofd_flush_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_flush_ret = FALSE;$/;"	v
-fake_aiofd_flush_ret	tests/test_flags.c	/^int fake_aiofd_flush_ret = FALSE;$/;"	v
 fake_aiofd_initialize	cutil/tests/test_flags.c	/^int_t fake_aiofd_initialize = FALSE;$/;"	v
-fake_aiofd_initialize	tests/test_flags.c	/^int fake_aiofd_initialize = FALSE;$/;"	v
 fake_aiofd_initialize_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_initialize_ret = FALSE;$/;"	v
-fake_aiofd_initialize_ret	tests/test_flags.c	/^int fake_aiofd_initialize_ret = FALSE;$/;"	v
 fake_aiofd_read	cutil/tests/test_flags.c	/^int_t fake_aiofd_read = FALSE;$/;"	v
-fake_aiofd_read	tests/test_flags.c	/^int fake_aiofd_read = FALSE;$/;"	v
 fake_aiofd_read_ret	cutil/tests/test_flags.c	/^ssize_t fake_aiofd_read_ret = -1;$/;"	v
-fake_aiofd_read_ret	tests/test_flags.c	/^int fake_aiofd_read_ret = 0;$/;"	v
 fake_aiofd_readv	cutil/tests/test_flags.c	/^int_t fake_aiofd_readv = FALSE;$/;"	v
 fake_aiofd_readv_ret	cutil/tests/test_flags.c	/^ssize_t fake_aiofd_readv_ret = -1;$/;"	v
 fake_aiofd_write	cutil/tests/test_flags.c	/^int_t fake_aiofd_write = FALSE;$/;"	v
-fake_aiofd_write	tests/test_flags.c	/^int fake_aiofd_write = FALSE;$/;"	v
 fake_aiofd_write_common	cutil/tests/test_flags.c	/^int_t fake_aiofd_write_common = FALSE;$/;"	v
-fake_aiofd_write_common	tests/test_flags.c	/^int fake_aiofd_write_common = FALSE;$/;"	v
 fake_aiofd_write_common_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_write_common_ret = FALSE;$/;"	v
-fake_aiofd_write_common_ret	tests/test_flags.c	/^int fake_aiofd_write_common_ret = FALSE;$/;"	v
 fake_aiofd_write_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_write_ret = FALSE;$/;"	v
-fake_aiofd_write_ret	tests/test_flags.c	/^int fake_aiofd_write_ret = FALSE;$/;"	v
 fake_aiofd_writev	cutil/tests/test_flags.c	/^int_t fake_aiofd_writev = FALSE;$/;"	v
-fake_aiofd_writev	tests/test_flags.c	/^int fake_aiofd_writev = FALSE;$/;"	v
 fake_aiofd_writev_ret	cutil/tests/test_flags.c	/^int_t fake_aiofd_writev_ret = FALSE;$/;"	v
-fake_aiofd_writev_ret	tests/test_flags.c	/^int fake_aiofd_writev_ret = FALSE;$/;"	v
 fake_bind	cutil/tests/test_flags.c	/^int_t fake_bind = FALSE;$/;"	v
-fake_bind	tests/test_flags.c	/^int fake_bind = FALSE;$/;"	v
 fake_bind_ret	cutil/tests/test_flags.c	/^int fake_bind_ret = -1;$/;"	v
-fake_bind_ret	tests/test_flags.c	/^int fake_bind_ret = -1;$/;"	v
 fake_connect	cutil/tests/test_flags.c	/^int_t fake_connect = FALSE;$/;"	v
-fake_connect	tests/test_flags.c	/^int fake_connect = FALSE;$/;"	v
 fake_connect_ret	cutil/tests/test_flags.c	/^int fake_connect_ret = -1;$/;"	v
-fake_connect_ret	tests/test_flags.c	/^int fake_connect_ret = -1;$/;"	v
 fake_errno	cutil/tests/test_flags.c	/^int_t fake_errno = FALSE;$/;"	v
-fake_errno	tests/test_flags.c	/^int fake_errno = FALSE;$/;"	v
 fake_errno_value	cutil/tests/test_flags.c	/^int fake_errno_value = 0;$/;"	v
-fake_errno_value	tests/test_flags.c	/^int fake_errno_value = 0;$/;"	v
 fake_ev_default_loop	cutil/tests/test_flags.c	/^int_t fake_ev_default_loop = FALSE;$/;"	v
-fake_ev_default_loop	tests/test_flags.c	/^int fake_ev_default_loop = FALSE;$/;"	v
 fake_ev_default_loop_ret	cutil/tests/test_flags.c	/^void* fake_ev_default_loop_ret = NULL;$/;"	v
-fake_ev_default_loop_ret	tests/test_flags.c	/^void* fake_ev_default_loop_ret = NULL;$/;"	v
 fake_event_handler_init	cutil/tests/test_flags.c	/^int_t fake_event_handler_init = FALSE;$/;"	v
-fake_event_handler_init	tests/test_flags.c	/^int fake_event_handler_init = FALSE;$/;"	v
 fake_event_handler_init_count	cutil/tests/test_flags.c	/^int fake_event_handler_init_count = 0;$/;"	v
-fake_event_handler_init_count	tests/test_flags.c	/^int fake_event_handler_init_count = 0;$/;"	v
 fake_event_handler_init_ret	cutil/tests/test_flags.c	/^int_t fake_event_handler_init_ret = FALSE;$/;"	v
-fake_event_handler_init_ret	tests/test_flags.c	/^int fake_event_handler_init_ret = FALSE;$/;"	v
 fake_event_start_handler	cutil/tests/test_flags.c	/^int_t fake_event_start_handler = FALSE;$/;"	v
-fake_event_start_handler	tests/test_flags.c	/^int fake_event_start_handler = FALSE;$/;"	v
 fake_event_start_handler_ret	cutil/tests/test_flags.c	/^int_t fake_event_start_handler_ret = FALSE;$/;"	v
-fake_event_start_handler_ret	tests/test_flags.c	/^int fake_event_start_handler_ret = FALSE;$/;"	v
 fake_event_stop_handler	cutil/tests/test_flags.c	/^int_t fake_event_stop_handler = FALSE;$/;"	v
-fake_event_stop_handler	tests/test_flags.c	/^int fake_event_stop_handler = FALSE;$/;"	v
 fake_event_stop_handler_ret	cutil/tests/test_flags.c	/^int_t fake_event_stop_handler_ret = FALSE;$/;"	v
-fake_event_stop_handler_ret	tests/test_flags.c	/^int fake_event_stop_handler_ret = FALSE;$/;"	v
 fake_fcntl	cutil/tests/test_flags.c	/^int_t fake_fcntl = FALSE;$/;"	v
-fake_fcntl	tests/test_flags.c	/^int fake_fcntl = FALSE;$/;"	v
 fake_fcntl_ret	cutil/tests/test_flags.c	/^int fake_fcntl_ret = -1;$/;"	v
-fake_fcntl_ret	tests/test_flags.c	/^int fake_fcntl_ret = -1;$/;"	v
 fake_fork	cutil/tests/test_flags.c	/^int_t fake_fork = FALSE;$/;"	v
-fake_fork	tests/test_flags.c	/^int fake_fork = FALSE;$/;"	v
 fake_fork_ret	cutil/tests/test_flags.c	/^int fake_fork_ret = -1;$/;"	v
-fake_fork_ret	tests/test_flags.c	/^int fake_fork_ret = -1;$/;"	v
 fake_fstat	cutil/tests/test_flags.c	/^int_t fake_fstat = FALSE;$/;"	v
-fake_fstat	tests/test_flags.c	/^int fake_fstat = FALSE;$/;"	v
 fake_fstat_ret	cutil/tests/test_flags.c	/^int fake_fstat_ret = -1;$/;"	v
-fake_fstat_ret	tests/test_flags.c	/^int fake_fstat_ret = -1;$/;"	v
 fake_fsync	cutil/tests/test_flags.c	/^int_t fake_fsync = FALSE;$/;"	v
 fake_fsync_ret	cutil/tests/test_flags.c	/^int fake_fsync_ret = -1;$/;"	v
 fake_getaddrinfo	cutil/tests/test_flags.c	/^int_t fake_getaddrinfo = FALSE;$/;"	v
 fake_getaddrinfo_ret	cutil/tests/test_flags.c	/^int fake_getaddrinfo_ret = -1;$/;"	v
 fake_getdtablesize	cutil/tests/test_flags.c	/^int_t fake_getdtablesize = FALSE;$/;"	v
-fake_getdtablesize	tests/test_flags.c	/^int fake_getdtablesize = FALSE;$/;"	v
 fake_getdtablesize_ret	cutil/tests/test_flags.c	/^int fake_getdtablesize_ret = -1;$/;"	v
-fake_getdtablesize_ret	tests/test_flags.c	/^int fake_getdtablesize_ret = -1;$/;"	v
 fake_getegid	cutil/tests/test_flags.c	/^int_t fake_getegid = FALSE;$/;"	v
-fake_getegid	tests/test_flags.c	/^int fake_getegid = FALSE;$/;"	v
 fake_getegid_ret	cutil/tests/test_flags.c	/^int fake_getegid_ret = -1;$/;"	v
-fake_getegid_ret	tests/test_flags.c	/^int fake_getegid_ret = -1;$/;"	v
 fake_geteuid	cutil/tests/test_flags.c	/^int_t fake_geteuid = FALSE;$/;"	v
-fake_geteuid	tests/test_flags.c	/^int fake_geteuid = FALSE;$/;"	v
 fake_geteuid_ret	cutil/tests/test_flags.c	/^int fake_geteuid_ret = -1;$/;"	v
-fake_geteuid_ret	tests/test_flags.c	/^int fake_geteuid_ret = -1;$/;"	v
 fake_getgid	cutil/tests/test_flags.c	/^int_t fake_getgid = FALSE;$/;"	v
-fake_getgid	tests/test_flags.c	/^int fake_getgid = FALSE;$/;"	v
 fake_getgid_ret	cutil/tests/test_flags.c	/^int fake_getgid_ret = -1;$/;"	v
-fake_getgid_ret	tests/test_flags.c	/^int fake_getgid_ret = -1;$/;"	v
 fake_getgroups	cutil/tests/test_flags.c	/^int_t fake_getgroups = FALSE;$/;"	v
-fake_getgroups	tests/test_flags.c	/^int fake_getgroups = FALSE;$/;"	v
 fake_getgroups_ret	cutil/tests/test_flags.c	/^int fake_getgroups_ret = -1;$/;"	v
-fake_getgroups_ret	tests/test_flags.c	/^int fake_getgroups_ret = -1;$/;"	v
 fake_getuid	cutil/tests/test_flags.c	/^int_t fake_getuid = FALSE;$/;"	v
-fake_getuid	tests/test_flags.c	/^int fake_getuid = FALSE;$/;"	v
 fake_getuid_ret	cutil/tests/test_flags.c	/^int fake_getuid_ret = -1;$/;"	v
-fake_getuid_ret	tests/test_flags.c	/^int fake_getuid_ret = -1;$/;"	v
 fake_ht_deinit	cutil/tests/test_flags.c	/^int_t fake_ht_deinit = FALSE;$/;"	v
-fake_ht_deinit	tests/test_flags.c	/^int fake_ht_deinit = FALSE;$/;"	v
 fake_ht_deinit_ret	cutil/tests/test_flags.c	/^int_t fake_ht_deinit_ret = FALSE;$/;"	v
-fake_ht_deinit_ret	tests/test_flags.c	/^int fake_ht_deinit_ret = FALSE;$/;"	v
 fake_ht_find	cutil/tests/test_flags.c	/^int_t fake_ht_find = FALSE;$/;"	v
-fake_ht_find	tests/test_flags.c	/^int fake_ht_find = FALSE;$/;"	v
 fake_ht_find_ret	cutil/tests/test_hashtable.c	/^ht_itr_t fake_ht_find_ret;$/;"	v
 fake_ht_grow	cutil/tests/test_flags.c	/^int_t fake_ht_grow = FALSE;$/;"	v
-fake_ht_grow	tests/test_flags.c	/^int fake_ht_grow = FALSE;$/;"	v
 fake_ht_grow_ret	cutil/tests/test_flags.c	/^int_t fake_ht_grow_ret = FALSE;$/;"	v
-fake_ht_grow_ret	tests/test_flags.c	/^int fake_ht_grow_ret = FALSE;$/;"	v
 fake_ht_init	cutil/tests/test_flags.c	/^int_t fake_ht_init = FALSE;$/;"	v
-fake_ht_init	tests/test_flags.c	/^int fake_ht_init = FALSE;$/;"	v
 fake_ht_init_ret	cutil/tests/test_flags.c	/^int_t fake_ht_init_ret = FALSE;$/;"	v
-fake_ht_init_ret	tests/test_flags.c	/^int fake_ht_init_ret = FALSE;$/;"	v
 fake_ioctl	cutil/tests/test_flags.c	/^int_t fake_ioctl = FALSE;$/;"	v
-fake_ioctl	tests/test_flags.c	/^int fake_ioctl = FALSE;$/;"	v
 fake_ioctl_ret	cutil/tests/test_flags.c	/^int fake_ioctl_ret = -1;$/;"	v
-fake_ioctl_ret	tests/test_flags.c	/^int fake_ioctl_ret = -1;$/;"	v
 fake_irc_msg_parse	tests/test_flags.c	/^int fake_irc_msg_parse = FALSE;$/;"	v
 fake_irc_msg_parse_ret	tests/test_flags.c	/^int fake_irc_msg_parse_ret = FALSE;$/;"	v
 fake_list_count	cutil/tests/test_flags.c	/^int_t fake_list_count = FALSE;$/;"	v
-fake_list_count	tests/test_flags.c	/^int fake_list_count = FALSE;$/;"	v
 fake_list_count_ret	cutil/tests/test_flags.c	/^int fake_list_count_ret = 0;$/;"	v
-fake_list_count_ret	tests/test_flags.c	/^int fake_list_count_ret = 0;$/;"	v
 fake_list_deinit	cutil/tests/test_flags.c	/^int_t fake_list_deinit = FALSE;$/;"	v
-fake_list_deinit	tests/test_flags.c	/^int fake_list_deinit = FALSE;$/;"	v
 fake_list_deinit_ret	cutil/tests/test_flags.c	/^int_t fake_list_deinit_ret = FALSE;$/;"	v
-fake_list_deinit_ret	tests/test_flags.c	/^int fake_list_deinit_ret = FALSE;$/;"	v
 fake_list_get	cutil/tests/test_flags.c	/^int_t fake_list_get = FALSE;$/;"	v
-fake_list_get	tests/test_flags.c	/^int fake_list_get = FALSE;$/;"	v
 fake_list_get_ret	cutil/tests/test_flags.c	/^void* fake_list_get_ret = NULL;$/;"	v
-fake_list_get_ret	tests/test_flags.c	/^void* fake_list_get_ret = NULL;$/;"	v
 fake_list_grow	cutil/tests/test_flags.c	/^int_t fake_list_grow = FALSE;$/;"	v
-fake_list_grow	tests/test_flags.c	/^int fake_list_grow = FALSE;$/;"	v
 fake_list_grow_ret	cutil/tests/test_flags.c	/^int_t fake_list_grow_ret = FALSE;$/;"	v
-fake_list_grow_ret	tests/test_flags.c	/^int fake_list_grow_ret = FALSE;$/;"	v
 fake_list_init	cutil/tests/test_flags.c	/^int_t fake_list_init = FALSE;$/;"	v
-fake_list_init	tests/test_flags.c	/^int fake_list_init = FALSE;$/;"	v
 fake_list_init_ret	cutil/tests/test_flags.c	/^int_t fake_list_init_ret = FALSE;$/;"	v
-fake_list_init_ret	tests/test_flags.c	/^int fake_list_init_ret = FALSE;$/;"	v
 fake_list_push	cutil/tests/test_flags.c	/^int_t fake_list_push = FALSE;$/;"	v
-fake_list_push	tests/test_flags.c	/^int fake_list_push = FALSE;$/;"	v
 fake_list_push_ret	cutil/tests/test_flags.c	/^int_t fake_list_push_ret = FALSE;$/;"	v
-fake_list_push_ret	tests/test_flags.c	/^int fake_list_push_ret = FALSE;$/;"	v
 fake_listen	cutil/tests/test_flags.c	/^int_t fake_listen = FALSE;$/;"	v
-fake_listen	tests/test_flags.c	/^int fake_listen = FALSE;$/;"	v
 fake_listen_ret	cutil/tests/test_flags.c	/^int fake_listen_ret = -1;$/;"	v
-fake_listen_ret	tests/test_flags.c	/^int fake_listen_ret = -1;$/;"	v
 fake_open_devnull	cutil/tests/test_flags.c	/^int_t fake_open_devnull = FALSE;$/;"	v
-fake_open_devnull	tests/test_flags.c	/^int fake_open_devnull = FALSE;$/;"	v
 fake_open_devnull_ret	cutil/tests/test_flags.c	/^int_t fake_open_devnull_ret = FALSE;$/;"	v
-fake_open_devnull_ret	tests/test_flags.c	/^int fake_open_devnull_ret = FALSE;$/;"	v
 fake_pipe	cutil/tests/test_flags.c	/^int_t fake_pipe = FALSE;$/;"	v
-fake_pipe	tests/test_flags.c	/^int fake_pipe = FALSE;$/;"	v
 fake_pipe_ret	cutil/tests/test_flags.c	/^int fake_pipe_ret = -1;$/;"	v
-fake_pipe_ret	tests/test_flags.c	/^int fake_pipe_ret = -1;$/;"	v
 fake_read	cutil/tests/test_flags.c	/^int_t fake_read = FALSE;$/;"	v
-fake_read	tests/test_flags.c	/^int fake_read = FALSE;$/;"	v
 fake_read_ret	cutil/tests/test_flags.c	/^ssize_t fake_read_ret = -1;$/;"	v
-fake_read_ret	tests/test_flags.c	/^int fake_read_ret = -1;$/;"	v
 fake_readv	cutil/tests/test_flags.c	/^int_t fake_readv = FALSE;$/;"	v
 fake_readv_ret	cutil/tests/test_flags.c	/^ssize_t fake_readv_ret = -1;$/;"	v
 fake_recv	cutil/tests/test_flags.c	/^int_t fake_recv = FALSE;$/;"	v
@@ -1520,47 +1443,26 @@ fake_sendmsg_ret	cutil/tests/test_flags.c	/^ssize_t fake_sendmsg_ret = -1;$/;"	v
 fake_sendto	cutil/tests/test_flags.c	/^int_t fake_sendto = FALSE;$/;"	v
 fake_sendto_ret	cutil/tests/test_flags.c	/^ssize_t fake_sendto_ret = -1;$/;"	v
 fake_setegid	cutil/tests/test_flags.c	/^int_t fake_setegid = FALSE;$/;"	v
-fake_setegid	tests/test_flags.c	/^int fake_setegid = FALSE;$/;"	v
 fake_setegid_ret	cutil/tests/test_flags.c	/^int fake_setegid_ret = -1;$/;"	v
-fake_setegid_ret	tests/test_flags.c	/^int fake_setegid_ret = -1;$/;"	v
 fake_seteuid	cutil/tests/test_flags.c	/^int_t fake_seteuid = FALSE;$/;"	v
-fake_seteuid	tests/test_flags.c	/^int fake_seteuid = FALSE;$/;"	v
 fake_seteuid_ret	cutil/tests/test_flags.c	/^int fake_seteuid_ret = -1;$/;"	v
-fake_seteuid_ret	tests/test_flags.c	/^int fake_seteuid_ret = -1;$/;"	v
 fake_setgroups	cutil/tests/test_flags.c	/^int_t fake_setgroups = FALSE;$/;"	v
-fake_setgroups	tests/test_flags.c	/^int fake_setgroups = FALSE;$/;"	v
 fake_setgroups_ret	cutil/tests/test_flags.c	/^int fake_setgroups_ret = -1;$/;"	v
-fake_setgroups_ret	tests/test_flags.c	/^int fake_setgroups_ret = -1;$/;"	v
 fake_setregid	cutil/tests/test_flags.c	/^int_t fake_setregid = FALSE;$/;"	v
-fake_setregid	tests/test_flags.c	/^int fake_setregid = FALSE;$/;"	v
 fake_setregid_ret	cutil/tests/test_flags.c	/^int fake_setregid_ret = -1;$/;"	v
-fake_setregid_ret	tests/test_flags.c	/^int fake_setregid_ret = -1;$/;"	v
 fake_setreuid	cutil/tests/test_flags.c	/^int_t fake_setreuid = FALSE;$/;"	v
-fake_setreuid	tests/test_flags.c	/^int fake_setreuid = FALSE;$/;"	v
 fake_setreuid_ret	cutil/tests/test_flags.c	/^int fake_setreuid_ret = -1;$/;"	v
-fake_setreuid_ret	tests/test_flags.c	/^int fake_setreuid_ret = -1;$/;"	v
 fake_setsockopt	cutil/tests/test_flags.c	/^int_t fake_setsockopt = FALSE;$/;"	v
-fake_setsockopt	tests/test_flags.c	/^int fake_setsockopt = FALSE;$/;"	v
 fake_setsockopt_ret	cutil/tests/test_flags.c	/^int fake_setsockopt_ret = -1;$/;"	v
-fake_setsockopt_ret	tests/test_flags.c	/^int fake_setsockopt_ret = -1;$/;"	v
 fake_socket	cutil/tests/test_flags.c	/^int_t fake_socket = FALSE;$/;"	v
-fake_socket	tests/test_flags.c	/^int fake_socket = FALSE;$/;"	v
 fake_socket_bind	cutil/tests/test_flags.c	/^int_t fake_socket_bind = FALSE;$/;"	v
-fake_socket_bind	tests/test_flags.c	/^int fake_socket_bind = FALSE;$/;"	v
 fake_socket_bind_ret	cutil/tests/test_flags.c	/^int_t fake_socket_bind_ret = FALSE;$/;"	v
-fake_socket_bind_ret	tests/test_flags.c	/^int fake_socket_bind_ret = FALSE;$/;"	v
 fake_socket_bound	cutil/tests/test_flags.c	/^int_t fake_socket_bound = FALSE;$/;"	v
-fake_socket_bound	tests/test_flags.c	/^int fake_socket_bound = FALSE;$/;"	v
 fake_socket_bound_ret	cutil/tests/test_flags.c	/^int_t fake_socket_bound_ret = FALSE;$/;"	v
-fake_socket_bound_ret	tests/test_flags.c	/^int fake_socket_bound_ret = FALSE;$/;"	v
 fake_socket_connect	cutil/tests/test_flags.c	/^int_t fake_socket_connect = FALSE;$/;"	v
-fake_socket_connect	tests/test_flags.c	/^int fake_socket_connect = FALSE;$/;"	v
 fake_socket_connect_ret	cutil/tests/test_flags.c	/^int_t fake_socket_connect_ret = FALSE;$/;"	v
-fake_socket_connect_ret	tests/test_flags.c	/^int fake_socket_connect_ret = FALSE;$/;"	v
 fake_socket_connected	cutil/tests/test_flags.c	/^int_t fake_socket_connected = FALSE;$/;"	v
-fake_socket_connected	tests/test_flags.c	/^int fake_socket_connected = FALSE;$/;"	v
 fake_socket_connected_ret	cutil/tests/test_flags.c	/^int_t fake_socket_connected_ret = FALSE;$/;"	v
-fake_socket_connected_ret	tests/test_flags.c	/^int fake_socket_connected_ret = FALSE;$/;"	v
 fake_socket_create_tcp_socket	cutil/tests/test_flags.c	/^int_t fake_socket_create_tcp_socket = FALSE;$/;"	v
 fake_socket_create_tcp_socket_ret	cutil/tests/test_flags.c	/^int_t fake_socket_create_tcp_socket_ret = FALSE;$/;"	v
 fake_socket_create_udp_socket	cutil/tests/test_flags.c	/^int_t fake_socket_create_udp_socket = FALSE;$/;"	v
@@ -1568,17 +1470,11 @@ fake_socket_create_udp_socket_ret	cutil/tests/test_flags.c	/^int_t fake_socket_c
 fake_socket_create_unix_socket	cutil/tests/test_flags.c	/^int_t fake_socket_create_unix_socket = FALSE;$/;"	v
 fake_socket_create_unix_socket_ret	cutil/tests/test_flags.c	/^int_t fake_socket_create_unix_socket_ret = FALSE;$/;"	v
 fake_socket_errval	cutil/tests/test_flags.c	/^int fake_socket_errval = 0;$/;"	v
-fake_socket_errval	tests/test_flags.c	/^int fake_socket_errval = 0;$/;"	v
 fake_socket_get_error_ret	cutil/tests/test_flags.c	/^int_t fake_socket_get_error_ret = FALSE;$/;"	v
-fake_socket_get_error_ret	tests/test_flags.c	/^int fake_socket_get_error_ret = FALSE;$/;"	v
 fake_socket_getsockopt	cutil/tests/test_flags.c	/^int_t fake_socket_getsockopt = FALSE;$/;"	v
-fake_socket_getsockopt	tests/test_flags.c	/^int fake_socket_getsockopt = FALSE;$/;"	v
 fake_socket_lookup_host	cutil/tests/test_flags.c	/^int_t fake_socket_lookup_host = FALSE;$/;"	v
-fake_socket_lookup_host	tests/test_flags.c	/^int fake_socket_lookup_host = FALSE;$/;"	v
 fake_socket_lookup_host_ret	cutil/tests/test_flags.c	/^int_t fake_socket_lookup_host_ret = FALSE;$/;"	v
-fake_socket_lookup_host_ret	tests/test_flags.c	/^int fake_socket_lookup_host_ret = FALSE;$/;"	v
 fake_socket_ret	cutil/tests/test_flags.c	/^int fake_socket_ret = -1;$/;"	v
-fake_socket_ret	tests/test_flags.c	/^int fake_socket_ret = -1;$/;"	v
 fake_stat	cutil/tests/test_flags.c	/^int_t fake_stat = FALSE;$/;"	v
 fake_stat_ret	cutil/tests/test_flags.c	/^int fake_stat_ret = -1;$/;"	v
 fake_strcmp	cutil/tests/test_flags.c	/^int_t fake_strcmp = FALSE;$/;"	v
@@ -1590,13 +1486,9 @@ fake_strtol_ret	cutil/tests/test_flags.c	/^uint_t fake_strtol_ret = LONG_MIN;$/;
 fake_unlink	cutil/tests/test_flags.c	/^int_t fake_unlink = FALSE;$/;"	v
 fake_unlink_ret	cutil/tests/test_flags.c	/^int fake_unlink_ret = -1;$/;"	v
 fake_write	cutil/tests/test_flags.c	/^int_t fake_write = FALSE;$/;"	v
-fake_write	tests/test_flags.c	/^int fake_write = FALSE;$/;"	v
 fake_write_ret	cutil/tests/test_flags.c	/^ssize_t fake_write_ret = -1;$/;"	v
-fake_write_ret	tests/test_flags.c	/^int fake_write_ret = -1;$/;"	v
 fake_writev	cutil/tests/test_flags.c	/^int_t fake_writev = FALSE;$/;"	v
-fake_writev	tests/test_flags.c	/^int fake_writev = FALSE;$/;"	v
 fake_writev_ret	cutil/tests/test_flags.c	/^ssize_t fake_writev_ret = -1;$/;"	v
-fake_writev_ret	tests/test_flags.c	/^int fake_writev_ret = -1;$/;"	v
 fd	cutil/src/events.h	/^        int fd;$/;"	m	struct:evt_params_u::__anon3
 filelog_fns	cutil/src/log.c	/^static cookie_io_functions_t filelog_fns =$/;"	v	file:
 filelog_writer	cutil/src/log.c	/^static ssize_t filelog_writer( void * cookie, char const * data, size_t leng )$/;"	f	file:
@@ -1604,7 +1496,6 @@ first	cutil/src/pair.c	/^    void * first;$/;"	m	struct:pair_s	file:
 first	cutil/tests/test_pair.c	/^int8_t const * const first = "first";$/;"	v
 fn	src/event_cb.c	/^	event_cb_fn			fn;$/;"	m	struct:irc_event_cb_s	file:
 fnv_key_hash	src/gen_hashes.c	/^static uint32_t fnv_key_hash(void const * const key)$/;"	f	file:
-fnv_key_hash	src/session.c	/^static uint32_t fnv_key_hash(void const * const key)$/;"	f	file:
 fnv_string_hash	src/event_cb.c	/^static uint32_t fnv_string_hash(void const * const key)$/;"	f	file:
 free_head	cutil/src/list.h	/^    list_itr_t      free_head;              \/* head node of the free circular list *\/$/;"	m	struct:list_s
 free_list	cutil/src/btree.c	/^    node_t*             free_list;  \/* list of free nodes *\/$/;"	m	struct:bt_s	file:
@@ -1669,7 +1560,7 @@ initial	cutil/src/hashtable.h	/^    uint_t              initial;            \/* 
 inp	src/conn.c	/^	uint8_t*		inp;			\/* pointer to where incoming data gets written *\/$/;"	m	struct:irc_conn_s	file:
 insert_item	cutil/src/list.c	/^static list_itr_t insert_item( list_item_t * const items, $/;"	f	file:
 int_less	cutil/tests/test_btree.c	/^static int int_less( void * l, void * r )$/;"	f	file:
-int_less	src/session.c	/^static int int_less( void * l, void * r )$/;"	f	file:
+int_less	src/session.c	/^static int_t int_less( void * l, void * r )$/;"	f	file:
 int_t	cutil/src/macros.h	/^typedef int32_t int_t;$/;"	t
 int_t	cutil/src/macros.h	/^typedef int64_t int_t;$/;"	t
 io	cutil/src/events.h	/^    struct ev_io        io;$/;"	m	union:ev_data_u	typeref:struct:ev_data_u::ev_io
@@ -1694,16 +1585,16 @@ irc_command_e	src/commands.h	/^typedef enum irc_command_e$/;"	g
 irc_command_events	src/gen_hashes.c	/^int8_t const * const irc_command_events[] =$/;"	v
 irc_command_t	src/commands.h	/^} irc_command_t;$/;"	t	typeref:enum:irc_command_e
 irc_commands	src/commands.c	/^int8_t const * const irc_commands[NUM_COMMANDS] =$/;"	v
-irc_conn_connect	src/conn.c	/^irc_ret_t irc_conn_connect( irc_conn_t* const conn,				\/* irc context *\/$/;"	f
+irc_conn_connect	src/conn.c	/^irc_ret_t irc_conn_connect( irc_conn_t * const conn )$/;"	f
 irc_conn_connected	src/session.c	/^static irc_ret_t irc_conn_connected( irc_conn_t * const conn, $/;"	f	file:
 irc_conn_deinitialize	src/conn.c	/^static void irc_conn_deinitialize( irc_conn_t * const conn )$/;"	f	file:
 irc_conn_delete	src/conn.c	/^void irc_conn_delete(void * c)$/;"	f
 irc_conn_disconnect	src/conn.c	/^irc_ret_t irc_conn_disconnect( irc_conn_t* const conn, int do_wait )$/;"	f
 irc_conn_disconnected	src/session.c	/^static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn, $/;"	f	file:
-irc_conn_initialize	src/conn.c	/^static void irc_conn_initialize( irc_conn_t * const conn,$/;"	f	file:
+irc_conn_initialize	src/conn.c	/^static int_t irc_conn_initialize( irc_conn_t * const conn,$/;"	f	file:
 irc_conn_message_in	src/session.c	/^static irc_ret_t irc_conn_message_in( irc_conn_t * const conn, $/;"	f	file:
 irc_conn_message_out	src/session.c	/^static irc_ret_t irc_conn_message_out( irc_conn_t * const conn,$/;"	f	file:
-irc_conn_new	src/conn.c	/^irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	\/* callbacks for irc messages *\/$/;"	f
+irc_conn_new	src/conn.c	/^irc_conn_t* irc_conn_new( uint8_t const * const server_host,$/;"	f
 irc_conn_ops_s	src/conn.h	/^typedef struct irc_conn_ops_s$/;"	s
 irc_conn_ops_t	src/conn.h	/^} irc_conn_ops_t;$/;"	t	typeref:struct:irc_conn_ops_s
 irc_conn_s	src/conn.c	/^struct irc_conn_s$/;"	s	file:
@@ -1714,7 +1605,7 @@ irc_event_cb_delete	src/event_cb.c	/^void irc_event_cb_delete( void * c )$/;"	f
 irc_event_cb_get_cmd	src/event_cb.c	/^irc_command_t irc_event_cb_get_cmd( irc_event_cb_t * const cb )$/;"	f
 irc_event_cb_hash	src/event_cb.c	/^uint_t irc_event_cb_hash( void const * const key )$/;"	f
 irc_event_cb_ht_find	src/event_cb.c	/^ht_itr_t irc_event_cb_ht_find( ht_t * const ht, uint8_t const * const name )$/;"	f
-irc_event_cb_match	src/event_cb.c	/^int irc_event_cb_match( void const * const l, void const * const r )$/;"	f
+irc_event_cb_match	src/event_cb.c	/^int_t irc_event_cb_match( void const * const l, void const * const r )$/;"	f
 irc_event_cb_new	src/event_cb.c	/^irc_event_cb_t* irc_event_cb_new( uint8_t const * const name,$/;"	f
 irc_event_cb_s	src/event_cb.c	/^struct irc_event_cb_s$/;"	s	file:
 irc_event_cb_t	src/event_cb.h	/^typedef struct irc_event_cb_s irc_event_cb_t;$/;"	t	typeref:struct:irc_event_cb_s
@@ -1726,13 +1617,11 @@ irc_events_400	src/gen_hashes.c	/^int8_t const * const irc_events_400[] =$/;"	v
 irc_events_500	src/gen_hashes.c	/^int8_t const * const irc_events_500[] =$/;"	v
 irc_host_type_e	src/msg.h	/^typedef enum irc_host_type_e$/;"	g
 irc_host_type_t	src/msg.h	/^} irc_host_type_t;$/;"	t	typeref:enum:irc_host_type_e
-irc_msg_add_parameter	src/msg.c	/^irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)$/;"	f
 irc_msg_delete	src/msg.c	/^void irc_msg_delete(void * m)$/;"	f
 irc_msg_h_s	src/msg.h	/^typedef struct irc_msg_h_s			\/* host *\/$/;"	s
 irc_msg_h_t	src/msg.h	/^} irc_msg_h_t;$/;"	t	typeref:struct:irc_msg_h_s
 irc_msg_in_buf_s	src/msg.h	/^typedef struct irc_msg_in_buf_s$/;"	s
 irc_msg_in_buf_t	src/msg.h	/^} irc_msg_in_buf_t;$/;"	t	typeref:struct:irc_msg_in_buf_s
-irc_msg_initialize	src/msg.c	/^irc_ret_t irc_msg_initialize($/;"	f
 irc_msg_log	src/msg.c	/^void irc_msg_log( irc_msg_t const * const msg )$/;"	f
 irc_msg_log_prefix	src/msg.c	/^static void irc_msg_log_prefix( irc_msg_origin_t const * const origin )$/;"	f	file:
 irc_msg_new	src/msg.c	/^irc_msg_t* irc_msg_new()$/;"	f
@@ -1760,10 +1649,11 @@ irc_session_connect	src/session.c	/^irc_ret_t irc_session_connect( irc_session_t
 irc_session_deinitialize	src/session.c	/^static void irc_session_deinitialize( irc_session_t * const session )$/;"	f	file:
 irc_session_delete	src/session.c	/^void irc_session_delete( void * s )$/;"	f
 irc_session_disconnect	src/session.c	/^irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )$/;"	f
+irc_session_events	src/commands.c	/^int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =$/;"	v
 irc_session_events	src/gen_hashes.c	/^int8_t const * const irc_session_events[] =$/;"	v
 irc_session_get	src/session.c	/^void * irc_session_get( irc_session_t * const session,$/;"	f
 irc_session_initialize	src/session.c	/^static int irc_session_initialize( irc_session_t * const session,$/;"	f	file:
-irc_session_new	src/session.c	/^irc_session_t * irc_session_new( evt_loop_t * const el,$/;"	f
+irc_session_new	src/session.c	/^irc_session_t * irc_session_new( uint8_t const * const host,$/;"	f
 irc_session_s	src/session.c	/^struct irc_session_s$/;"	s	file:
 irc_session_send_msg	src/session.c	/^irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg )$/;"	f
 irc_session_set	src/session.c	/^irc_ret_t irc_session_set( irc_session_t * const session,$/;"	f
@@ -1951,9 +1841,9 @@ readaddrlen	cutil/src/socket.c	/^    socklen_t *     readaddrlen;    \/* place t
 readv_fn	cutil/src/aiofd.h	/^        ssize_t (*readv_fn)(int fd, struct iovec * const iov, size_t const iovcnt, void * user_data);$/;"	m	struct:aiofd_s::aiofd_ops_s
 readv_fn	cutil/tests/test_aiofd.c	/^static ssize_t readv_fn(int fd, struct iovec *iov, int iovcnt, void * user_data)$/;"	f	file:
 remove_item	cutil/src/list.c	/^static list_itr_t remove_item( list_item_t * const items, list_itr_t const itr )$/;"	f	file:
+reset_circ_test_flags	tests/test_flags.c	/^void reset_circ_test_flags( void )$/;"	f
 reset_signals_to_default	cutil/src/sanitize.c	/^int_t reset_signals_to_default( sigset_t const * const sigs )$/;"	f
 reset_test_flags	cutil/tests/test_flags.c	/^void reset_test_flags( void )$/;"	f
-reset_test_flags	tests/test_flags.c	/^void reset_test_flags( void )$/;"	f
 restore_privileges	cutil/src/privileges.c	/^int_t restore_privileges( priv_state_t const * const orig )$/;"	f
 revt	cutil/src/aiofd.h	/^    evt_t       revt;           \/* read event *\/$/;"	m	struct:aiofd_s
 rfd	cutil/src/aiofd.h	/^    int         rfd;            \/* read fd if two are given *\/$/;"	m	struct:aiofd_s
@@ -1976,7 +1866,7 @@ servers	src/session.c	/^	ht_t*				servers;				\/* hashtable of servers in the ne
 session	src/event_cb.c	/^	irc_session_t *		session;$/;"	m	struct:irc_event_cb_s	file:
 setting_delete_fn	src/session.c	/^static void setting_delete_fn( void * p )$/;"	f	file:
 setting_hash_fn	src/session.c	/^static uint_t setting_hash_fn( void const * const key )$/;"	f	file:
-setting_match_fn	src/session.c	/^static int setting_match_fn( void const * const l, void const * const r )$/;"	f	file:
+setting_match_fn	src/session.c	/^static int_t setting_match_fn( void const * const l, void const * const r )$/;"	f	file:
 settings	src/session.c	/^	ht_t*				settings;				\/* hashtable of settings *\/$/;"	m	struct:irc_session_s	file:
 sid	cutil/src/daemon.c	/^pid_t pid, sid;$/;"	v
 sig	cutil/src/events.h	/^    struct ev_signal    sig;$/;"	m	union:ev_data_u	typeref:struct:ev_data_u::ev_signal
@@ -2015,7 +1905,7 @@ socket_get_addr_string	cutil/src/socket.c	/^int_t socket_get_addr_string( sockad
 socket_get_addrinfo_string	cutil/src/socket.c	/^static uint8_t * socket_get_addrinfo_string( addrinfo_t const * const info )$/;"	f	file:
 socket_get_error	cutil/src/socket.c	/^static int_t socket_get_error( socket_t * const s, int * errval )$/;"	f	file:
 socket_get_type	cutil/src/socket.c	/^socket_type_t socket_get_type( socket_t * const s )$/;"	f
-socket_in_addr	cutil/src/socket.c	/^static inline void * socket_in_addr( sockaddr_t * const addr )$/;"	f	file:
+socket_in_addr	cutil/src/socket.c	/^void * socket_in_addr( sockaddr_t * const addr )$/;"	f
 socket_in_port	cutil/src/socket.c	/^static inline in_port_t socket_in_port( sockaddr_t * const addr )$/;"	f	file:
 socket_initialize	cutil/src/socket.c	/^static int socket_initialize( socket_t * const s,$/;"	f	file:
 socket_is_bound	cutil/src/socket.c	/^int_t socket_is_bound( socket_t const * const s )$/;"	f
@@ -2030,7 +1920,7 @@ socket_open_unix_socket	cutil/src/socket.c	/^static int_t socket_open_unix_socke
 socket_ops_s	cutil/src/socket.h	/^typedef struct socket_ops_s $/;"	s
 socket_ops_t	cutil/src/socket.h	/^} socket_ops_t;$/;"	t	typeref:struct:socket_ops_s
 socket_read	cutil/src/socket.c	/^ssize_t socket_read( socket_t* const s, $/;"	f
-socket_read_fn	src/conn.c	/^static int32_t socket_read_fn( socket_t * const s,$/;"	f	file:
+socket_read_fn	src/conn.c	/^static ssize_t socket_read_fn( socket_t * const s,$/;"	f	file:
 socket_read_from	cutil/src/socket.c	/^ssize_t socket_read_from( socket_t* const s, $/;"	f
 socket_readv	cutil/src/socket.c	/^ssize_t socket_readv( socket_t * const s,$/;"	f
 socket_readv_from	cutil/src/socket.c	/^ssize_t socket_readv_from( socket_t * const s,$/;"	f
@@ -2046,7 +1936,7 @@ socket_udp_write_fn	cutil/src/socket.c	/^static ssize_t socket_udp_write_fn( int
 socket_udp_writev_fn	cutil/src/socket.c	/^static ssize_t socket_udp_writev_fn( int fd, struct iovec const * const iov, size_t const iovcnt, void * user_data, void * per_write_data )$/;"	f	file:
 socket_validate_port	cutil/src/socket.c	/^static inline int_t socket_validate_port( uint8_t const * const port )$/;"	f	file:
 socket_write	cutil/src/socket.c	/^socket_ret_t socket_write( socket_t * const s,$/;"	f
-socket_write_fn	src/conn.c	/^static int32_t socket_write_fn( socket_t * const s,$/;"	f	file:
+socket_write_fn	src/conn.c	/^static ssize_t socket_write_fn( socket_t * const s,$/;"	f	file:
 socket_write_to	cutil/src/socket.c	/^socket_ret_t socket_write_to( socket_t * const s,$/;"	f
 socket_writev	cutil/src/socket.c	/^socket_ret_t socket_writev( socket_t * const s,$/;"	f
 socket_writev_to	cutil/src/socket.c	/^socket_ret_t socket_writev_to( socket_t * const s,$/;"	f
@@ -2055,7 +1945,7 @@ startp	src/conn.c	/^	uint8_t*		startp;			\/* start of the pending message *\/$/;
 state	src/session.c	/^	irc_session_state_t state;					\/* session state *\/$/;"	m	struct:irc_session_s	file:
 stop_logging	cutil/src/log.c	/^void stop_logging( log_t * log )$/;"	f
 string_eq	src/event_cb.c	/^static int string_eq( void const * const l, void const * const r )$/;"	f	file:
-string_eq	src/session.c	/^static int string_eq( void const * const l, void const * const r )$/;"	f	file:
+string_eq	src/session.c	/^static int_t string_eq( void const * const l, void const * const r )$/;"	f	file:
 syslog_fns	cutil/src/log.c	/^static cookie_io_functions_t syslog_fns =$/;"	v	file:
 syslog_writer	cutil/src/log.c	/^static ssize_t syslog_writer( void * cookie, char const * data, size_t leng )$/;"	f	file:
 t_cdone	cutil/tests/test_socket.c	/^static int t_cdone = FALSE;$/;"	v	file:
@@ -2329,8 +2219,6 @@ user_data	cutil/src/socket.c	/^    void *          user_data;      \/* passed to
 user_data	src/conn.c	/^	void*			user_data;		\/* user data *\/$/;"	m	struct:irc_conn_s	file:
 user_data	src/event_cb.c	/^	void *				user_data;$/;"	m	struct:irc_event_cb_s	file:
 user_data	src/session.c	/^	void *				user_data;				\/* handler context *\/$/;"	m	struct:irc_session_s	file:
-v4	src/msg.h	/^	IPv4        		v4;			\/* IPv4 address *\/$/;"	m	struct:irc_msg_h_s
-v6	src/msg.h	/^	IPv6        		v6;			\/* IPv6 address *\/$/;"	m	struct:irc_msg_h_s
 val	cutil/src/btree.c	/^    void * val;                 \/* value *\/$/;"	m	struct:node_s	file:
 vdfn	cutil/src/btree.c	/^    bt_delete_fn        vdfn;       \/* value delete function *\/$/;"	m	struct:bt_s	file:
 w	cutil/src/aiofd.c	/^    int r, w, e;$/;"	m	struct:cb_count_s	file:

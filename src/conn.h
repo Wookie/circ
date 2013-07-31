@@ -41,17 +41,19 @@ typedef struct irc_conn_ops_s
 
 
 /* these function allocate/deallocate the opaque handle */
-irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	/* callbacks for irc messages */
+irc_conn_t* irc_conn_new( uint8_t const * const server_host,
+                          uint8_t const * const server_port,
+                          irc_conn_ops_t * const ops,	/* callbacks for irc messages */
 						  evt_loop_t * const el,	/* event loop to use */
 						  void * user_data);		/* user data passed back to callbacks */
 
 /* delete an irc cx */
 void irc_conn_delete( void * c );
 
-/* these functions handle connecting/disconnecting to/from servers */
-irc_ret_t irc_conn_connect( irc_conn_t* const irc,
-							int8_t const * const server_host,
-							uint16_t const server_port );
+/* connect to the server */
+irc_ret_t irc_conn_connect( irc_conn_t * const irc );
+
+/* disconnect from the servers */
 irc_ret_t irc_conn_disconnect( irc_conn_t* const irc, int do_wait );
 
 /* send the specified IRC command to the server */

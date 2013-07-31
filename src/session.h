@@ -55,14 +55,16 @@ typedef struct irc_session_s irc_session_t;
 typedef struct irc_event_cb_s irc_event_cb_t;
 
 /* create/destroy session */
-irc_session_t * irc_session_new( evt_loop_t * const evt,
+irc_session_t * irc_session_new( uint8_t const * const host,
+                                 uint8_t const * const port,
+                                 evt_loop_t * const evt,
 								 void * user_data );
 void irc_session_delete( void * s );
 
 /* get/set functions for session settings */
 irc_ret_t irc_session_set( irc_session_t * const session,
 						   irc_session_setting_t const setting,
-						   void * const value );
+						   void const * const value );
 void * irc_session_get( irc_session_t * const session,
 					    irc_session_setting_t const setting );
 

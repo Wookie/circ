@@ -79,6 +79,8 @@ clean:
 	rm -rf *.info
 	rm -rf ev.h.gcov
 	rm -rf gen_hashes.gcov
+	rm -rf gen_hashes.gcda
+	rm -rf gen_hashes.gcno
 	rm -rf gen_hashes.o
 	rm -rf gen_hashes
 

@@ -124,7 +124,7 @@ static int string_eq( void const * const l, void const * const r )
 	return ( 0 == strcmp(C(l), C(r)) );
 }
 
-int irc_event_cb_match( void const * const l, void const * const r )
+int_t irc_event_cb_match( void const * const l, void const * const r )
 {
 	irc_event_cb_t * lcb = (irc_event_cb_t*)l;
 	irc_event_cb_t * rcb = (irc_event_cb_t*)r;

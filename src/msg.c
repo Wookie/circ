@@ -254,7 +254,7 @@ static void irc_msg_log_prefix( irc_msg_origin_t const * const origin )
                 case V4_HOSTADDR:
                     /* convert IPv4 address to dotted quad string */
                     MEMSET( buf, 0, IP_LOG_BUF_SIZE );
-                    inet_ntop( AF_INET, &(origin->nuh.host.v4), buf, IP_LOG_BUF_SIZE );
+                    inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&(origin->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
 
                     if ( origin->nuh.user != NULL )
                     {
@@ -270,7 +270,7 @@ static void irc_msg_log_prefix( irc_msg_origin_t const * const origin )
                 case V6_HOSTADDR:
                     /* convert IPv6 address to dotted quad string */
                     MEMSET( buf, 0, IP_LOG_BUF_SIZE );
-                    inet_ntop( AF_INET6, &(origin->nuh.host.v6), buf, IP_LOG_BUF_SIZE );
+                    inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&(origin->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
 
                     if ( origin->nuh.user != NULL )
                     {
@@ -328,7 +328,7 @@ void irc_msg_log( irc_msg_t const * const msg )
     LOG(")\n");
 }
 
-
+#if 0
 /* initialize the message in one pass */
 irc_ret_t irc_msg_initialize(
     irc_msg_t* const msg,
@@ -388,7 +388,7 @@ irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const para
 
     return IRC_OK;
 }
-
+#endif
 #if 0
 irc_ret_t irc_msg_compile(irc_msg_t* const msg)
 {
@@ -818,7 +818,7 @@ static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const
     CHECK_RET( *ptr < end, FALSE );
 
     /* first try to parse an IPv6 address */
-    if ( inet_pton( AF_INET6, *ptr, &(host->v6) ) )
+    if ( inet_pton( AF_INET6, *ptr, socket_in_addr(&(host->addr)) ) )
     {
         /* remember that it is an IPv6 address */
         host->kind = V6_HOSTADDR;
@@ -826,7 +826,7 @@ static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const
     }
 
     /* if that didn't work, try to parse an IPv4 address */
-    if ( inet_pton( AF_INET, *ptr, &(host->v4) ) )
+    if ( inet_pton( AF_INET, *ptr, socket_in_addr(&(host->addr)) ) )
     {
         /* remember that it is a IPv4 address */
         host->kind = V4_HOSTADDR;

@@ -37,6 +37,7 @@
 #include "msg.h"
 #include "conn.h"
 #include "session.h"
+#include "event_cb.h"
 
 #define CHECK_HANDLER_PRAMS CHECK_PTR_RET( session, IRC_BADPARAM ); \
 							CHECK_PTR_RET( msg, IRC_BADPARAM );
@@ -53,17 +54,16 @@ struct irc_session_s
 };
 
 /* forward declare the PING handler */
-/*static HANDLER_FN( NULL, PING );*/
-static irc_ret_t fn_NULL_PING_fn( irc_session_t * const session,
-								  irc_msg_t * const msg,
-								  void * user_data );
+static HANDLER_FN( session, PING );
+static HANDLER_FN( session, RPL_WELCOME );
+static HANDLER_FN( session, NICK );
+static HANDLER_FN( session, PRIVMSG );
 
 /* forward declare the helper functions */
-static uint32_t fnv_key_hash(void const * const key);
-static int string_eq( void const * const l, void const * const r );
-static int int_less( void * l, void * r );
+static int_t string_eq( void const * const l, void const * const r );
+static int_t int_less( void * l, void * r );
 static uint_t setting_hash_fn( void const * const key );
-static int setting_match_fn( void const * const l, void const * const r );
+static int_t setting_match_fn( void const * const l, void const * const r );
 static void setting_delete_fn( void * p );
 
 /* handles calling the handlers associated with the cmd */
@@ -261,6 +261,8 @@ irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const
 }
 
 static int irc_session_initialize( irc_session_t * const session,
+                                   uint8_t const * const host,
+                                   uint8_t const * const port,
 								   evt_loop_t * const el,
 								   void * user_data )
 {
@@ -290,7 +292,7 @@ static int irc_session_initialize( irc_session_t * const session,
 	session->el = el;
 
 	/* create the irc connection */
-	session->conn = irc_conn_new( &conn_ops, el, (void*)session );
+	session->conn = irc_conn_new( host, port, &conn_ops, el, (void*)session );
 	CHECK_PTR_RET( session->conn, FALSE );
 
 	/* create the settings hashtable */
@@ -305,26 +307,32 @@ static int irc_session_initialize( irc_session_t * const session,
 	session->user_data = user_data;
 
 	/* register PING handler */
-	ping_cb = NEW_HANDLER( PING, session, NULL );
+	ping_cb = NEW_HANDLER( PING, session, session );
 	CHECK_RET( (IRC_OK == irc_session_set_handler( session, ping_cb )), FALSE );
 
 	/* register RPL_WELCOME handler */
-	rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, NULL );
+	rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, session );
 	CHECK_RET( (IRC_OK == irc_session_set_handler( session, rpl_welcome_cb )), FALSE );
 
 	/* register NICK handler */
-	nick_cb = NEW_HANDLER( NICK, session, NULL );
+	nick_cb = NEW_HANDLER( NICK, session, session );
 	CHECK_RET( (IRC_OK == irc_session_set_handler( session, nick_cb)), FALSE );
 
 	/* register PRIVMSG handler */
-	privmsg_cb = NEW_HANDLER( PRIVMSG, session, NULL );
+	privmsg_cb = NEW_HANDLER( PRIVMSG, session, session );
 	CHECK_RET( (IRC_OK == irc_session_set_handler( session, privmsg_cb)), FALSE );
+
+    /* store the host/port */
+    CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_HOST, host )), FALSE );
+    CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_PORT, port )), FALSE );
 
 	return TRUE;
 }
 
 
-irc_session_t * irc_session_new( evt_loop_t * const el,
+irc_session_t * irc_session_new( uint8_t const * const host,
+                                 uint8_t const * const port,
+                                 evt_loop_t * const el,
 								 void * user_data )
 {
 	irc_session_t * session = NULL;
@@ -335,7 +343,7 @@ irc_session_t * irc_session_new( evt_loop_t * const el,
 	session = CALLOC( 1, sizeof(irc_session_t) );
 	CHECK_PTR_RET_MSG( session, NULL, "failed to allocate session struct\n" );
 
-	if ( !irc_session_initialize( session, el, user_data ) )
+	if ( !irc_session_initialize( session, host, port, el, user_data ) )
 	{
 		FREE( session );
 		return NULL;
@@ -378,7 +386,7 @@ void irc_session_delete( void * s )
 
 irc_ret_t irc_session_set( irc_session_t * const session,
 						   irc_session_setting_t const setting,
-						   void * const value )
+						   void const * const value )
 {
 	pair_t * p, * r = NULL;
 	ht_itr_t itr;
@@ -437,16 +445,15 @@ irc_ret_t irc_session_clear_handler( irc_session_t * const session,
 
 irc_ret_t irc_session_connect( irc_session_t * const session )
 {
-	int8_t * host;
-	uint16_t port;
+	int8_t * host, * port;
 	CHECK_PTR_RET( session, IRC_BADPARAM );
 
-	host = (int8_t*)irc_session_get( session, SERVER_HOST );
-	port = *((uint16_t*)irc_session_get( session, SERVER_PORT ));
+	host = UT(irc_session_get( session, SERVER_HOST ));
+	port = UT(irc_session_get( session, SERVER_PORT ));
 
 	/* try to initiate an irc connection */
-	DEBUG( "attempting connection to: %s:%d\n", host, port );
-	if ( irc_conn_connect( session->conn, host, port ) != IRC_OK )
+	DEBUG( "attempting connection to: %s:%s\n", host, port );
+	if ( irc_conn_connect( session->conn ) != IRC_OK )
 	{
 		WARN(" failed to create session connection\n" );
 		return IRC_ERR;
@@ -508,28 +515,15 @@ irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
 /********************** static helper functions **/
 /*************************************************/
 
-#define FNV_PRIME (0x01000193)
-static uint32_t fnv_key_hash(void const * const key)
-{
-    uint32_t hash = 0x811c9dc5;
-	uint8_t const * p = (uint8_t const *)key;
-	while ( (*p) != '\0' )
-	{
-		hash *= FNV_PRIME;
-		hash ^= *p++;
-	}
-	return hash;
-}
-
-static int string_eq( void const * const l, void const * const r )
+static int_t string_eq( void const * const l, void const * const r )
 {
 	return ( 0 == strcmp(C(l), C(r)) );
 }
 
-static int int_less( void * l, void * r )
+static int_t int_less( void * l, void * r )
 {
-	int li = (int)l;
-	int ri = (int)r;
+	int_t li = (int_t)l;
+	int_t ri = (int_t)r;
 
 	if ( li < ri )
 		return -1;
@@ -544,7 +538,7 @@ static uint_t setting_hash_fn( void const * const key )
 	return (uint_t)pair_first((pair_t*)key);
 }
 
-static int setting_match_fn( void const * const l, void const * const r )
+static int_t setting_match_fn( void const * const l, void const * const r )
 {
 	CHECK_PTR_RET( l, FALSE );
 	CHECK_PTR_RET( r, FALSE );
@@ -561,13 +555,14 @@ static void setting_delete_fn( void * p )
 }
 
 /* this gets called when we receive a PING message from the server */
-static HANDLER_FN( NULL, PING )
+static HANDLER_FN( session, PING )
 {
 	int8_t const * dest;
 	irc_msg_t * pong = NULL;
 
 	CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
 
+#if 0
 	/* get a pointer to the last part of the PING message */
 	dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
 	DEBUG("received PING from %s\n", dest);
@@ -578,12 +573,13 @@ static HANDLER_FN( NULL, PING )
 
 	/* send the PONG command */
 	irc_conn_send_msg( session->conn, pong );
+#endif
 
 	return IRC_OK;
 }
 
 /* this gets called when the connection is fully registered */
-static HANDLER_FN( NULL, RPL_WELCOME )
+static HANDLER_FN( session, RPL_WELCOME )
 {
 	CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
 
@@ -594,7 +590,7 @@ static HANDLER_FN( NULL, RPL_WELCOME )
 }
 
 /* this gets called when a user changes their nick */
-static HANDLER_FN( NULL, NICK )
+static HANDLER_FN( session, NICK )
 {
 	CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
 
@@ -605,7 +601,7 @@ static HANDLER_FN( NULL, NICK )
 }
 
 /* this gets called whenever a PRIVMSG comes to us */
-static HANDLER_FN( NULL, PRIVMSG )
+static HANDLER_FN( session, PRIVMSG )
 {
 	uint8_t * p = NULL;
 	CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
@@ -613,10 +609,7 @@ static HANDLER_FN( NULL, PRIVMSG )
 	/* we need to figure out if this is a private or public message.  if first
 	 * parameter is equal to our current nick, then it is a private message to
 	 * us, otherwise it is public. */
-	CHECK_RET( (msg->num_params > 0), IRC_BADPARAM );
-
-	p = msg->parameter[0];
-	while( *p && ((
+	CHECK_RET( (list_size( msg->params ) > 0), IRC_BADPARAM );
 
 	return IRC_OK;
 }

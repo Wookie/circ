@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Date:</td>
-            <td class="headerValue">2013-06-18</td>
+            <td class="headerValue">2013-07-31</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntry">47</td>
@@ -326,7 +326,7 @@
 <span class="lineNum">     254 </span>                :            :                 case V4_HOSTADDR:
 <span class="lineNum">     255 </span>                :            :                     /* convert IPv4 address to dotted quad string */
 <span class="lineNum">     256 </span>                :<span class="lineCov">          2 :                     MEMSET( buf, 0, IP_LOG_BUF_SIZE );</span>
-<span class="lineNum">     257 </span>                :<span class="lineCov">          2 :                     inet_ntop( AF_INET, &amp;(origin-&gt;nuh.host.v4), buf, IP_LOG_BUF_SIZE );</span>
+<span class="lineNum">     257 </span>                :<span class="lineCov">          2 :                     inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&amp;(origin-&gt;nuh.host.addr)), buf, IP_LOG_BUF_SIZE );</span>
 <span class="lineNum">     258 </span>                :            : 
 <span class="lineNum">     259 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          2 :                     if ( origin-&gt;nuh.user != NULL )</span>
 <span class="lineNum">     260 </span>                :            :                     {
@@ -342,7 +342,7 @@
 <span class="lineNum">     270 </span>                :            :                 case V6_HOSTADDR:
 <span class="lineNum">     271 </span>                :            :                     /* convert IPv6 address to dotted quad string */
 <span class="lineNum">     272 </span>                :<span class="lineCov">          2 :                     MEMSET( buf, 0, IP_LOG_BUF_SIZE );</span>
-<span class="lineNum">     273 </span>                :<span class="lineCov">          2 :                     inet_ntop( AF_INET6, &amp;(origin-&gt;nuh.host.v6), buf, IP_LOG_BUF_SIZE );</span>
+<span class="lineNum">     273 </span>                :<span class="lineCov">          2 :                     inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&amp;(origin-&gt;nuh.host.addr)), buf, IP_LOG_BUF_SIZE );</span>
 <span class="lineNum">     274 </span>                :            : 
 <span class="lineNum">     275 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          2 :                     if ( origin-&gt;nuh.user != NULL )</span>
 <span class="lineNum">     276 </span>                :            :                     {
@@ -400,71 +400,71 @@
 <span class="lineNum">     328 </span>                :<span class="lineCov">         10 :     LOG(&quot;)\n&quot;);</span>
 <span class="lineNum">     329 </span>                :<span class="lineCov">         10 : }</span>
 <span class="lineNum">     330 </span>                :            : 
-<span class="lineNum">     331 </span>                :            : 
-<span class="lineNum">     332 </span>                :            : #if 0
-<span class="lineNum">     333 </span>                :            : irc_ret_t irc_msg_compile(irc_msg_t* const msg)
-<span class="lineNum">     334 </span>                :            : {
-<span class="lineNum">     335 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
-<span class="lineNum">     336 </span>                :            :     return IRC_OK;
-<span class="lineNum">     337 </span>                :            : }
-<span class="lineNum">     338 </span>                :            : 
-<span class="lineNum">     339 </span>                :            : /* initialize the message in one pass */
-<span class="lineNum">     340 </span>                :            : irc_ret_t irc_msg_initialize(
-<span class="lineNum">     341 </span>                :            :     irc_msg_t* const msg,
-<span class="lineNum">     342 </span>                :            :     irc_command_t const cmd,
-<span class="lineNum">     343 </span>                :            :     uint8_t* const prefix,
-<span class="lineNum">     344 </span>                :            :     int32_t const num_params,
-<span class="lineNum">     345 </span>                :            :     ...
-<span class="lineNum">     346 </span>                :            : )
-<span class="lineNum">     347 </span>                :            : {
-<span class="lineNum">     348 </span>                :            :     va_list va;
-<span class="lineNum">     349 </span>                :            :     int32_t i;
-<span class="lineNum">     350 </span>                :            :     
-<span class="lineNum">     351 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
-<span class="lineNum">     352 </span>                :            :     CHECK_RET(IS_VALID_COMMAND(cmd), IRC_BADPARAM);
-<span class="lineNum">     353 </span>                :            :     
-<span class="lineNum">     354 </span>                :            :     /* store the prefix if there is one */
-<span class="lineNum">     355 </span>                :            :     if(prefix != NULL)
+<span class="lineNum">     331 </span>                :            : #if 0
+<span class="lineNum">     332 </span>                :            : /* initialize the message in one pass */
+<span class="lineNum">     333 </span>                :            : irc_ret_t irc_msg_initialize(
+<span class="lineNum">     334 </span>                :            :     irc_msg_t* const msg,
+<span class="lineNum">     335 </span>                :            :     irc_command_t const cmd,
+<span class="lineNum">     336 </span>                :            :     uint8_t* const prefix,
+<span class="lineNum">     337 </span>                :            :     int32_t const num_params,
+<span class="lineNum">     338 </span>                :            :     ...
+<span class="lineNum">     339 </span>                :            : )
+<span class="lineNum">     340 </span>                :            : {
+<span class="lineNum">     341 </span>                :            :     va_list va;
+<span class="lineNum">     342 </span>                :            :     int32_t i;
+<span class="lineNum">     343 </span>                :            :     
+<span class="lineNum">     344 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
+<span class="lineNum">     345 </span>                :            :     CHECK_RET(IS_VALID_COMMAND(cmd), IRC_BADPARAM);
+<span class="lineNum">     346 </span>                :            :     
+<span class="lineNum">     347 </span>                :            :     /* store the prefix if there is one */
+<span class="lineNum">     348 </span>                :            :     if(prefix != NULL)
+<span class="lineNum">     349 </span>                :            :     {
+<span class="lineNum">     350 </span>                :            :         /* dup the prefix into place */
+<span class="lineNum">     351 </span>                :            :         msg-&gt;prefix = T(strndup(C(prefix), IRC_MSG_SIZE));
+<span class="lineNum">     352 </span>                :            :     }
+<span class="lineNum">     353 </span>                :            : 
+<span class="lineNum">     354 </span>                :            :     /* store the command string */
+<span class="lineNum">     355 </span>                :            :     if(IRC_OK != irc_msg_set_command(msg, cmd))
 <span class="lineNum">     356 </span>                :            :     {
-<span class="lineNum">     357 </span>                :            :         /* dup the prefix into place */
-<span class="lineNum">     358 </span>                :            :         msg-&gt;prefix = T(strndup(C(prefix), IRC_MSG_SIZE));
-<span class="lineNum">     359 </span>                :            :     }
-<span class="lineNum">     360 </span>                :            : 
-<span class="lineNum">     361 </span>                :            :     /* store the command string */
-<span class="lineNum">     362 </span>                :            :     if(IRC_OK != irc_msg_set_command(msg, cmd))
+<span class="lineNum">     357 </span>                :            :         return IRC_ERR;
+<span class="lineNum">     358 </span>                :            :     }
+<span class="lineNum">     359 </span>                :            :     
+<span class="lineNum">     360 </span>                :            :     /* append the parameters */
+<span class="lineNum">     361 </span>                :            :     va_start(va, num_params);
+<span class="lineNum">     362 </span>                :            :     for(i = 0; i &lt; num_params; i++)
 <span class="lineNum">     363 </span>                :            :     {
-<span class="lineNum">     364 </span>                :            :         return IRC_ERR;
+<span class="lineNum">     364 </span>                :            :         irc_msg_add_parameter(msg, va_arg(va, uint8_t*));
 <span class="lineNum">     365 </span>                :            :     }
-<span class="lineNum">     366 </span>                :            :     
-<span class="lineNum">     367 </span>                :            :     /* append the parameters */
-<span class="lineNum">     368 </span>                :            :     va_start(va, num_params);
-<span class="lineNum">     369 </span>                :            :     for(i = 0; i &lt; num_params; i++)
-<span class="lineNum">     370 </span>                :            :     {
-<span class="lineNum">     371 </span>                :            :         irc_msg_add_parameter(msg, va_arg(va, uint8_t*));
-<span class="lineNum">     372 </span>                :            :     }
-<span class="lineNum">     373 </span>                :            :     va_end(va);
-<span class="lineNum">     374 </span>                :            : 
-<span class="lineNum">     375 </span>                :            :     return IRC_OK;
-<span class="lineNum">     376 </span>                :            : }
-<span class="lineNum">     377 </span>                :            : 
-<span class="lineNum">     378 </span>                :            : /* add a parameter */
-<span class="lineNum">     379 </span>                :            : irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)
-<span class="lineNum">     380 </span>                :            : {
-<span class="lineNum">     381 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
-<span class="lineNum">     382 </span>                :            :     CHECK_PTR_RET(param, IRC_BADPARAM);
-<span class="lineNum">     383 </span>                :            :     
-<span class="lineNum">     384 </span>                :            :     /* dup the string into the next param slot */
-<span class="lineNum">     385 </span>                :            :     msg-&gt;parameters[msg-&gt;num_params] = T(strndup(C(param), IRC_MSG_SIZE));
-<span class="lineNum">     386 </span>                :            :     
-<span class="lineNum">     387 </span>                :            :     if(msg-&gt;parameters[msg-&gt;num_params] == NULL)
-<span class="lineNum">     388 </span>                :            :     {
-<span class="lineNum">     389 </span>                :            :         WARN(&quot;failed to allocate parameter buffer\n&quot;);
-<span class="lineNum">     390 </span>                :            :         return IRC_ERR;
-<span class="lineNum">     391 </span>                :            :     }
-<span class="lineNum">     392 </span>                :            :     
-<span class="lineNum">     393 </span>                :            :     /* increment the number of params */
-<span class="lineNum">     394 </span>                :            :     msg-&gt;num_params++;
-<span class="lineNum">     395 </span>                :            : 
+<span class="lineNum">     366 </span>                :            :     va_end(va);
+<span class="lineNum">     367 </span>                :            : 
+<span class="lineNum">     368 </span>                :            :     return IRC_OK;
+<span class="lineNum">     369 </span>                :            : }
+<span class="lineNum">     370 </span>                :            : 
+<span class="lineNum">     371 </span>                :            : /* add a parameter */
+<span class="lineNum">     372 </span>                :            : irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)
+<span class="lineNum">     373 </span>                :            : {
+<span class="lineNum">     374 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
+<span class="lineNum">     375 </span>                :            :     CHECK_PTR_RET(param, IRC_BADPARAM);
+<span class="lineNum">     376 </span>                :            :     
+<span class="lineNum">     377 </span>                :            :     /* dup the string into the next param slot */
+<span class="lineNum">     378 </span>                :            :     msg-&gt;parameters[msg-&gt;num_params] = T(strndup(C(param), IRC_MSG_SIZE));
+<span class="lineNum">     379 </span>                :            :     
+<span class="lineNum">     380 </span>                :            :     if(msg-&gt;parameters[msg-&gt;num_params] == NULL)
+<span class="lineNum">     381 </span>                :            :     {
+<span class="lineNum">     382 </span>                :            :         WARN(&quot;failed to allocate parameter buffer\n&quot;);
+<span class="lineNum">     383 </span>                :            :         return IRC_ERR;
+<span class="lineNum">     384 </span>                :            :     }
+<span class="lineNum">     385 </span>                :            :     
+<span class="lineNum">     386 </span>                :            :     /* increment the number of params */
+<span class="lineNum">     387 </span>                :            :     msg-&gt;num_params++;
+<span class="lineNum">     388 </span>                :            : 
+<span class="lineNum">     389 </span>                :            :     return IRC_OK;
+<span class="lineNum">     390 </span>                :            : }
+<span class="lineNum">     391 </span>                :            : #endif
+<span class="lineNum">     392 </span>                :            : #if 0
+<span class="lineNum">     393 </span>                :            : irc_ret_t irc_msg_compile(irc_msg_t* const msg)
+<span class="lineNum">     394 </span>                :            : {
+<span class="lineNum">     395 </span>                :            :     CHECK_PTR_RET(msg, IRC_BADPARAM);
 <span class="lineNum">     396 </span>                :            :     return IRC_OK;
 <span class="lineNum">     397 </span>                :            : }
 <span class="lineNum">     398 </span>                :            : 
@@ -901,7 +901,7 @@
 <span class="lineNum">     818 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 28 times"> + </span>]:<span class="lineCov">         29 :     CHECK_RET( *ptr &lt; end, FALSE );</span>
 <span class="lineNum">     819 </span>                :            : 
 <span class="lineNum">     820 </span>                :            :     /* first try to parse an IPv6 address */
-<span class="lineNum">     821 </span>        [<span class="branchCov" title="Branch 1 was taken 8 times"> + </span><span class="branchCov" title="Branch 2 was taken 20 times"> + </span>]:<span class="lineCov">         28 :     if ( inet_pton( AF_INET6, *ptr, &amp;(host-&gt;v6) ) )</span>
+<span class="lineNum">     821 </span>        [<span class="branchCov" title="Branch 2 was taken 8 times"> + </span><span class="branchCov" title="Branch 3 was taken 20 times"> + </span>]:<span class="lineCov">         28 :     if ( inet_pton( AF_INET6, *ptr, socket_in_addr(&amp;(host-&gt;addr)) ) )</span>
 <span class="lineNum">     822 </span>                :            :     {
 <span class="lineNum">     823 </span>                :            :         /* remember that it is an IPv6 address */
 <span class="lineNum">     824 </span>                :<span class="lineCov">          8 :         host-&gt;kind = V6_HOSTADDR;</span>
@@ -909,7 +909,7 @@
 <span class="lineNum">     826 </span>                :            :     }
 <span class="lineNum">     827 </span>                :            : 
 <span class="lineNum">     828 </span>                :            :     /* if that didn't work, try to parse an IPv4 address */
-<span class="lineNum">     829 </span>        [<span class="branchCov" title="Branch 1 was taken 8 times"> + </span><span class="branchCov" title="Branch 2 was taken 12 times"> + </span>]:<span class="lineCov">         20 :     if ( inet_pton( AF_INET, *ptr, &amp;(host-&gt;v4) ) )</span>
+<span class="lineNum">     829 </span>        [<span class="branchCov" title="Branch 2 was taken 8 times"> + </span><span class="branchCov" title="Branch 3 was taken 12 times"> + </span>]:<span class="lineCov">         20 :     if ( inet_pton( AF_INET, *ptr, socket_in_addr(&amp;(host-&gt;addr)) ) )</span>
 <span class="lineNum">     830 </span>                :            :     {
 <span class="lineNum">     831 </span>                :            :         /* remember that it is a IPv4 address */
 <span class="lineNum">     832 </span>                :<span class="lineCov">          8 :         host-&gt;kind = V4_HOSTADDR;</span>

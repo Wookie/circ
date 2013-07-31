@@ -90,7 +90,7 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
     T("USERHOST"),
     T("ISON")
 };
-#if 0
+
 /* session event strings */
 int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 {
@@ -100,7 +100,6 @@ int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 	T("PUBMSG"),
 	T("DISCONNECTED"),
 };
-#endif
 
 int8_t const * const irc_any_cmd = T("ANYCMD");
 int8_t const * const irc_no_cmd = T("NOCMD");

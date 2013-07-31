@@ -298,8 +298,8 @@ static irc_ret_t irc_receive_msg( irc_conn_t* const conn, size_t * const nread )
 }
 
 
-static int32_t socket_read_fn( socket_t * const s,
-							   size_t nread,
+static ssize_t socket_read_fn( socket_t * const s,
+							   size_t const nread,
 							   void * user_data )
 {
 	irc_ret_t ret = IRC_OK;
@@ -350,7 +350,7 @@ static int32_t socket_read_fn( socket_t * const s,
 }
 
 
-static int32_t socket_write_fn( socket_t * const s,
+static ssize_t socket_write_fn( socket_t * const s,
 								uint8_t const * const buffer,
 								void * user_data )
 {
@@ -392,7 +392,9 @@ static int32_t socket_write_fn( socket_t * const s,
 }
 
 
-static void irc_conn_initialize( irc_conn_t * const conn,
+static int_t irc_conn_initialize( irc_conn_t * const conn,
+                                 uint8_t const * const server_host,
+                                 uint8_t const * const server_port,
 								 irc_conn_ops_t * const ops,
 								 evt_loop_t * const el,
 								 void * user_data )
@@ -406,6 +408,11 @@ static void irc_conn_initialize( irc_conn_t * const conn,
 		&socket_write_fn 
 	};
 
+    CHECK_PTR_RET( conn, FALSE );
+    CHECK_PTR_RET( server_host, FALSE );
+    CHECK_PTR_RET( server_port, FALSE );
+    CHECK_PTR_RET( el, FALSE );
+
 	/* zero out the memory */
 	MEMSET( (void*)conn, 0, sizeof( irc_conn_t ) );
 
@@ -418,20 +425,25 @@ static void irc_conn_initialize( irc_conn_t * const conn,
 	
 	/* initialize the socket */
 	conn->disconnect = FALSE;
-	conn->socket = socket_new( SOCKET_TCP, &sock_ops, conn->el, conn );
+	conn->socket = socket_new( SOCKET_TCP, server_host, server_port, 0, AF_INET, &sock_ops, conn->el, conn );
+    CHECK_PTR_RET( conn->socket, FALSE );
 
 	/* initialize the write msg list */
-	list_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL );
+	CHECK_RET( list_initialize( &(conn->wmsgs), DEFAULT_WRITE_QUEUE_SIZE, NULL ), FALSE );
 
 	/* initialize read buffer pointers */
 	conn->startp = conn->scanp = conn->inp = conn->buf;
 
 	/* initialize the warning marker pointer */
 	conn->warnp = (conn->buf + (IRC_READ_BUF - (2 * IRC_MSG_SIZE)));
+
+    return TRUE;
 }
 
 
-irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	/* callbacks for irc messages */
+irc_conn_t* irc_conn_new( uint8_t const * const server_host,
+                          uint8_t const * const server_port,
+                          irc_conn_ops_t * const ops,	/* callbacks for irc messages */
 						  evt_loop_t * const el,	/* event loop to use */
 						  void * user_data )		/* user data passed back to callbacks */
 {
@@ -444,7 +456,7 @@ irc_conn_t* irc_conn_new( irc_conn_ops_t * const ops,	/* callbacks for irc messa
 	conn = MALLOC( sizeof(irc_conn_t) );
 	CHECK_PTR_RET_MSG( conn, NULL, "failed to allocate irc struct\n" );
 
-	irc_conn_initialize( conn, ops, el, user_data );
+	CHECK_RET( irc_conn_initialize( conn, server_host, server_port, ops, el, user_data ), NULL );
 
 	return conn;
 }
@@ -466,6 +478,7 @@ static void irc_conn_deinitialize( irc_conn_t * const conn )
 	list_deinitialize( &(conn->wmsgs) );
 }
 
+
 /* these function allocate/deallocate the opaque handle */
 void irc_conn_delete(void * c)
 {
@@ -479,27 +492,14 @@ void irc_conn_delete(void * c)
 	FREE( conn );
 }
 
-
-/* these functions handle connecting/disconnecting to/from servers */
-irc_ret_t irc_conn_connect( irc_conn_t* const conn,				/* irc context */
-							int8_t const * const server_host,	/* hostname of the server */
-							uint16_t const server_port)			/* port of the server */
+irc_ret_t irc_conn_connect( irc_conn_t * const conn )
 {
-	CHECK_PTR_RET(conn, IRC_BADPARAM);
-	
-	/* disconnect any existing socket if needed */
-	if ( socket_is_connected( conn->socket ) )
-	{
-		WARN( "socket already connected\n" );
-		return IRC_ERR;
-	}
-	
-	if ( socket_connect( conn->socket, server_host, server_port ) != SOCKET_OK )
-		return IRC_SOCKET_ERROR;
+    CHECK_PTR_RET( conn, IRC_BADPARAM );
 
-	return IRC_OK;
+    CHECK_PTR_RET( socket_connect( conn->socket ) == SOCKET_OK, IRC_SOCKET_ERROR );
+
+    return IRC_OK;
 }
-
 
 irc_ret_t irc_conn_disconnect( irc_conn_t* const conn, int do_wait )
 {

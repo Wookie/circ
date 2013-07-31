@@ -115,7 +115,6 @@ typedef enum irc_command_e
     NUM_COMMANDS = LAST_COMMAND - FIRST_COMMAND,
 
 	/* session events */
-	/*
 	SESSION_CONNECTED = SESSION_BASE,
 	SESSION_ON_NICK,
 	SESSION_ON_PRIVMSG,
@@ -124,7 +123,6 @@ typedef enum irc_command_e
 	LAST_SESSION_EVENT,
 	FIRST_SESSION_EVENT = SESSION_CONNECTED,
 	NUM_SESSION_EVENTS = LAST_SESSION_EVENT - FIRST_SESSION_EVENT,
-	*/
     
     /* RFC 2812, Section 5 -- Replies */
     

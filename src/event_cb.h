@@ -49,7 +49,7 @@ irc_ret_t irc_event_cb_call_fn( irc_event_cb_t * const cb, irc_msg_t * const msg
 /* helpers for storing irc_event_cb_t structs in a hash table */
 ht_itr_t irc_event_cb_ht_find( ht_t * const ht, uint8_t const * const name );
 uint_t irc_event_cb_hash( void const * const key );
-int irc_event_cb_match( void const * const l, void const * const r );
+int_t irc_event_cb_match( void const * const l, void const * const r );
 
 #endif/*IRC_EVENT_CB_H*/
 

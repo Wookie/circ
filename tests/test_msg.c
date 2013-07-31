@@ -18,6 +18,7 @@
 
 #include <CUnit/Basic.h>
 
+#include <cutil/macros.h>
 #include <cutil/events.h>
 #include <cutil/list.h>
 #include <cutil/log.h>

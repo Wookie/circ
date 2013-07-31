@@ -71,8 +71,7 @@ typedef struct irc_msg_out_buf_s
 typedef struct irc_msg_h_s			/* host */
 {
 	irc_host_type_t		kind;		/* kind of host field */
-	IPv4        		v4;			/* IPv4 address */
-	IPv6        		v6;			/* IPv6 address */
+    sockaddr_t          addr;       /* address */
 	uint8_t			  * hostname;	/* DNS hostname */
 
 } irc_msg_h_t;

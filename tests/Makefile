@@ -6,13 +6,13 @@ CUTIL_ROOT?=../cutil/src
 EXTRA_LIBS_ROOT?=/usr/local
 
 SHELL=/bin/sh
-SRC=test_all.c test_flags.c test_msg.c
+SRC=test_all.c test_flags.c test_msg.c ../cutil/tests/test_flags.c
 OBJ=$(SRC:.c=.o)
 GCDA=$(SRC:.c=.gcda)
 GCNO=$(SRC:.c=.gcno)
 GCOV=$(SRC:.c=.c.gcov)
 OUT=test_all
-LIBS=-lcirc -lcutil -lcunit -lev
+LIBS=-lcirc -lcutil -lcunit -lev -lm
 CIRC_ROOT=../src
 CFLAGS=-O0 -gstabs+ -I$(CIRC_ROOT)/include -I$(CUTIL_ROOT)/include
 LDFLAGS=-gstabs+ -L$(CIRC_ROOT)/lib -L$(CUTIL_ROOT)/lib
