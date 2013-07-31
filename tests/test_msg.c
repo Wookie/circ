@@ -247,13 +247,13 @@ static void test_msg_parse_params( void )
 static int init_msg_suite( void )
 {
     srand(0xDEADBEEF);
-    reset_test_flags();
+    reset_circ_test_flags();
     return 0;
 }
 
 static int deinit_msg_suite( void )
 {
-    reset_test_flags();
+    reset_circ_test_flags();
     return 0;
 }
 
