@@ -285,8 +285,8 @@
 98	cutil/coverage/cutil/src/buffer.c.gcov.html	/^<a name="98"><span class="lineNum">      98 <\/span>                :            : }<\/a>$/;"	a
 983	coverage/circ/src/msg.c.gcov.html	/^<a name="983"><span class="lineNum">     983 <\/span>                :            :  * command = 1*letter \/ 3digit<\/a>$/;"	a
 999	cutil/coverage/cutil/src/socket.c.gcov.html	/^<a name="999"><span class="lineNum">     999 <\/span>                :            : <\/a>$/;"	a
-ACCEPT	cutil/src/macros.h	131;"	d
-ACCEPT	cutil/src/macros.h	298;"	d
+ACCEPT	cutil/src/macros.h	132;"	d
+ACCEPT	cutil/src/macros.h	301;"	d
 ADD_SUITE	cutil/tests/test_macros.h	21;"	d
 ADD_SUITE	tests/test_macros.h	21;"	d
 ADD_TEST	cutil/tests/test_macros.h	22;"	d
@@ -299,14 +299,14 @@ ASSERT	cutil/src/macros.h	92;"	d
 AT	src/msg.c	/^static uint8_t AT = '@';$/;"	v	file:
 AWAY	src/commands.h	/^    AWAY,$/;"	e	enum:irc_command_e
 BANG	src/msg.c	/^static uint8_t BANG = '!';$/;"	v	file:
-BIND	cutil/src/macros.h	135;"	d
-BIND	cutil/src/macros.h	302;"	d
+BIND	cutil/src/macros.h	136;"	d
+BIND	cutil/src/macros.h	305;"	d
 BIT	cutil/src/bitset.c	27;"	d	file:
 BUILDDIRS	Makefile	/^BUILDDIRS = $(DIRS:%=build-%)$/;"	m
 BUILDDIRS	cutil/Makefile	/^BUILDDIRS = $(DIRS:%=build-%)$/;"	m
 C	cutil/src/macros.h	37;"	d
-CALLOC	cutil/src/macros.h	122;"	d
-CALLOC	cutil/src/macros.h	306;"	d
+CALLOC	cutil/src/macros.h	123;"	d
+CALLOC	cutil/src/macros.h	309;"	d
 CFLAGS	cutil/src/Makefile	/^CFLAGS=-O3 -I$(EXTRA_LIBS_ROOT)\/include$/;"	m
 CFLAGS	cutil/src/Makefile	/^coverage: CFLAGS=-fprofile-arcs -ftest-coverage -O0 -gstabs+ -DUNIT_TESTING -I$(EXTRA_LIBS_ROOT)\/include -I..\/tests$/;"	m
 CFLAGS	cutil/src/Makefile	/^debug: CFLAGS=-O0 -gstabs+ -I$(EXTRA_LIBS_ROOT)\/include$/;"	m
@@ -319,25 +319,25 @@ CFLAGS	src/Makefile	/^debug: CFLAGS=-O0 -gstabs+ -I$(CUTIL_ROOT)\/include$/;"	m
 CFLAGS	src/Makefile	/^test: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)\/include -I..\/tests$/;"	m
 CFLAGS	src/Makefile	/^testnr: CFLAGS=-O0 -gstabs+ -DUNIT_TESTING -I$(CUTIL_ROOT)\/include -I..\/tests$/;"	m
 CFLAGS	tests/Makefile	/^CFLAGS=-O0 -gstabs+ -I$(CIRC_ROOT)\/include -I$(CUTIL_ROOT)\/include$/;"	m
-CHECK	cutil/src/macros.h	103;"	d
-CHECK_ERR_STR	cutil/src/macros.h	100;"	d
-CHECK_GOTO	cutil/src/macros.h	107;"	d
+CHECK	cutil/src/macros.h	104;"	d
+CHECK_ERR_STR	cutil/src/macros.h	101;"	d
+CHECK_GOTO	cutil/src/macros.h	108;"	d
 CHECK_HANDLER_PRAMS	src/session.c	42;"	d	file:
-CHECK_MSG	cutil/src/macros.h	104;"	d
-CHECK_PTR	cutil/src/macros.h	108;"	d
-CHECK_PTR_GOTO	cutil/src/macros.h	112;"	d
-CHECK_PTR_MSG	cutil/src/macros.h	109;"	d
-CHECK_PTR_RET	cutil/src/macros.h	110;"	d
-CHECK_PTR_RET_MSG	cutil/src/macros.h	111;"	d
-CHECK_RET	cutil/src/macros.h	105;"	d
-CHECK_RET_MSG	cutil/src/macros.h	106;"	d
+CHECK_MSG	cutil/src/macros.h	105;"	d
+CHECK_PTR	cutil/src/macros.h	109;"	d
+CHECK_PTR_GOTO	cutil/src/macros.h	113;"	d
+CHECK_PTR_MSG	cutil/src/macros.h	110;"	d
+CHECK_PTR_RET	cutil/src/macros.h	111;"	d
+CHECK_PTR_RET_MSG	cutil/src/macros.h	112;"	d
+CHECK_RET	cutil/src/macros.h	106;"	d
+CHECK_RET_MSG	cutil/src/macros.h	107;"	d
 CIRC_ROOT	tests/Makefile	/^CIRC_ROOT=..\/src$/;"	m
 CLEANDIRS	Makefile	/^CLEANDIRS = $(DIRS:%=clean-%)$/;"	m
 CLEANDIRS	cutil/Makefile	/^CLEANDIRS = $(DIRS:%=clean-%)$/;"	m
 CMD_BASE	src/commands.h	37;"	d
 COLON	src/msg.c	/^static uint8_t COLON = ':';$/;"	v	file:
-CONNECT	cutil/src/macros.h	139;"	d
-CONNECT	cutil/src/macros.h	310;"	d
+CONNECT	cutil/src/macros.h	140;"	d
+CONNECT	cutil/src/macros.h	313;"	d
 CONNECT_	src/commands.h	/^    CONNECT_, \/* NOTE: name collision with CONNECT macro in cutil\/src\/macros.h *\/$/;"	e	enum:irc_command_e
 CONN_ORIGIN	src/msg.h	/^	CONN_ORIGIN = 0,				\/* no prefix in message, origin from connection *\/$/;"	e	enum:irc_origin_type_e
 COVERAGE	Makefile	/^COVERAGE?=.\/coverage$/;"	m
@@ -369,8 +369,8 @@ DOT	src/msg.c	/^static uint8_t DOT = '.';$/;"	v	file:
 DWORDS_NEEDED	cutil/src/bitset.c	25;"	d	file:
 DWORD_INDEX	cutil/src/bitset.c	26;"	d	file:
 EMPTY_ENV	cutil/src/child.h	24;"	d
-ERRNO	cutil/src/macros.h	143;"	d
-ERRNO	cutil/src/macros.h	314;"	d
+ERRNO	cutil/src/macros.h	144;"	d
+ERRNO	cutil/src/macros.h	317;"	d
 ERROR	src/commands.h	/^    ERROR,$/;"	e	enum:irc_command_e
 ERR_ALREADYREGISTERED	src/commands.h	/^    ERR_ALREADYREGISTERED   = 462,$/;"	e	enum:irc_command_e
 ERR_BADCHANMASK	src/commands.h	/^    ERR_BADCHANMASK         = 476,$/;"	e	enum:irc_command_e
@@ -437,8 +437,8 @@ EVT_SIGNAL	cutil/src/events.h	/^    EVT_SIGNAL,$/;"	e	enum:evt_type_e
 EVT_TYPE_COUNT	cutil/src/events.h	/^    EVT_TYPE_COUNT = EVT_TYPE_LAST - EVT_TYPE_FIRST$/;"	e	enum:evt_type_e
 EVT_TYPE_FIRST	cutil/src/events.h	/^    EVT_TYPE_FIRST = EVT_SIGNAL,$/;"	e	enum:evt_type_e
 EVT_TYPE_LAST	cutil/src/events.h	/^    EVT_TYPE_LAST,$/;"	e	enum:evt_type_e
-EV_DEFAULT_LOOP	cutil/src/macros.h	292;"	d
-EV_DEFAULT_LOOP	cutil/src/macros.h	481;"	d
+EV_DEFAULT_LOOP	cutil/src/macros.h	293;"	d
+EV_DEFAULT_LOOP	cutil/src/macros.h	484;"	d
 EV_MULTIPLICITY	cutil/src/events.c	18;"	d	file:
 EV_NSIG	cutil/src/macros.h	67;"	d
 EV_NSIG	cutil/src/macros.h	69;"	d
@@ -457,8 +457,8 @@ EXTRA_LIBS_ROOT	src/Makefile	/^EXTRA_LIBS_ROOT?=\/usr\/local$/;"	m
 EXTRA_LIBS_ROOT	tests/Makefile	/^EXTRA_LIBS_ROOT?=\/usr\/local$/;"	m
 FAIL	cutil/src/macros.h	96;"	d
 FALSE	cutil/src/macros.h	51;"	d
-FCNTL	cutil/src/macros.h	147;"	d
-FCNTL	cutil/src/macros.h	318;"	d
+FCNTL	cutil/src/macros.h	148;"	d
+FCNTL	cutil/src/macros.h	321;"	d
 FIRST_COMMAND	src/commands.h	/^    FIRST_COMMAND = PASS,$/;"	e	enum:irc_command_e
 FIRST_ERR	src/commands.h	/^	FIRST_ERR = ERR_NOSUCHNCK,$/;"	e	enum:irc_command_e
 FIRST_MSG_HOST	src/msg.h	/^	FIRST_MSG_HOST = NO_HOST,$/;"	e	enum:irc_host_type_e
@@ -467,14 +467,14 @@ FIRST_RPL	src/commands.h	/^	FIRST_RPL = RPL_WELCOME,$/;"	e	enum:irc_command_e
 FIRST_SESSION_EVENT	src/commands.h	/^	FIRST_SESSION_EVENT = SESSION_CONNECTED,$/;"	e	enum:irc_command_e
 FNV_PRIME	src/event_cb.c	103;"	d	file:
 FNV_PRIME	src/gen_hashes.c	391;"	d	file:
-FORK	cutil/src/macros.h	151;"	d
-FORK	cutil/src/macros.h	322;"	d
-FREE	cutil/src/macros.h	124;"	d
-FREE	cutil/src/macros.h	326;"	d
-FSTAT	cutil/src/macros.h	155;"	d
-FSTAT	cutil/src/macros.h	330;"	d
-FSYNC	cutil/src/macros.h	159;"	d
-FSYNC	cutil/src/macros.h	334;"	d
+FORK	cutil/src/macros.h	152;"	d
+FORK	cutil/src/macros.h	325;"	d
+FREE	cutil/src/macros.h	125;"	d
+FREE	cutil/src/macros.h	329;"	d
+FSTAT	cutil/src/macros.h	156;"	d
+FSTAT	cutil/src/macros.h	333;"	d
+FSYNC	cutil/src/macros.h	160;"	d
+FSYNC	cutil/src/macros.h	337;"	d
 GCDA	cutil/src/Makefile	/^GCDA=$(SRC:.c=.gcda)$/;"	m
 GCDA	cutil/tests/Makefile	/^GCDA=$(SRC:.c=.gcda)$/;"	m
 GCDA	src/Makefile	/^GCDA=$(SRC:.c=.gcda)$/;"	m
@@ -489,20 +489,20 @@ GCOV	src/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
 GCOV	tests/Makefile	/^GCOV=$(SRC:.c=.c.gcov)$/;"	m
 GCOVDIRS	Makefile	/^GCOVDIRS = $(SRCDIR:%=gcov-%) $(TESTDIR:%=gcov-%)$/;"	m
 GCOVDIRS	cutil/Makefile	/^GCOVDIRS = $(DIRS:%=gcov-%)$/;"	m
-GETADDRINFO	cutil/src/macros.h	163;"	d
-GETADDRINFO	cutil/src/macros.h	338;"	d
-GETDTABLESIZE	cutil/src/macros.h	167;"	d
-GETDTABLESIZE	cutil/src/macros.h	342;"	d
-GETEGID	cutil/src/macros.h	171;"	d
-GETEGID	cutil/src/macros.h	346;"	d
-GETEUID	cutil/src/macros.h	175;"	d
-GETEUID	cutil/src/macros.h	350;"	d
-GETGID	cutil/src/macros.h	179;"	d
-GETGID	cutil/src/macros.h	354;"	d
-GETGROUPS	cutil/src/macros.h	183;"	d
-GETGROUPS	cutil/src/macros.h	358;"	d
-GETUID	cutil/src/macros.h	187;"	d
-GETUID	cutil/src/macros.h	362;"	d
+GETADDRINFO	cutil/src/macros.h	164;"	d
+GETADDRINFO	cutil/src/macros.h	341;"	d
+GETDTABLESIZE	cutil/src/macros.h	168;"	d
+GETDTABLESIZE	cutil/src/macros.h	345;"	d
+GETEGID	cutil/src/macros.h	172;"	d
+GETEGID	cutil/src/macros.h	349;"	d
+GETEUID	cutil/src/macros.h	176;"	d
+GETEUID	cutil/src/macros.h	353;"	d
+GETGID	cutil/src/macros.h	180;"	d
+GETGID	cutil/src/macros.h	357;"	d
+GETGROUPS	cutil/src/macros.h	184;"	d
+GETGROUPS	cutil/src/macros.h	361;"	d
+GETUID	cutil/src/macros.h	188;"	d
+GETUID	cutil/src/macros.h	365;"	d
 HANDLER	src/event_cb.h	27;"	d
 HANDLER_FN	src/channel.c	/^static HANDLER_FN( channel, JOIN )$/;"	f	file:
 HANDLER_FN	src/channel.c	/^static HANDLER_FN( channel, KICK )$/;"	f	file:
@@ -537,8 +537,8 @@ INSTALL_PROGRAM	cutil/Makefile	/^INSTALL_PROGRAM=$(INSTALL)$/;"	m
 INSTALL_PROGRAM	cutil/src/Makefile	/^INSTALL_PROGRAM=$(INSTALL)$/;"	m
 INSTALL_PROGRAM	src/Makefile	/^INSTALL_PROGRAM=$(INSTALL)$/;"	m
 INVITE	src/commands.h	/^    INVITE,$/;"	e	enum:irc_command_e
-IOCTL	cutil/src/macros.h	191;"	d
-IOCTL	cutil/src/macros.h	366;"	d
+IOCTL	cutil/src/macros.h	192;"	d
+IOCTL	cutil/src/macros.h	369;"	d
 IP_LOG_BUF_SIZE	src/msg.c	236;"	d	file:
 IRC_BADPARAM	src/commands.h	/^    IRC_BADPARAM        = -2,$/;"	e	enum:irc_ret_e
 IRC_BAD_MESSAGE	src/commands.h	/^    IRC_BAD_MESSAGE     = -4,$/;"	e	enum:irc_ret_e
@@ -657,7 +657,6 @@ IRC_UMODE_w	src/modes.h	/^	IRC_UMODE_w,$/;"	e	enum:irc_umode_e
 IRC_UMODE_x	src/modes.h	/^	IRC_UMODE_x,$/;"	e	enum:irc_umode_e
 IRC_UMODE_y	src/modes.h	/^	IRC_UMODE_y,$/;"	e	enum:irc_umode_e
 IRC_UMODE_z	src/modes.h	/^	IRC_UMODE_z,$/;"	e	enum:irc_umode_e
-IRC_UTIL_H	src/util.h	19;"	d
 ISON	src/commands.h	/^    ISON,$/;"	e	enum:irc_command_e
 IS_CMODE	src/modes.h	161;"	d
 IS_COMMAND	src/commands.h	338;"	d
@@ -690,8 +689,8 @@ LIBS	cutil/tests/Makefile	/^LIBS=-lcutil -lcunit -lev -lm -lpthread$/;"	m
 LIBS	tests/Makefile	/^LIBS=-lcirc -lcutil -lcunit -lev -lm$/;"	m
 LINKS	src/commands.h	/^    LINKS,$/;"	e	enum:irc_command_e
 LIST	src/commands.h	/^    LIST,$/;"	e	enum:irc_command_e
-LISTEN	cutil/src/macros.h	195;"	d
-LISTEN	cutil/src/macros.h	370;"	d
+LISTEN	cutil/src/macros.h	196;"	d
+LISTEN	cutil/src/macros.h	373;"	d
 LIST_AT	cutil/src/hashtable.c	33;"	d	file:
 LOG	cutil/src/macros.h	95;"	d
 LOG_TYPE_FILE	cutil/src/log.h	/^    LOG_TYPE_FILE,$/;"	e	enum:log_type_s
@@ -699,14 +698,14 @@ LOG_TYPE_LIST	cutil/src/log.h	/^    LOG_TYPE_LIST$/;"	e	enum:log_type_s
 LOG_TYPE_STDERR	cutil/src/log.h	/^    LOG_TYPE_STDERR,$/;"	e	enum:log_type_s
 LOG_TYPE_SYSLOG	cutil/src/log.h	/^    LOG_TYPE_SYSLOG,$/;"	e	enum:log_type_s
 LUSERS	src/commands.h	/^    LUSERS,$/;"	e	enum:irc_command_e
-MALLOC	cutil/src/macros.h	121;"	d
-MALLOC	cutil/src/macros.h	374;"	d
-MEMCMP	cutil/src/macros.h	126;"	d
-MEMCMP	cutil/src/macros.h	378;"	d
-MEMCPY	cutil/src/macros.h	127;"	d
-MEMCPY	cutil/src/macros.h	382;"	d
-MEMSET	cutil/src/macros.h	125;"	d
-MEMSET	cutil/src/macros.h	386;"	d
+MALLOC	cutil/src/macros.h	122;"	d
+MALLOC	cutil/src/macros.h	377;"	d
+MEMCMP	cutil/src/macros.h	127;"	d
+MEMCMP	cutil/src/macros.h	381;"	d
+MEMCPY	cutil/src/macros.h	128;"	d
+MEMCPY	cutil/src/macros.h	385;"	d
+MEMSET	cutil/src/macros.h	126;"	d
+MEMSET	cutil/src/macros.h	389;"	d
 MISSING_64BIT_ENDIAN	cutil/src/macros.h	57;"	d
 MISSING_STRNLEN	cutil/src/macros.h	56;"	d
 MODE	src/commands.h	/^    MODE,$/;"	e	enum:irc_command_e
@@ -718,7 +717,7 @@ MULTIPLE	cutil/tests/test_events.c	37;"	d	file:
 MULTIPLE	cutil/tests/test_hashtable.c	36;"	d	file:
 MULTIPLE	cutil/tests/test_list.c	36;"	d	file:
 MULTIPLE	cutil/tests/test_privileges.c	35;"	d	file:
-MULTIPLE	cutil/tests/test_socket.c	39;"	d	file:
+MULTIPLE	cutil/tests/test_socket.c	41;"	d	file:
 NAME	cutil/src/Makefile	/^NAME=cutil$/;"	m
 NAME	src/Makefile	/^NAME=circ$/;"	m
 NAMES	src/commands.h	/^    NAMES,$/;"	e	enum:irc_command_e
@@ -755,8 +754,8 @@ OUT	tests/Makefile	/^OUT=test_all$/;"	m
 PART	src/commands.h	/^    PART,$/;"	e	enum:irc_command_e
 PASS	src/commands.h	/^    PASS = CMD_BASE,$/;"	e	enum:irc_command_e
 PING	src/commands.h	/^    PING,$/;"	e	enum:irc_command_e
-PIPE	cutil/src/macros.h	199;"	d
-PIPE	cutil/src/macros.h	390;"	d
+PIPE	cutil/src/macros.h	200;"	d
+PIPE	cutil/src/macros.h	393;"	d
 PIPE_READ_IDX	cutil/src/child.c	215;"	d	file:
 PIPE_WRITE_IDX	cutil/src/child.c	216;"	d	file:
 PONG	src/commands.h	/^    PONG,$/;"	e	enum:irc_command_e
@@ -769,18 +768,18 @@ PRIMES	cutil/src/hashtable.c	/^uint_t const PRIMES[] =$/;"	v
 PRIVMSG	src/commands.h	/^    PRIVMSG,$/;"	e	enum:irc_command_e
 QUIT	src/commands.h	/^    QUIT,$/;"	e	enum:irc_command_e
 QUIT_MSG	src/session.h	/^	QUIT_MSG			= 0xcc785413,$/;"	e	enum:irc_session_setting_e
-READ	cutil/src/macros.h	203;"	d
-READ	cutil/src/macros.h	394;"	d
-READV	cutil/src/macros.h	207;"	d
-REALLOC	cutil/src/macros.h	123;"	d
-REALLOC	cutil/src/macros.h	398;"	d
+READ	cutil/src/macros.h	204;"	d
+READ	cutil/src/macros.h	397;"	d
+READV	cutil/src/macros.h	208;"	d
+REALLOC	cutil/src/macros.h	124;"	d
+REALLOC	cutil/src/macros.h	401;"	d
 REAL_NAME	src/session.h	/^	REAL_NAME			= 0x4215b8fe,$/;"	e	enum:irc_session_setting_e
-RECV	cutil/src/macros.h	211;"	d
-RECV	cutil/src/macros.h	402;"	d
-RECVFROM	cutil/src/macros.h	215;"	d
-RECVFROM	cutil/src/macros.h	406;"	d
-RECVMSG	cutil/src/macros.h	219;"	d
-RECVMSG	cutil/src/macros.h	410;"	d
+RECV	cutil/src/macros.h	212;"	d
+RECV	cutil/src/macros.h	405;"	d
+RECVFROM	cutil/src/macros.h	216;"	d
+RECVFROM	cutil/src/macros.h	409;"	d
+RECVMSG	cutil/src/macros.h	220;"	d
+RECVMSG	cutil/src/macros.h	413;"	d
 REHASH	src/commands.h	/^    REHASH,$/;"	e	enum:irc_command_e
 REPEAT	cutil/tests/test_aiofd.c	34;"	d	file:
 REPEAT	cutil/tests/test_child.c	34;"	d	file:
@@ -788,7 +787,7 @@ REPEAT	cutil/tests/test_events.c	35;"	d	file:
 REPEAT	cutil/tests/test_hashtable.c	34;"	d	file:
 REPEAT	cutil/tests/test_list.c	34;"	d	file:
 REPEAT	cutil/tests/test_privileges.c	33;"	d	file:
-REPEAT	cutil/tests/test_socket.c	37;"	d	file:
+REPEAT	cutil/tests/test_socket.c	39;"	d	file:
 REPORTDIRS	Makefile	/^REPORTDIRS = $(SRCDIR:%=report-%) $(TESTDIR:%=report-%)$/;"	m
 REPORTDIRS	cutil/Makefile	/^REPORTDIRS = $(DIRS:%=report-%)$/;"	m
 RESTART	src/commands.h	/^    RESTART,$/;"	e	enum:irc_command_e
@@ -920,12 +919,12 @@ RPL_YOUREOPER	src/commands.h	/^    RPL_YOUREOPER           = 381,$/;"	e	enum:irc
 RPL_YOURESERVICE	src/commands.h	/^    RPL_YOURESERVICE        = 383,$/;"	e	enum:irc_command_e
 RPL_YOURHOST	src/commands.h	/^    RPL_YOURHOST            = 2,$/;"	e	enum:irc_command_e
 RPL_YOURID	src/commands.h	/^	RPL_YOURID				= 42,  \/* IRCnet *\/$/;"	e	enum:irc_command_e
-SEND	cutil/src/macros.h	223;"	d
-SEND	cutil/src/macros.h	414;"	d
-SENDMSG	cutil/src/macros.h	227;"	d
-SENDMSG	cutil/src/macros.h	418;"	d
-SENDTO	cutil/src/macros.h	231;"	d
-SENDTO	cutil/src/macros.h	422;"	d
+SEND	cutil/src/macros.h	224;"	d
+SEND	cutil/src/macros.h	417;"	d
+SENDMSG	cutil/src/macros.h	228;"	d
+SENDMSG	cutil/src/macros.h	421;"	d
+SENDTO	cutil/src/macros.h	232;"	d
+SENDTO	cutil/src/macros.h	425;"	d
 SERVERNAME_ORIGIN	src/msg.h	/^	SERVERNAME_ORIGIN = 1,			\/* prefix is server name *\/$/;"	e	enum:irc_origin_type_e
 SERVER_HOST	src/session.h	/^	SERVER_HOST			= 0x602099fa,$/;"	e	enum:irc_session_setting_e
 SERVER_PASS	src/session.h	/^	SERVER_PASS			= 0x01026017,$/;"	e	enum:irc_session_setting_e
@@ -938,18 +937,18 @@ SESSION_DISCONNECTED	src/commands.h	/^	SESSION_DISCONNECTED,$/;"	e	enum:irc_comm
 SESSION_ON_NICK	src/commands.h	/^	SESSION_ON_NICK,$/;"	e	enum:irc_command_e
 SESSION_ON_PRIVMSG	src/commands.h	/^	SESSION_ON_PRIVMSG,$/;"	e	enum:irc_command_e
 SESSION_ON_PUBMSG	src/commands.h	/^	SESSION_ON_PUBMSG,$/;"	e	enum:irc_command_e
-SETEGID	cutil/src/macros.h	235;"	d
-SETEGID	cutil/src/macros.h	426;"	d
-SETEUID	cutil/src/macros.h	239;"	d
-SETEUID	cutil/src/macros.h	430;"	d
-SETGROUPS	cutil/src/macros.h	243;"	d
-SETGROUPS	cutil/src/macros.h	434;"	d
-SETREGID	cutil/src/macros.h	247;"	d
-SETREGID	cutil/src/macros.h	438;"	d
-SETREUID	cutil/src/macros.h	251;"	d
-SETREUID	cutil/src/macros.h	442;"	d
-SETSOCKOPT	cutil/src/macros.h	255;"	d
-SETSOCKOPT	cutil/src/macros.h	446;"	d
+SETEGID	cutil/src/macros.h	236;"	d
+SETEGID	cutil/src/macros.h	429;"	d
+SETEUID	cutil/src/macros.h	240;"	d
+SETEUID	cutil/src/macros.h	433;"	d
+SETGROUPS	cutil/src/macros.h	244;"	d
+SETGROUPS	cutil/src/macros.h	437;"	d
+SETREGID	cutil/src/macros.h	248;"	d
+SETREGID	cutil/src/macros.h	441;"	d
+SETREUID	cutil/src/macros.h	252;"	d
+SETREUID	cutil/src/macros.h	445;"	d
+SETSOCKOPT	cutil/src/macros.h	256;"	d
+SETSOCKOPT	cutil/src/macros.h	449;"	d
 SHELL	Makefile	/^SHELL=\/bin\/sh$/;"	m
 SHELL	cutil/Makefile	/^SHELL=\/bin\/sh$/;"	m
 SHELL	cutil/src/Makefile	/^SHELL=\/bin\/sh$/;"	m
@@ -962,9 +961,9 @@ SIZEMAX	cutil/tests/test_events.c	36;"	d	file:
 SIZEMAX	cutil/tests/test_hashtable.c	35;"	d	file:
 SIZEMAX	cutil/tests/test_list.c	35;"	d	file:
 SIZEMAX	cutil/tests/test_privileges.c	34;"	d	file:
-SIZEMAX	cutil/tests/test_socket.c	38;"	d	file:
-SOCKET	cutil/src/macros.h	259;"	d
-SOCKET	cutil/src/macros.h	450;"	d
+SIZEMAX	cutil/tests/test_socket.c	40;"	d	file:
+SOCKET	cutil/src/macros.h	260;"	d
+SOCKET	cutil/src/macros.h	453;"	d
 SOCKET_BADHOSTNAME	cutil/src/socket.h	/^    SOCKET_BADHOSTNAME  = -3,$/;"	e	enum:socket_ret_e
 SOCKET_BADPARAM	cutil/src/socket.h	/^    SOCKET_BADPARAM     = -2,$/;"	e	enum:socket_ret_e
 SOCKET_BIND_FAIL	cutil/src/socket.h	/^    SOCKET_BIND_FAIL    = -11,$/;"	e	enum:socket_ret_e
@@ -996,15 +995,16 @@ SRC	src/Makefile	/^SRC=commands.c conn.c event_cb.c modes.c msg.c session.c$/;"	
 SRC	tests/Makefile	/^SRC=test_all.c test_flags.c test_msg.c ..\/cutil\/tests\/test_flags.c$/;"	m
 SRCDIR	Makefile	/^SRCDIR = src$/;"	m
 SRCDIR	cutil/Makefile	/^SRCDIR = src$/;"	m
-STAT	cutil/src/macros.h	263;"	d
-STAT	cutil/src/macros.h	454;"	d
+STAT	cutil/src/macros.h	264;"	d
+STAT	cutil/src/macros.h	457;"	d
 STATS	src/commands.h	/^    STATS,$/;"	e	enum:irc_command_e
-STRCMP	cutil/src/macros.h	267;"	d
-STRCMP	cutil/src/macros.h	458;"	d
-STRDUP	cutil/src/macros.h	271;"	d
-STRDUP	cutil/src/macros.h	462;"	d
-STRTOL	cutil/src/macros.h	275;"	d
-STRTOL	cutil/src/macros.h	466;"	d
+STRCMP	cutil/src/macros.h	268;"	d
+STRCMP	cutil/src/macros.h	461;"	d
+STRDUP	cutil/src/macros.h	272;"	d
+STRDUP	cutil/src/macros.h	465;"	d
+STRERROR	cutil/src/macros.h	97;"	d
+STRTOL	cutil/src/macros.h	276;"	d
+STRTOL	cutil/src/macros.h	469;"	d
 SUITE	cutil/tests/test_macros.h	20;"	d
 SUITE	tests/test_macros.h	20;"	d
 SUMMON	src/commands.h	/^    SUMMON,$/;"	e	enum:irc_command_e
@@ -1021,12 +1021,12 @@ TRACE	src/commands.h	/^    TRACE,$/;"	e	enum:irc_command_e
 TRUE	cutil/src/macros.h	52;"	d
 UNINSTALLDIRS	Makefile	/^UNINSTALLDIRS = $(DIRS:%=uninstall-%)$/;"	m
 UNINSTALLDIRS	cutil/Makefile	/^UNINSTALLDIRS = $(DIRS:%=uninstall-%)$/;"	m
-UNIT_TEST_FAIL	cutil/src/macros.h	117;"	d
-UNIT_TEST_FAIL	cutil/src/macros.h	485;"	d
-UNIT_TEST_RET	cutil/src/macros.h	116;"	d
-UNIT_TEST_RET	cutil/src/macros.h	484;"	d
-UNLINK	cutil/src/macros.h	279;"	d
-UNLINK	cutil/src/macros.h	470;"	d
+UNIT_TEST_FAIL	cutil/src/macros.h	118;"	d
+UNIT_TEST_FAIL	cutil/src/macros.h	488;"	d
+UNIT_TEST_RET	cutil/src/macros.h	117;"	d
+UNIT_TEST_RET	cutil/src/macros.h	487;"	d
+UNLINK	cutil/src/macros.h	280;"	d
+UNLINK	cutil/src/macros.h	473;"	d
 USER	src/commands.h	/^    USER,$/;"	e	enum:irc_command_e
 USERHOST	src/commands.h	/^    USERHOST,$/;"	e	enum:irc_command_e
 USERS	src/commands.h	/^    USERS,$/;"	e	enum:irc_command_e
@@ -1042,10 +1042,10 @@ WARN	cutil/src/macros.h	93;"	d
 WHO	src/commands.h	/^    WHO,$/;"	e	enum:irc_command_e
 WHOIS	src/commands.h	/^    WHOIS,$/;"	e	enum:irc_command_e
 WHOWAS	src/commands.h	/^    WHOWAS,$/;"	e	enum:irc_command_e
-WRITE	cutil/src/macros.h	283;"	d
-WRITE	cutil/src/macros.h	474;"	d
-WRITEV	cutil/src/macros.h	287;"	d
-WRITEV	cutil/src/macros.h	478;"	d
+WRITE	cutil/src/macros.h	284;"	d
+WRITE	cutil/src/macros.h	477;"	d
+WRITEV	cutil/src/macros.h	288;"	d
+WRITEV	cutil/src/macros.h	481;"	d
 _GNU_SOURCE	cutil/src/log.c	17;"	d	file:
 _GNU_SOURCE	src/msg.c	17;"	d	file:
 __AIOFD_H__	cutil/src/aiofd.h	18;"	d
@@ -1207,9 +1207,7 @@ callback	cutil/src/events.h	/^    evt_fn          callback;$/;"	m	struct:evt_s
 cb_count_s	cutil/src/aiofd.c	/^typedef struct cb_count_s$/;"	s	file:
 cb_count_t	cutil/src/aiofd.c	/^} cb_count_t;$/;"	t	typeref:struct:cb_count_s	file:
 cb_counts	cutil/src/aiofd.c	/^static cb_count_t cb_counts;$/;"	v	file:
-channel	src/util.h	/^	uint8_t * channel;$/;"	m	struct:msgto_s
 check_err_str_	cutil/src/macros.h	/^uint8_t * check_err_str_;$/;"	v
-check_ipv4_part	src/util.c	/^static int check_ipv4_part( uint8_t * pstart, uint8_t *pend )$/;"	f	file:
 child	cutil/src/events.h	/^    struct ev_child     child;$/;"	m	union:ev_data_u	typeref:struct:ev_data_u::ev_child
 child	cutil/tests/test_all.c	/^SUITE( child );$/;"	v
 child_aiofd_error_evt_fn	cutil/src/child.c	/^static int_t child_aiofd_error_evt_fn( aiofd_t * const aiofd,$/;"	f	file:
@@ -1508,10 +1506,7 @@ hashtable	cutil/tests/test_all.c	/^SUITE( hashtable );$/;"	v
 hfn	cutil/src/hashtable.h	/^    ht_hash_fn          hfn;                \/* hash function *\/$/;"	m	struct:ht_s
 host	cutil/src/socket.c	/^    uint8_t *       host;           \/* host name *\/$/;"	m	struct:socket_s	file:
 host	src/msg.h	/^	irc_msg_h_t			host;$/;"	m	struct:irc_msg_nuh_s
-hostaddr_ipv4	src/util.h	/^	uint8_t * hostaddr_ipv4;$/;"	m	struct:msgto_s
-hostaddr_ipv6	src/util.h	/^	uint8_t * hostaddr_ipv6;$/;"	m	struct:msgto_s
 hostname	src/msg.h	/^	uint8_t			  * hostname;	\/* DNS hostname *\/$/;"	m	struct:irc_msg_h_s
-hostname	src/util.h	/^	uint8_t * hostname;$/;"	m	struct:msgto_s
 ht_clear	cutil/src/hashtable.c	/^int_t ht_clear( ht_t * const htable )$/;"	f
 ht_count	cutil/src/hashtable.c	/^uint_t ht_count( ht_t * const htable )$/;"	f
 ht_deinitialize	cutil/src/hashtable.c	/^int_t ht_deinitialize( ht_t * const htable )$/;"	f
@@ -1744,14 +1739,11 @@ min	cutil/src/btree.c	33;"	d	file:
 min	src/conn.c	39;"	d	file:
 msg	src/conn.c	/^	irc_msg_t		msg;			\/* pending message *\/$/;"	m	struct:irc_conn_s	file:
 msg	tests/test_all.c	/^SUITE( msg );$/;"	v
-msgto_s	src/util.h	/^typedef struct msgto_s$/;"	s
-msgto_t	src/util.h	/^} msgto_t;$/;"	t	typeref:struct:msgto_s
 name	src/channel.c	/^    uint8_t*	name;			\/* name of the channel *\/$/;"	m	struct:irc_channel_s	file:
 name	src/event_cb.c	/^	uint8_t const *		name;$/;"	m	struct:irc_event_cb_s	file:
 next	cutil/src/btree.c	/^    struct node_s * next;       \/* traversal threading pointer\/free list pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
 next	cutil/src/list.c	/^    int_t   next;   \/* next node in the list *\/$/;"	m	struct:list_item_s	file:
 ngroups	cutil/src/privileges.h	/^    int     ngroups;$/;"	m	struct:priv_state_s
-nick	src/util.h	/^	uint8_t * nick;$/;"	m	struct:msgto_s
 nickname	src/msg.h	/^	uint8_t			  * nickname;			$/;"	m	struct:irc_msg_nuh_s
 nleft	cutil/src/aiofd.c	/^    size_t nleft;$/;"	m	struct:aiofd_write_s	file:
 node_list	cutil/src/btree.c	/^    node_t**            node_list;  \/* memory for the nodes *\/$/;"	m	struct:bt_s	file:
@@ -1782,31 +1774,17 @@ pair_second	cutil/src/pair.c	/^void * pair_second( pair_t const * const pair )$/
 pair_t	cutil/src/pair.h	/^typedef struct pair_s pair_t;$/;"	t	typeref:struct:pair_s
 params	src/msg.h	/^	list_t				params;		\/* list of uint8_t * to each parameter *\/$/;"	m	struct:irc_msg_s
 parent	cutil/src/btree.c	/^    struct node_s * parent;     \/* parent pointer *\/$/;"	m	struct:node_s	typeref:struct:node_s::node_s	file:
-parse_channel	src/util.c	/^static int parse_channel( uint8_t * start, uint8_t ** end, uint8_t ** channel )$/;"	f	file:
 parse_command	src/msg.c	/^static int_t parse_command( irc_command_t * const cmd, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_host	src/msg.c	/^static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_host	src/util.c	/^static int parse_host( uint8_t * start, uint8_t ** end, uint8_t ** hostname, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostaddr	src/msg.c	/^static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_hostaddr	src/util.c	/^static int parse_hostaddr( uint8_t * start, uint8_t ** end, uint8_t ** ipv4, uint8_t ** ipv6 )$/;"	f	file:
 parse_hostname	src/msg.c	/^static int_t parse_hostname( uint8_t ** hostname, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_hostname	src/util.c	/^static int parse_hostname( uint8_t * start, uint8_t ** end )$/;"	f	file:
-parse_hostname	src/util.c	/^static int parse_hostname( uint8_t * start, uint8_t ** end, uint8_t ** hostname )$/;"	f	file:
-parse_ipv4	src/util.c	/^static int parse_ipv4( uint8_t * start, uint8_t ** end, uint8_t ** ipv4 )$/;"	f	file:
-parse_ipv6	src/util.c	/^static int parse_ipv6( uint8_t * start, uint8_t ** end, uint8_t ** ipv6 )$/;"	f	file:
-parse_msgtarget	src/util.c	/^int parse_msgtarget( uint8_t * start, msgto_t ** msgtos, int * nmsgtos )$/;"	f
-parse_msgto	src/util.c	/^int parse_msgto( uint8_t * start, uint8_t ** end, msgto_t * mt )$/;"	f
-parse_nick	src/util.c	/^static int parse_nick( uint8_t * start, uint8_t ** end, uint8_t ** nick )$/;"	f	file:
 parse_nickname	src/msg.c	/^static int_t parse_nickname( uint8_t ** nickname, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_nuh	src/msg.c	/^static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_params	src/msg.c	/^static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
 parse_prefix	src/msg.c	/^static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_prefix	src/util.c	/^int parse_prefix( uint8_t * start, uint8_t ** nick, uint8_t ** user, $/;"	f
 parse_servername	src/msg.c	/^static int_t parse_servername( uint8_t ** servername, uint8_t **ptr, uint8_t * const end )$/;"	f	file:
-parse_servername	src/util.c	/^static int parse_servername( uint8_t * start, uint8_t ** end, uint8_t ** servername )$/;"	f	file:
 parse_shortname	src/msg.c	/^static int_t parse_shortname( uint8_t **shortname, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_shortname	src/util.c	/^static int parse_shortname( uint8_t * start, uint8_t ** end, uint8_t ** shortname )$/;"	f	file:
 parse_user	src/msg.c	/^static int_t parse_user( uint8_t ** user, uint8_t ** ptr, uint8_t * const end )$/;"	f	file:
-parse_user	src/util.c	/^static int parse_user( uint8_t * start, uint8_t ** end, uint8_t ** user )$/;"	f	file:
 part_msg	src/channel.c	/^	uint8_t*	part_msg;		\/* part message *\/$/;"	m	struct:irc_channel_s	file:
 parting	src/channel.c	/^	int			parting;		\/* fully pared? *\/$/;"	m	struct:irc_channel_s	file:
 pass	src/channel.c	/^    uint8_t*    pass;           \/* the channel password *\/$/;"	m	struct:irc_channel_s	file:
@@ -1860,7 +1838,6 @@ send_nick	src/session.c	/^static void send_nick( irc_session_t * const session )
 send_pass	src/session.c	/^static void send_pass( irc_session_t * const session )$/;"	f	file:
 send_quit	src/session.c	/^static void send_quit( irc_session_t * const session )$/;"	f	file:
 send_user	src/session.c	/^static void send_user( irc_session_t * const session )$/;"	f	file:
-server_name	src/util.h	/^	uint8_t * server_name;$/;"	m	struct:msgto_s
 servername	src/msg.h	/^	uint8_t			  * servername;$/;"	m	struct:irc_msg_origin_s
 servers	src/session.c	/^	ht_t*				servers;				\/* hashtable of servers in the network *\/$/;"	m	struct:irc_session_s	file:
 session	src/event_cb.c	/^	irc_session_t *		session;$/;"	m	struct:irc_event_cb_s	file:
@@ -2211,7 +2188,6 @@ umodes	src/modes.c	/^static int8_t const * const umodes = "abcdfghiklmnopqrstuvw
 used	cutil/src/list.c	/^    int_t   used;   \/* bool to mark used nodes *\/$/;"	m	struct:list_item_s	file:
 used_head	cutil/src/list.h	/^    list_itr_t      used_head;              \/* head node of the used circular list *\/$/;"	m	struct:list_s
 user	src/msg.h	/^	uint8_t			  * user;$/;"	m	struct:irc_msg_nuh_s
-user	src/util.h	/^	uint8_t * user;$/;"	m	struct:msgto_s
 user_data	cutil/src/aiofd.h	/^    void *      user_data;      \/* context to pass to callbacks *\/$/;"	m	struct:aiofd_s
 user_data	cutil/src/child.c	/^    void *          user_data;      \/* passed to ops callbacks *\/$/;"	m	struct:child_process_s	file:
 user_data	cutil/src/events.h	/^    void *          user_data;$/;"	m	struct:evt_s

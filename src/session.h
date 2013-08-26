@@ -27,27 +27,27 @@
 #include "msg.h"
 #include "conn.h"
 
-#define IRC_PARAM_LEN	(512)
+#define IRC_PARAM_LEN (512)
 
 typedef enum irc_session_setting_e
 {
-	SERVER_PORT			= 0xea1146cd,
-	SERVER_HOST			= 0x602099fa,
-	NICK_NAME			= 0x1606207d,
-	USER_NAME			= 0x20d80d65,
-	REAL_NAME			= 0x4215b8fe,
-	SERVER_PASS			= 0x01026017,
-	QUIT_MSG			= 0xcc785413,
+  SERVER_PORT   = 0xea1146cd,
+  SERVER_HOST   = 0x602099fa,
+  NICK_NAME     = 0x1606207d,
+  USER_NAME     = 0x20d80d65,
+  REAL_NAME     = 0x4215b8fe,
+  SERVER_PASS   = 0x01026017,
+  QUIT_MSG      = 0xcc785413,
 
 } irc_session_setting_t;
 
 typedef enum irc_session_state_e
 {
-	IRC_SESSION_DISCONNECTED,
-	IRC_SESSION_CONNECTED,
-	IRC_SESSION_ACTIVE,
-	IRC_SESSION_QUIT,
-	IRC_SESSION_PENDING_DISCONNECT
+  IRC_SESSION_DISCONNECTED,
+  IRC_SESSION_CONNECTED,
+  IRC_SESSION_ACTIVE,
+  IRC_SESSION_QUIT,
+  IRC_SESSION_PENDING_DISCONNECT
 
 } irc_session_state_t;
 
@@ -58,21 +58,21 @@ typedef struct irc_event_cb_s irc_event_cb_t;
 irc_session_t * irc_session_new( uint8_t const * const host,
                                  uint8_t const * const port,
                                  evt_loop_t * const evt,
-								 void * user_data );
+                                 void * user_data );
 void irc_session_delete( void * s );
 
 /* get/set functions for session settings */
 irc_ret_t irc_session_set( irc_session_t * const session,
-						   irc_session_setting_t const setting,
-						   void const * const value );
+                           irc_session_setting_t const setting,
+                           void const * const value );
 void * irc_session_get( irc_session_t * const session,
-					    irc_session_setting_t const setting );
+                        irc_session_setting_t const setting );
 
 /* add a callback function for the given command at a certain priority */
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
-								   irc_event_cb_t * const cb );
+                                   irc_event_cb_t * const cb );
 irc_ret_t irc_session_clear_handler( irc_session_t * const session,
-									 uint8_t const * const name );
+                                     uint8_t const * const name );
 
 /* connect/disconnect from the server */
 irc_ret_t irc_session_connect( irc_session_t * const session );
