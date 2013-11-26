@@ -14,9 +14,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-#ifndef __CIRC_TEST_FLAGS_H__
-
-#include "../cutil/tests/test_flags.h"
+#ifndef CIRC_TEST_FLAGS_H
 
 /* irc_msg */
 extern int fake_irc_msg_parse;
@@ -25,5 +23,5 @@ extern int fail_irc_msg_new_data_alloc;
 
 void reset_circ_test_flags( void );
 
-#endif/*__CIRC_TEST_FLAGS_H__*/
+#endif/*CIRC_TEST_FLAGS_H*/
 

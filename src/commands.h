@@ -14,16 +14,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
  
-#ifndef __IRC_COMMANDS_H__
-#define __IRC_COMMANDS_H__
+#ifndef IRC_COMMANDS_H
+#define IRC_COMMANDS_H
 
 typedef enum irc_ret_e
 {
     /* non-error return value */
     IRC_OK              = 1,
     IRC_MSG_MOREDATA    = 2,
-    IRC_CONTINUE		= 3,
-	IRC_DONE			= 4,
+    IRC_CONTINUE        = 3,
+    IRC_DONE            = 4,
     
     /* errors */
     IRC_ERR             = -1,
@@ -39,14 +39,14 @@ typedef enum irc_ret_e
 
 typedef enum irc_command_e
 {
-	/* used to indicate any command */
-	ANYCMD = -2,
+    /* used to indicate any command */
+    ANYCMD = -2,
 
     /* used when no command is specified */
     NOCMD = -1,
-    
+
     /* RFC 2812, Section 3 -- Message Details */
-    
+
     /* RFC 2812, Section 3.1 -- Connection Registration */
     PASS = CMD_BASE,
     NICK,
@@ -66,11 +66,11 @@ typedef enum irc_command_e
     LIST,
     INVITE,
     KICK,
-    
+
     /* RFC 2812, Section 3.3 -- Sending Messages */
     PRIVMSG,
     NOTICE,
-    
+
     /* RFC 2812, Section 3.4 -- Server Queries and Commands */
     MOTD,
     LUSERS,
@@ -82,22 +82,22 @@ typedef enum irc_command_e
     TRACE,
     ADMIN,
     INFO,
-        
+
     /* RFC 2812, Section 3.5 -- Service Query and Commands */
     SERVLIST,
     SQUERY,
-    
+
     /* RFC 2812, Section 3.6 -- User Based Queries */
     WHO,
     WHOIS,
     WHOWAS,
-    
+
     /* RFC 2812, Section 3.7 -- Misc Messages */
     KILL,
     PING,
     PONG,
     ERROR,
-    
+
     /* RFC 2812, Section 4 -- Optional Features */
     AWAY,
     REHASH,
@@ -108,24 +108,24 @@ typedef enum irc_command_e
     WALLOPS,
     USERHOST,
     ISON,
-    
+
     /* helpers for checking command validity */
     LAST_COMMAND,
     FIRST_COMMAND = PASS,
     NUM_COMMANDS = LAST_COMMAND - FIRST_COMMAND,
 
-	/* session events */
-	SESSION_CONNECTED = SESSION_BASE,
-	SESSION_ON_NICK,
-	SESSION_ON_PRIVMSG,
-	SESSION_ON_PUBMSG,
-	SESSION_DISCONNECTED,
-	LAST_SESSION_EVENT,
-	FIRST_SESSION_EVENT = SESSION_CONNECTED,
-	NUM_SESSION_EVENTS = LAST_SESSION_EVENT - FIRST_SESSION_EVENT,
-    
+    /* session events */
+    SESSION_CONNECTED = SESSION_BASE,
+    SESSION_ON_NICK,
+    SESSION_ON_PRIVMSG,
+    SESSION_ON_PUBMSG,
+    SESSION_DISCONNECTED,
+    LAST_SESSION_EVENT,
+    FIRST_SESSION_EVENT = SESSION_CONNECTED,
+    NUM_SESSION_EVENTS = LAST_SESSION_EVENT - FIRST_SESSION_EVENT,
+
     /* RFC 2812, Section 5 -- Replies */
-    
+
     /* 
      * RFC 2812, Section 5.1 -- Command Responses
      * Numerics in the range from 001 to 099 are used for 
@@ -138,25 +138,25 @@ typedef enum irc_command_e
     RPL_CREATED             = 3,
     RPL_MYINFO              = 4,
     RPL_BOUNCE              = 5,   /* RFC2812 */
-    RPL_ISUPPORT			= 5,
-    RPL_MAP					= 6,   /* Unreal */
-    RPL_MAPEND				= 7,   /* Unreal */
-    RPL_SNOMASK				= 8,   /* ircu */
-    RPL_STATMENTOT			= 9,   /* ircu */
-    RPL_BOUNCE_2			= 10,
-	RPL_STATMEM				= 10,  /* ircu */
-	
-	RPL_YOURCOOKIE			= 14,  /* Hybrid? */
-	RPL_MAP_2				= 15,  /* ircu */
-	RPL_MAPMORE				= 16,  /* ircu */
-	RPL_MAPEND_2			= 17,  /* ircu */
-	
-	RPL_YOURID				= 42,  /* IRCnet */
-	RPL_SAVENICK			= 43,  /* IRCnet */
-	
-	RPL_ATTEMPTINGJUNC		= 50,  /* aircd */
-	RPL_ATTEMPTINGREROUTE   = 51,  /* aircd */
-    
+    RPL_ISUPPORT            = 5,
+    RPL_MAP                 = 6,   /* Unreal */
+    RPL_MAPEND              = 7,   /* Unreal */
+    RPL_SNOMASK             = 8,   /* ircu */
+    RPL_STATMENTOT          = 9,   /* ircu */
+    RPL_BOUNCE_2            = 10,
+    RPL_STATMEM             = 10,  /* ircu */
+
+    RPL_YOURCOOKIE          = 14,  /* Hybrid? */
+    RPL_MAP_2               = 15,  /* ircu */
+    RPL_MAPMORE             = 16,  /* ircu */
+    RPL_MAPEND_2            = 17,  /* ircu */
+
+    RPL_YOURID              = 42,  /* IRCnet */
+    RPL_SAVENICK            = 43,  /* IRCnet */
+
+    RPL_ATTEMPTINGJUNC      = 50,  /* aircd */
+    RPL_ATTEMPTINGREROUTE   = 51,  /* aircd */
+
     RPL_TRACELINK           = 200,
     RPL_TRACECONNECTING     = 201,
     RPL_TRACEHANDSHAKE      = 202,
@@ -202,14 +202,14 @@ typedef enum irc_command_e
     RPL_TRACELOG            = 261,
     RPL_TRACEEND            = 262,
     RPL_TRYAGAIN            = 263,
-    
-    RPL_LOCALUSERS			= 265,
-    RPL_GLOBALUSERS			= 266,
-    RPL_START_NETSTAT		= 267,
-    RPL_NETSTAT				= 268,
-    RPL_END_NETSTAT			= 269,
+
+    RPL_LOCALUSERS          = 265,
+    RPL_GLOBALUSERS         = 266,
+    RPL_START_NETSTAT       = 267,
+    RPL_NETSTAT             = 268,
+    RPL_END_NETSTAT         = 269,
     /* more from http://www.alien.net.au/irc/irc2numerics.html */
-    
+
     RPL_NONE                = 300, /* reserved */
     RPL_AWAY                = 301,
     RPL_USERHOST            = 302,
@@ -233,7 +233,7 @@ typedef enum irc_command_e
     RPL_CHANNELCREATEDON    = 329,
     RPL_NOTOPIC             = 331,
     RPL_TOPIC               = 332,
-	RPL_TOPICINFO			= 333,
+    RPL_TOPICINFO           = 333,
     RPL_INVITING            = 341,
     RPL_SUMMONING           = 342,
     RPL_INVITELIST          = 346,
@@ -268,10 +268,10 @@ typedef enum irc_command_e
     RPL_ENDOFUSERS          = 394,
     RPL_NOUSERS             = 395,
 
-	LAST_RPL,
-	FIRST_RPL = RPL_WELCOME,
-	NUM_RPLS = LAST_RPL - FIRST_RPL,
-    
+    LAST_RPL,
+    FIRST_RPL = RPL_WELCOME,
+    NUM_RPLS = LAST_RPL - FIRST_RPL,
+
     /* RFC 2812, Section 5.2 -- Error Replies */
     ERR_NOSUCHNCK           = 401,
     ERR_NOSUCKSERVER        = 402,
@@ -327,16 +327,16 @@ typedef enum irc_command_e
     ERR_UMODEUNKNOWNFLAG    = 501,
     ERR_USERSDONTMATCH      = 502,
 
-	LAST_ERR,
-	FIRST_ERR = ERR_NOSUCHNCK,
-	NUM_ERRS = LAST_ERR - FIRST_ERR
+    LAST_ERR,
+    FIRST_ERR = ERR_NOSUCHNCK,
+    NUM_ERRS = LAST_ERR - FIRST_ERR
 
 } irc_command_t;
 
 #define IS_ERROR(x) ((x >= FIRST_ERR) && (x < LAST_ERR))
 #define IS_REPLY(x) ((x >= FIRST_RPL) && (x < LAST_RPL))
 #define IS_COMMAND(x) ((x >= FIRST_COMMAND) && (x < LAST_COMMAND))
-/*#define IS_SESSION_EVENT(x) ((x >= FIRST_SESSION_EVENT) && (x < LAST_SESSION_EVENT))*/
+#define IS_SESSION_EVENT(x) ((x >= FIRST_SESSION_EVENT) && (x < LAST_SESSION_EVENT))
 #define IS_RESERVED(x) ( \
     (x == RPL_STATSCLINE) || \
     (x == RPL_STATSNLINE) || \
@@ -362,18 +362,11 @@ typedef enum irc_command_e
     (x == RPL_MYPORTIS) || \
     (x == ERR_NOSERVICEHOST))
 #define IS_VALID_COMMAND(x) (IS_ERROR(x) || \
-							 IS_REPLY(x) || \
-							 IS_COMMAND(x) || \
-							 (x == NOCMD) || \
-							 (x == ANYCMD))
-#if 0
-#define IS_VALID_COMMAND(x) (IS_ERROR(x) || \
-							 IS_REPLY(x) || \
-							 IS_COMMAND(x) || \
-							 IS_SESSION_EVENT(x) || \
-							 (x == NOCMD) || \
-							 (x == ANYCMD))
-#endif
+               IS_REPLY(x) || \
+               IS_COMMAND(x) || \
+               IS_SESSION_EVENT(x) || \
+               (x == NOCMD) || \
+               (x == ANYCMD))
 
 /* translate a command into a string */
 int8_t const * irc_cmd_get_string( irc_command_t const cmd );
@@ -384,5 +377,5 @@ int8_t const * irc_cmd_get_type_string( irc_command_t const cmd );
 /* translate a string into a command number */
 irc_command_t irc_cmd_get_command_from_string( int8_t const * const str );
 
-#endif//__IRC_COMMANDS_H__
+#endif//IRC_COMMANDS_H
 

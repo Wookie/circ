@@ -22,6 +22,9 @@
 #include <cutil/events.h>
 #include <cutil/list.h>
 #include <cutil/log.h>
+#include <cutil/tests/test_flags.h>
+#include <cutil/tests/test_macros.h>
+
 #include <circ/commands.h>
 #include <circ/msg.h>
 
@@ -244,6 +247,81 @@ static void test_msg_parse_params( void )
 }
 
 
+#define FINALIZE_SIZE (10)
+static void test_msg_finalize( void )
+{
+    static uint8_t const * datas[FINALIZE_SIZE] =
+    {
+        ":qeed!~qeed@adsl-98-85-45-93.mco.bellsouth.net QUIT :Quit: qeed\r\n",
+        "PING LAG1370515089364389\r\n",
+        ":blah PONG 1 2 3 4 :trailing parameter\r\n",
+        "PONG\r\n",
+        ":[blah] PONG\r\n",
+        ":[blah]@127.0.0.1 PONG\r\n",
+        ":[blah]!blah@127.0.0.1 PONG\r\n",
+        ":[blah]@::1 PONG\r\n",
+        ":[blah]!blah@::1 PONG\r\n",
+        ":[blah]@foo.com PONG\r\n"
+    };
+    static irc_command_t cmds[FINALIZE_SIZE] =
+    {
+        QUIT,
+        PING,
+        PONG,
+        PONG,
+        PONG,
+        PONG,
+        PONG,
+        PONG,
+        PONG,
+        PONG
+    };
+    int i;
+    uint8_t * s = NULL;
+    irc_msg_t * msg = NULL;
+
+    for ( i = 0; i < FINALIZE_SIZE; i++ )
+    {
+        msg = irc_msg_new_from_data( datas[i], strlen( datas[i] ) );
+        CU_ASSERT_PTR_NOT_NULL( msg );
+        CU_ASSERT_EQUAL( msg->cmd, cmds[i] );
+        irc_msg_finalize( msg );
+        irc_msg_flatten( msg, &s );
+        CU_ASSERT_STRING_EQUAL( s, datas[i] );
+        irc_msg_delete( msg );
+        FREE( s );
+        msg = NULL;
+        s = NULL;
+    }
+}
+
+static void test_msg_set_all( void )
+{
+    irc_msg_t *msg = NULL;
+    uint8_t * s = NULL;
+
+    msg = irc_msg_new();
+    CU_ASSERT_EQUAL( IRC_OK, irc_msg_set_all( msg, NICK, NULL, 1, "joe" ) );
+    irc_msg_finalize( msg );
+    irc_msg_flatten( msg, &s );
+    CU_ASSERT_TRUE( strcmp( s, "NICK joe\r\n" ) == 0 );
+    irc_msg_delete(msg);
+    FREE( s );
+    msg = NULL;
+    s = NULL;
+
+    msg = irc_msg_new();
+    CU_ASSERT_EQUAL( IRC_OK, irc_msg_set_all( msg, QUIT, NULL, 0) );
+    CU_ASSERT_EQUAL( IRC_OK, irc_msg_set_trailing( msg, "Quitting for good" ) );
+    irc_msg_finalize( msg );
+    irc_msg_flatten( msg, &s );
+    CU_ASSERT_TRUE( strcmp( s, "QUIT :Quitting for good\r\n" ) == 0 );
+    irc_msg_delete(msg);
+    FREE( s );
+    msg = NULL;
+    s = NULL;
+}
+
 static int init_msg_suite( void )
 {
     srand(0xDEADBEEF);
@@ -265,6 +343,8 @@ static CU_pSuite add_msg_tests( CU_pSuite pSuite )
     ADD_TEST( "parse prefix", test_msg_parse_prefix );
     ADD_TEST( "parse params", test_msg_parse_params );
     ADD_TEST( "msg log", test_msg_log );
+    ADD_TEST( "msg finalize", test_msg_finalize );
+    ADD_TEST( "msg set all", test_msg_set_all );
 
     ADD_TEST( "msg private functions", test_msg_private_functions );
     

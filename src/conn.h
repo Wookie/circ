@@ -14,8 +14,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-#ifndef __IRC_CONN_H__
-#define __IRC_CONN_H__
+#ifndef IRC_CONN_H
+#define IRC_CONN_H
 
 #include <cutil/socket.h>
 #include <cutil/list.h>
@@ -59,5 +59,5 @@ irc_ret_t irc_conn_disconnect( irc_conn_t* const irc, int do_wait );
 /* send the specified IRC command to the server */
 irc_ret_t irc_conn_send_msg( irc_conn_t* const irc, irc_msg_t* const msg );
 
-#endif /*__IRC_CONN_H__*/
+#endif /*IRC_CONN_H*/
  

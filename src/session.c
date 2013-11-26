@@ -107,7 +107,7 @@ static void send_pass( irc_session_t * const session )
 
   /* send the PASS command */
   pass = irc_msg_new();
-  irc_msg_initialize( pass, PASS, NULL, 1, server_pass );
+  irc_msg_set_all( pass, PASS, NULL, 1, server_pass );
 
   /* send the PASS command */
   irc_conn_send_msg( session->conn, pass );
@@ -123,7 +123,7 @@ static void send_nick( irc_session_t * const session )
 
   /* send the NICK command */
   nick = irc_msg_new();
-  irc_msg_initialize( nick, NICK, NULL, 1, nick_name );
+  irc_msg_set_all( nick, NICK, NULL, 1, nick_name );
 
   /* send the NICk command */
   irc_conn_send_msg( session->conn, nick );
@@ -139,7 +139,7 @@ static void send_user( irc_session_t * const session )
 
   /* send the USER command */
   user = irc_msg_new();
-  irc_msg_initialize( user, USER, NULL, 3, user_name, "0", "*" );
+  irc_msg_set_all( user, USER, NULL, 3, user_name, "0", "*" );
   irc_msg_set_trailing( user, user_name );
 
   /* send the USER command */
@@ -156,7 +156,7 @@ static void send_quit( irc_session_t * const session )
 
   /* send QUIT */
   quit = irc_msg_new();
-  irc_msg_initialize( quit, QUIT, NULL, 0 );
+  irc_msg_set_all( quit, QUIT, NULL, 0 );
   irc_msg_set_trailing( quit, quit_msg );
 
   /* send the QUIT command */
@@ -569,7 +569,7 @@ static HANDLER_FN( session, PING )
 
   /* send PONG */
   pong = irc_msg_new();
-  irc_msg_initialize( pong, PONG, NULL, 1, dest );
+  irc_msg_set_all( pong, PONG, NULL, 1, dest );
 
   /* send the PONG command */
   irc_conn_send_msg( session->conn, pong );

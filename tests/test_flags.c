@@ -16,6 +16,9 @@
 
 #include <cutil/debug.h>
 #include <cutil/macros.h>
+#include <cutil/tests/test_flags.h>
+
+#include "test_flags.h"
 
 /* irc_msg */
 int fake_irc_msg_parse = FALSE;
@@ -24,7 +27,10 @@ int fail_irc_msg_new_data_alloc = FALSE;
 
 void reset_circ_test_flags( void )
 {
+    /* reset the cutil flags */
     reset_test_flags();
+
+    /* reset the circ test flags */
 
     /* irc_msg */
     fake_irc_msg_parse = FALSE;

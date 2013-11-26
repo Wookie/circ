@@ -47,11 +47,11 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
     T("LIST"),
     T("INVITE"),
     T("KICK"),
-    
+
     /* RFC 2812, Section 3.3 -- Sending Messages */
     T("PRIVMSG"),
     T("NOTICE"),
-    
+
     /* RFC 2812, Section 3.4 -- Server Queries and Commands */
     T("MOTD"),
     T("LUSERS"),
@@ -63,22 +63,22 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
     T("TRACE"),
     T("ADMIN"),
     T("INFO"),
-        
+
     /* RFC 2812, Section 3.5 -- Service Query and Commands */
     T("SERVLIST"),
     T("SQUERY"),
-    
+
     /* RFC 2812, Section 3.6 -- User Based Queries */
     T("WHO"),
     T("WHOIS"),
     T("WHOWAS"),
-    
+
     /* RFC 2812, Section 3.7 -- Misc Messages */
     T("KILL"),
     T("PING"),
     T("PONG"),
     T("ERROR"),
-    
+
     /* RFC 2812, Section 4 -- Optional Features */
     T("AWAY"),
     T("REHASH"),
@@ -94,11 +94,11 @@ int8_t const * const irc_commands[NUM_COMMANDS] =
 /* session event strings */
 int8_t const * const irc_session_events[NUM_SESSION_EVENTS] =
 {
-	T("CONNECTED"),
-	T("NICK"),
-	T("PRIVMSG"),
-	T("PUBMSG"),
-	T("DISCONNECTED"),
+    T("CONNECTED"),
+    T("NICK"),
+    T("PRIVMSG"),
+    T("PUBMSG"),
+    T("DISCONNECTED"),
 };
 
 int8_t const * const irc_any_cmd = T("ANYCMD");
@@ -113,20 +113,18 @@ int8_t const * irc_cmd_get_string(irc_command_t const cmd)
     {
         return irc_commands[cmd - CMD_BASE];   
     }
-/*
-	else if (IS_SESSION_EVENT(cmd))
-	{
-		return irc_session_events[cmd - SESSION_BASE];
-	}
-*/
-	else if ( cmd == ANYCMD )
-	{
-		return irc_any_cmd;
-	}
-	else if ( cmd == NOCMD )
-	{
-		return irc_no_cmd;
-	}
+    else if (IS_SESSION_EVENT(cmd))
+    {
+        return irc_session_events[cmd - SESSION_BASE];
+    }
+    else if ( cmd == ANYCMD )
+    {
+        return irc_any_cmd;
+    }
+    else if ( cmd == NOCMD )
+    {
+        return irc_no_cmd;
+    }
     else
     {
         sprintf(C(code), "%03d", cmd);
@@ -138,37 +136,35 @@ int8_t const * irc_cmd_get_string(irc_command_t const cmd)
 
 int8_t const * irc_cmd_get_type_string( irc_command_t const cmd )
 {
-	static int8_t const * const ERROR = T("ERROR");
-	static int8_t const * const REPLY = T("REPLY");
-	static int8_t const * const COMMAND = T("COMMAND");
-	/*static int8_t const * const SESSION_EVENT = T("SESSION_EVENT");*/
-	static int8_t const * const RESERVED = T("RESERVED");
-	static int8_t const * const UNKNOWN = T("UNKNOWN");
+    static int8_t const * const ERROR = T("ERROR");
+    static int8_t const * const REPLY = T("REPLY");
+    static int8_t const * const COMMAND = T("COMMAND");
+    static int8_t const * const SESSION_EVENT = T("SESSION_EVENT");
+    static int8_t const * const RESERVED = T("RESERVED");
+    static int8_t const * const UNKNOWN = T("UNKNOWN");
 
-	if ( IS_ERROR( cmd ) )
-	{
-		return ERROR;
-	}
-	else if ( IS_REPLY( cmd ) )
-	{
-		return REPLY;
-	}
-	else if ( IS_COMMAND( cmd ) )
-	{
-		return COMMAND;
-	}
-/*
-	else if ( IS_SESSION_EVENT( cmd ) )
-	{
-		return SESSION_EVENT;
-	}
-*/
-	else if ( IS_RESERVED( cmd ) )
-	{
-		return RESERVED;
-	}
-	
-	return UNKNOWN;
+    if ( IS_ERROR( cmd ) )
+    {
+        return ERROR;
+    }
+    else if ( IS_REPLY( cmd ) )
+    {
+        return REPLY;
+    }
+    else if ( IS_COMMAND( cmd ) )
+    {
+        return COMMAND;
+    }
+    else if ( IS_SESSION_EVENT( cmd ) )
+    {
+        return SESSION_EVENT;
+    }
+    else if ( IS_RESERVED( cmd ) )
+    {
+        return RESERVED;
+    }
+    
+    return UNKNOWN;
 }
 
 /* get the command in the message */
@@ -190,16 +186,15 @@ irc_command_t irc_cmd_get_command_from_string(int8_t const * const str)
             if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
                 return cmd;
         }
-#if 0	
-		/* scan through the session event strings looking for a match */
-		for(cmd = FIRST_SESSION_EVENT; cmd < LAST_SESSION_EVENT; cmd++)
-		{
-			if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
-				return cmd;
-		}
-#endif
-	}
-        
+
+        /* scan through the session event strings looking for a match */
+        for(cmd = FIRST_SESSION_EVENT; cmd < LAST_SESSION_EVENT; cmd++)
+        {
+            if(strcmp(C(str), C(irc_cmd_get_string(cmd))) == 0)
+                return cmd;
+        }
+    }
+
     /* no match so return no command */
     return NOCMD;
 }

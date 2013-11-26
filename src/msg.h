@@ -40,19 +40,35 @@ typedef enum irc_host_type_e
 
 #define IS_VALID_MSG_HOST(x)  ((x >= FIRST_MSG_HOST) && (x < LAST_MSG_HOST))
 
-typedef enum irc_origin_type_e
+typedef enum irc_prefix_type_e
 {
-	CONN_ORIGIN = 0,				/* no prefix in message, origin from connection */
-	SERVERNAME_ORIGIN = 1,			/* prefix is server name */
-	NUH_ORIGIN = 2,					/* prefix is name [ [ '!' user] '@' host ] */
+	CONN_PREFIX = 0,				/* no prefix in message, origin from connection */
+	SERVERNAME_PREFIX = 1,			/* prefix is server name */
+	NUH_PREFIX = 2,					/* prefix is name [ [ '!' user] '@' host ] */
 
-	LAST_ORIGIN,
-	FIRST_ORIGIN = CONN_ORIGIN,
-	NUM_ORIGIN = LAST_ORIGIN - FIRST_ORIGIN
+	LAST_PREFIX,
+	FIRST_PREFIX = CONN_PREFIX,
+	NUM_PREFIX = LAST_PREFIX - FIRST_PREFIX
 
-} irc_origin_type_t;
+} irc_prefix_type_t;
 
-#define IS_VALID_ORIGIN(x) ((x >= FIRST_ORIGIN) && (x < LAST_ORIGIN))
+#define IS_VALID_PREFIX(x) ((x >= FIRST_PREFIX) && (x < LAST_PREFIX))
+
+typedef struct irc_str_ref_s        /* string reference */
+{
+    struct iovec       v;           /* pointer to mem and len of data */
+    int_t              dyn;         /* is it dynamically allocated? */
+
+} irc_str_ref_t;
+
+#define STR_PTR(s) ((uint8_t*)((struct iovec*)&s)->iov_base)
+#define STR_PTR_P(p) ((uint8_t*)((struct iovec*)p)->iov_base)
+#define STR_PTR_SET(s, v) (((struct iovec*)&s)->iov_base = v)
+#define STR_PTR_P_SET(p, v) (((struct iovec*)p)->iov_base = v)
+#define STR_LEN(s) ((size_t)((struct iovec*)&s)->iov_len)
+#define STR_LEN_P(p) ((size_t)((struct iovec*)p)->iov_len)
+#define STR_LEN_SET(s, l) (((struct iovec*)&s)->iov_len = l)
+#define STR_LEN_P_SET(p, l) (((struct iovec*)p)->iov_len = l)
 
 typedef struct irc_msg_in_buf_s
 {
@@ -65,6 +81,7 @@ typedef struct irc_msg_out_buf_s
 {
 	struct iovec	  * iov;		/* list of iovec structures */
 	size_t				nvec;		/* number of iovec structures */
+    list_t              strs;       /* keep track of any dyn allocated strings */
 
 } irc_msg_out_buf_t;
 
@@ -72,25 +89,25 @@ typedef struct irc_msg_h_s			/* host */
 {
 	irc_host_type_t		kind;		/* kind of host field */
     sockaddr_t          addr;       /* address */
-	uint8_t			  * hostname;	/* DNS hostname */
+    irc_str_ref_t       hostname;   /* DNS hostname */
 
 } irc_msg_h_t;
 
 typedef struct irc_msg_nuh_s		/* (nickname [ [ "!" user ] "@" host ] ) */
 {
-	uint8_t			  * nickname;			
-	uint8_t			  * user;
+    irc_str_ref_t       nickname;
+    irc_str_ref_t       user;
 	irc_msg_h_t			host;
 
 } irc_msg_nuh_t;
 
-typedef struct irc_msg_origin_s		/* servername / nuh */
+typedef struct irc_msg_prefix_s		/* servername / nuh */
 {
-	irc_origin_type_t	kind;		/* kind of msg origin */
-	uint8_t			  * servername;
+	irc_prefix_type_t	kind;		/* kind of msg prefix */
+    irc_str_ref_t       servername;
 	irc_msg_nuh_t		nuh;
 
-} irc_msg_origin_t;
+} irc_msg_prefix_t;
 
 typedef struct irc_msg_s
 {
@@ -98,9 +115,10 @@ typedef struct irc_msg_s
 	irc_msg_out_buf_t	out;		/* the buffer used for sending sending */
 
 	/* the second pass is to parse the sub-parts of the major parts */
-	irc_msg_origin_t	origin;		/* origin specified in the prefix */
+	irc_msg_prefix_t	prefix;		/* prefix specified in the prefix */
 	irc_command_t		cmd;		/* the command/reply */
-	list_t				params;		/* list of uint8_t * to each parameter */
+	list_t				params;		/* list of *irc_str_ref_t */
+    int_t               trailing;   /* is last param a trailing param? */
 
 } irc_msg_t;
 
@@ -121,45 +139,25 @@ irc_ret_t irc_msg_compile( irc_msg_t * const msg );
 
 void irc_msg_log( irc_msg_t const * const msg );
 
-#if 0
 /* initialize the message in one pass */
-irc_ret_t irc_msg_initialize(irc_msg_t* const msg,
-							 irc_command_t const cmd,
-							 uint8_t* const prefix,
-							 int32_t const num_params,
-							 ...);
+irc_ret_t irc_msg_set_all( irc_msg_t * const msg,
+					       irc_command_t const cmd,
+                           irc_msg_prefix_t* const prefix,
+                           uint_t const count,
+                           ... );
 
 /* add a parameter */
-irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param);
+irc_ret_t irc_msg_add_parameter( irc_msg_t * const msg, 
+                                 uint8_t const * const param );
 
-/* set the trailing parameter */
-irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg, uint8_t const * const trailing);
+/* add a trailing parameter */
+irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg,
+                                uint8_t const * const param );
 
 /* "closes" a message and prepares it to be sent */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg );
 
-/* set the command */
-irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd);
-
-#endif
-
-
-
-#if 0
-
-/* copy the msg */
-void irc_msg_copy(irc_msg_t * const lhs, irc_msg_t const * const rhs);
-
-						 
-/* deinitialize the message */
-irc_ret_t irc_msg_deinitialize(irc_msg_t* const msg);
-
-/* clear the parameters */
-irc_ret_t irc_msg_clear_parameters(irc_msg_t* const msg);
-
-/* set a parameter */
-irc_ret_t irc_msg_set_parameter(irc_msg_t* const msg, int32_t const index, int8_t const * const param);
-
-#endif
+/* flatten finalized message into a string */
+irc_ret_t irc_msg_flatten( irc_msg_t * const msg, uint8_t ** s );
 
 #endif

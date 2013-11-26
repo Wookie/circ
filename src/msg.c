@@ -44,6 +44,7 @@ static uint8_t BANG = '!';
 static uint8_t const * const MSGEND = "\r\n";
 
 /* forward declaration of private functions */
+static void param_delete_fn(void *s);
 static inline int_t is_letter( uint8_t const c );
 static inline int_t is_digit( uint8_t const c );
 static inline int_t is_hex( uint8_t const c );
@@ -61,14 +62,34 @@ static int_t parse_user( uint8_t ** user, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end );
-static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end );
+static int_t parse_prefix( irc_msg_prefix_t * const prefix, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_command( irc_command_t * const cmd, uint8_t ** ptr, uint8_t * const end );
 static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * const end );
 
+#define TRAILING(l) ( (list_count(l) == 0) ? \
+                      FALSE : \
+                      (NULL != strchr( STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), \
+                                                 list_itr_tail( &(msg->params) ))), ' ' )))
 
 /*****************************************************************************/
 /********** PRIVATE FUNCTIONS ************************************************/
 /*****************************************************************************/
+
+
+static void param_delete_fn(void *s)
+{
+    irc_str_ref_t *sref = (irc_str_ref_t*)s;
+
+    /* if the string is dynamically allocated and we own it, free it here */
+    if ( sref->dyn )
+    {
+        FREE( STR_PTR_P(sref) );
+    }
+
+    /* clean up the ref struct */
+    FREE( sref );
+}
+
 
 /* create a new message */
 irc_msg_t* irc_msg_new()
@@ -80,8 +101,11 @@ irc_msg_t* irc_msg_new()
     CHECK_PTR_RET(msg, NULL);
 
     /* initialize the params list */
-    CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, NULL ), _irc_msg_new_fail );
+    CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, &param_delete_fn ), _irc_msg_new_fail );
     
+    /* initialize the out strs list */
+    CHECK_GOTO( list_initialize( &(msg->out.strs), IRC_NUM_PARAMS, &param_delete_fn ), _irc_msg_new_fail );
+
     return msg;
 
 _irc_msg_new_fail:
@@ -99,7 +123,10 @@ irc_msg_t* irc_msg_new_from_data( uint8_t const * const data, size_t const size 
     CHECK_PTR_RET(msg, NULL);
 
     /* initialize the params list */
-    CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, NULL ), _irc_msg_new_fail );
+    CHECK_GOTO( list_initialize( &(msg->params), IRC_NUM_PARAMS, &param_delete_fn ), _irc_msg_new_fail );
+
+    /* initialize the out strs list */
+    CHECK_GOTO( list_initialize( &(msg->out.strs), IRC_NUM_PARAMS, &param_delete_fn ), _irc_msg_new_fail );
 
 #if defined(UNIT_TESTING)
     if ( fail_irc_msg_new_data_alloc )
@@ -110,7 +137,7 @@ irc_msg_t* irc_msg_new_from_data( uint8_t const * const data, size_t const size 
 #endif
 
     /* allocate memory for the data */
-    msg->in.data = CALLOC( 1, size );
+    msg->in.data = CALLOC( size, sizeof(uint8_t) );
 
 #if defined(UNIT_TESTING)
     if ( fail_irc_msg_new_data_alloc )
@@ -127,6 +154,9 @@ irc_msg_t* irc_msg_new_from_data( uint8_t const * const data, size_t const size 
 
     /* now try to parse it */
     CHECK_GOTO( (IRC_OK == irc_msg_parse( msg )), _irc_msg_new_fail );
+
+    /* check for trailing parameter */
+    msg->trailing = TRAILING( &(msg->params) );
     
     return msg;
 
@@ -145,6 +175,9 @@ void irc_msg_delete(void * m)
 
     /* clean up the params list */
     list_deinitialize( &(msg->params) );
+
+    /* clean up the out strs list */
+    list_deinitialize( &(msg->out.strs) );
 
     /* delete the array of iovec structs */
     FREE( msg->out.iov );
@@ -221,7 +254,7 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
         /* skip over the leading ':' */
         ++ptr;
 
-        CHECK_RET( parse_prefix( &(msg->origin), &ptr, end ), IRC_ERR );
+        CHECK_RET( parse_prefix( &(msg->prefix), &ptr, end ), IRC_ERR );
     }
    
     /***** COMMAND *****/
@@ -234,65 +267,168 @@ irc_ret_t irc_msg_parse(irc_msg_t* const msg)
 }
 
 #define IP_LOG_BUF_SIZE (128)
-static void irc_msg_log_prefix( irc_msg_origin_t const * const origin )
+static ssize_t irc_msg_prefix_r( irc_msg_prefix_t const * const prefix, uint8_t * const buf, size_t len )
 {
-    static uint8_t buf[IP_LOG_BUF_SIZE];
-    switch( origin->kind )
+    uint8_t * p;
+    static uint8_t tmp[IP_LOG_BUF_SIZE];
+
+    switch( prefix->kind )
     {
-        case CONN_ORIGIN:
+        case CONN_PREFIX:
             /* no prefix...do nothing */
-            break;
-        case SERVERNAME_ORIGIN:
-            LOG( "  (%s)\n", origin->servername );
-            break;
-        case NUH_ORIGIN:
-            switch( origin->nuh.host.kind )
+            MEMSET( buf, 0, len );
+            return 0;
+        case SERVERNAME_PREFIX:
+            return snprintf( buf, len, "%s", STR_PTR(prefix->servername) );
+        case NUH_PREFIX:
+            switch( prefix->nuh.host.kind )
             {
                 case NO_HOST:
-                    LOG( " (%s)\n", origin->nuh.nickname );
-                    break;
+                    return snprintf( buf, len, "%s", STR_PTR(prefix->nuh.nickname) );
                 case V4_HOSTADDR:
-                    /* convert IPv4 address to dotted quad string */
-                    MEMSET( buf, 0, IP_LOG_BUF_SIZE );
-                    inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&(origin->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
+                    if ( STR_PTR( prefix->nuh.host.hostname ) == NULL )
+                    {
+                        /* convert IPv4 address to dotted quad string */
+                        MEMSET( tmp, 0, IP_LOG_BUF_SIZE );
+                        inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&(prefix->nuh.host.addr)), 
+                                   tmp, IP_LOG_BUF_SIZE );
+                        p = tmp;
+                    }
+                    else
+                    {
+                        p = STR_PTR( prefix->nuh.host.hostname );
+                    }
 
-                    if ( origin->nuh.user != NULL )
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
                     {
                         /* we have nick!user@host */
-                        LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, buf);
+                        return snprintf( buf, len, "%s!%s@%s", 
+                                         STR_PTR(prefix->nuh.nickname), 
+                                         STR_PTR(prefix->nuh.user), p );
                     }
                     else
                     {
                         /* we have nick@host */
-                        LOG( "  (%s @ %s)\n", origin->nuh.nickname, buf );
+                        return snprintf( buf, len, "%s@%s", STR_PTR(prefix->nuh.nickname), p );
+                    }
+                    break;
+                case V6_HOSTADDR:
+                    if ( STR_PTR( prefix->nuh.host.hostname ) == NULL )
+                    {
+                        /* convert IPv6 address to dotted quad string */
+                        MEMSET( tmp, 0, IP_LOG_BUF_SIZE );
+                        inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&(prefix->nuh.host.addr)), 
+                                   tmp, IP_LOG_BUF_SIZE );
+                        p = tmp;
+                    }
+                    else
+                    {
+                        p = STR_PTR( prefix->nuh.host.hostname );
+                    }
+
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
+                    {
+                        /* we have nick!user@host */
+                        return snprintf( buf, len, "%s!%s@%s", 
+                                         STR_PTR(prefix->nuh.nickname), 
+                                         STR_PTR(prefix->nuh.user), p );
+                    }
+                    else
+                    {
+                        /* we have nick@host */
+                        return snprintf( buf, len, "%s@%s", 
+                                         STR_PTR(prefix->nuh.nickname), p );
+                    }
+                    break;
+                case HOSTNAME:
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
+                    {
+                        /* we have nick!user@host */
+                        return snprintf( buf, len, "%s!%s@%s", 
+                                         STR_PTR(prefix->nuh.nickname),
+                                         STR_PTR(prefix->nuh.user), 
+                                         STR_PTR( prefix->nuh.host.hostname ) );
+                    }
+                    else
+                    {
+                        /* we have nick@host */
+                        return snprintf( buf, len, "%s@%s", 
+                                         STR_PTR(prefix->nuh.nickname), 
+                                         STR_PTR( prefix->nuh.host.hostname ) );
+                    }
+                    break;
+            }
+            break;
+    }
+
+    return IRC_ERR;
+}
+
+static void irc_msg_log_prefix( irc_msg_prefix_t const * const prefix )
+{
+    static uint8_t buf[IP_LOG_BUF_SIZE];
+
+    switch( prefix->kind )
+    {
+        case CONN_PREFIX:
+            /* no prefix...do nothing */
+            break;
+        case SERVERNAME_PREFIX:
+            LOG( "  (%s)\n", STR_PTR(prefix->servername) );
+            break;
+        case NUH_PREFIX:
+            switch( prefix->nuh.host.kind )
+            {
+                case NO_HOST:
+                    LOG( " (%s)\n", STR_PTR(prefix->nuh.nickname) );
+                    break;
+                case V4_HOSTADDR:
+                    /* convert IPv4 address to dotted quad string */
+                    MEMSET( buf, 0, IP_LOG_BUF_SIZE );
+                    inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&(prefix->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
+
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
+                    {
+                        /* we have nick!user@host */
+                        LOG( "  (%s ! %s @ %s)\n", STR_PTR(prefix->nuh.nickname), STR_PTR(prefix->nuh.user), buf);
+                    }
+                    else
+                    {
+                        /* we have nick@host */
+                        LOG( "  (%s @ %s)\n", STR_PTR(prefix->nuh.nickname), buf );
                     }
                     break;
                 case V6_HOSTADDR:
                     /* convert IPv6 address to dotted quad string */
                     MEMSET( buf, 0, IP_LOG_BUF_SIZE );
-                    inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&(origin->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
+                    inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&(prefix->nuh.host.addr)), buf, IP_LOG_BUF_SIZE );
 
-                    if ( origin->nuh.user != NULL )
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
                     {
                         /* we have nick!user@host */
-                        LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, buf);
+                        LOG( "  (%s ! %s @ %s)\n", STR_PTR(prefix->nuh.nickname), STR_PTR(prefix->nuh.user), buf);
                     }
                     else
                     {
                         /* we have nick@host */
-                        LOG( "  (%s @ %s)\n", origin->nuh.nickname, buf );
+                        LOG( "  (%s @ %s)\n", STR_PTR(prefix->nuh.nickname), buf );
                     }
                     break;
                 case HOSTNAME:
-                    if ( origin->nuh.user != NULL )
+                    if ( STR_PTR(prefix->nuh.user) != NULL )
                     {
                         /* we have nick!user@host */
-                        LOG( "  (%s ! %s @ %s)\n", origin->nuh.nickname, origin->nuh.user, origin->nuh.host.hostname );
+                        LOG( "  (%s ! %s @ %s)\n", 
+                             STR_PTR(prefix->nuh.nickname), 
+                             STR_PTR(prefix->nuh.user), 
+                             STR_PTR( prefix->nuh.host.hostname ) );
                     }
                     else
                     {
                         /* we have nick@host */
-                        LOG( "  (%s @ %s)\n", origin->nuh.nickname, origin->nuh.host.hostname);
+                        LOG( "  (%s @ %s)\n", 
+                             STR_PTR(prefix->nuh.nickname), 
+                             STR_PTR( prefix->nuh.host.hostname ) );
                     }
                     break;
             }
@@ -307,7 +443,7 @@ void irc_msg_log( irc_msg_t const * const msg )
     LOG( "(%s\n", irc_cmd_get_type_string( msg->cmd ) );
 
     /* PREFIX */
-    irc_msg_log_prefix( &(msg->origin) );
+    irc_msg_log_prefix( &(msg->prefix) );
     
     /* command */
     LOG( "  (%s\n", irc_cmd_get_string( msg->cmd ) );
@@ -328,120 +464,121 @@ void irc_msg_log( irc_msg_t const * const msg )
     LOG(")\n");
 }
 
-#if 0
 /* initialize the message in one pass */
-irc_ret_t irc_msg_initialize(
+irc_ret_t irc_msg_set_all(
     irc_msg_t* const msg,
     irc_command_t const cmd,
-    uint8_t* const prefix,
-    int32_t const num_params,
+    irc_msg_prefix_t* const prefix,
+    uint_t const count,
     ...
 )
 {
     va_list va;
-    int32_t i;
-    
+    uint_t i;
+
     CHECK_PTR_RET(msg, IRC_BADPARAM);
     CHECK_RET(IS_VALID_COMMAND(cmd), IRC_BADPARAM);
-    
+   
     /* store the prefix if there is one */
     if(prefix != NULL)
     {
-        /* dup the prefix into place */
-        msg->prefix = T(strndup(C(prefix), IRC_MSG_SIZE));
+        /* copy the prefix into place */
+        MEMCPY( &(msg->prefix), prefix, sizeof( irc_msg_prefix_t ) );
     }
 
     /* store the command string */
-    if(IRC_OK != irc_msg_set_command(msg, cmd))
+    msg->cmd = cmd;
+
+    /* add parameters */
+    va_start( va, count );
+    for( i = 0; i < count; i++ )
     {
-        return IRC_ERR;
-    }
-    
-    /* append the parameters */
-    va_start(va, num_params);
-    for(i = 0; i < num_params; i++)
-    {
-        irc_msg_add_parameter(msg, va_arg(va, uint8_t*));
+        CHECK_GOTO( IRC_OK == irc_msg_add_parameter( msg, va_arg(va, uint8_t*) ), _irc_msg_set_fail );
     }
     va_end(va);
-
+    
     return IRC_OK;
+
+_irc_msg_set_fail:
+    va_end(va);
+    return IRC_ERR;
 }
 
 /* add a parameter */
 irc_ret_t irc_msg_add_parameter(irc_msg_t* const msg, uint8_t const * const param)
 {
+    irc_str_ref_t * s;
     CHECK_PTR_RET(msg, IRC_BADPARAM);
     CHECK_PTR_RET(param, IRC_BADPARAM);
-    
-    /* dup the string into the next param slot */
-    msg->parameters[msg->num_params] = T(strndup(C(param), IRC_MSG_SIZE));
-    
-    if(msg->parameters[msg->num_params] == NULL)
-    {
-        WARN("failed to allocate parameter buffer\n");
-        return IRC_ERR;
-    }
-    
-    /* increment the number of params */
-    msg->num_params++;
+    CHECK_PTR_RET(msg->trailing == FALSE, IRC_ERR );
 
+    /* create str ref */
+    CHECK_PTR_GOTO( s = CALLOC( 1, sizeof(irc_str_ref_t) ), failed_to_add_param );
+
+    /* dup the parameter */
+    CHECK_PTR_GOTO( STR_PTR_P_SET(s, T(strndup(C(param), IRC_MSG_SIZE))), failed_to_add_param );
+  
+    /* push the param to the param list */
+    CHECK_GOTO( list_push_tail( &(msg->params), s ), failed_to_add_param );
+    
     return IRC_OK;
+
+failed_to_add_param:
+    WARN("failed to push param into message %s\n", check_err_str_);
+    FREE( STR_PTR_P(s) );
+    FREE( s );
+    return IRC_ERR;
 }
-#endif
-#if 0
-irc_ret_t irc_msg_compile(irc_msg_t* const msg)
+
+irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg, uint8_t const * const param )
 {
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
+    CHECK_PTR_RET( msg, IRC_BADPARAM );
+    CHECK_RET( msg->trailing == FALSE, IRC_ERR );
+    CHECK_RET( irc_msg_add_parameter( msg, param ), IRC_ERR );
+    msg->trailing = TRUE;
     return IRC_OK;
 }
 
-/* set the trailing parameter */
-irc_ret_t irc_msg_set_trailing( irc_msg_t* const msg, uint8_t const * const trailing)
-{
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    CHECK_PTR_RET(trailing, IRC_BADPARAM);
-
-    /* dup the string into the trailing place */
-    msg->trailing = T(strndup(C(trailing), IRC_MSG_SIZE));
-
-    if ( msg->trailing == NULL )
-    {
-        WARN( "failed to store trailing parameter\n" );
-        return IRC_ERR;
-    }
-
-    return IRC_OK;
-}
-
+/* this compiles the msg into a buffer than can be sent over the socket */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 {
-    int i;
     struct iovec * vec;
     size_t newsize = 0;
+    irc_str_ref_t * s = NULL;
+    list_itr_t itr;
+    static uint8_t buf[IRC_MSG_SIZE];
+    int_t trailing = FALSE;
 
     CHECK_PTR_RET(msg, IRC_BADPARAM);
 
     if ( msg->out.iov != NULL )
         FREE( msg->out.iov );
 
+    /***********************************************/
+    /**** count how many struct iovec's we need ****/
+    /***********************************************/
+
     /* add three for the prefix, (: prefix <space>)  */
-    if ( msg->prefix != NULL )
+    if ( msg->prefix.kind > CONN_PREFIX )
         newsize += 3;
 
     /* add one for the command */   
     newsize++;
 
     /* add two for each parameter (<space> param) */
-    newsize += (msg->num_params * 2);
+    newsize += (list_count( &(msg->params) ) * 2);
 
-    /* add two for trailing parameter (<space> : trailing) */
-    if ( msg->trailing != NULL )
-        newsize += 3;
+    /* add one for colon if last param has a space */
+    if ( msg->trailing )
+        newsize++;
 
     /* add one more for the \r\n at the end */
     newsize++;
 
+    /************************************/
+    /**** fill in the struct iovec's ****/
+    /************************************/
+    
     /* now allocate the new iovec struct array */
     msg->out.iov = CALLOC( newsize, sizeof(struct iovec) );
     CHECK_PTR_RET_MSG( msg->out.iov, IRC_ERR, "failed to allocate iovec struct array\n" );
@@ -452,16 +589,23 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
     /* now fill in the iovec structs */
     vec = msg->out.iov;
 
-    if ( msg->prefix != NULL )
+    if ( msg->prefix.kind > CONN_PREFIX )
     {
         /* add colon */
         vec->iov_base = &COLON;
         vec->iov_len = 1;
         vec++;
 
+        /* serialize the prefix */
+        s = CALLOC( 1, sizeof(irc_str_ref_t) );
+        irc_msg_prefix_r( &(msg->prefix), buf, IRC_MSG_SIZE );
+        STR_PTR_P_SET( s, T(strndup(buf, IRC_MSG_SIZE)) );
+        s->dyn = TRUE;
+        list_push_tail( &(msg->out.strs), (void*)s );
+
         /* add prefix */
-        vec->iov_base = msg->prefix;
-        vec->iov_len = strnlen( msg->prefix, IRC_MSG_SIZE );
+        vec->iov_base = STR_PTR_P(s);
+        vec->iov_len = strnlen( vec->iov_base, IRC_MSG_SIZE );
         vec++;
 
         /* add space */
@@ -471,39 +615,34 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
     }
 
     /* add command */
-    vec->iov_base = msg->command;
-    vec->iov_len = strnlen( msg->command, IRC_MSG_SIZE );
+    vec->iov_base = T(irc_cmd_get_string( msg->cmd ));
+    vec->iov_len = strnlen( vec->iov_base, IRC_MSG_SIZE );
     vec++;
 
     /* add the params */
-    for( i = 0; i < msg->num_params; i++ )
+    for ( itr = list_itr_begin( &(msg->params) ); 
+          itr != list_itr_end( &(msg->params) ); 
+          itr = list_itr_next( &(msg->params), itr ) )
     {
         /* add space */
         vec->iov_base = &SPACE;
         vec->iov_len = 1;
         vec++;
+
+        /* if this is the last param and it is marked as 'trailing',
+         * we need to precede it with a ':' character */
+        if ( (itr == list_itr_tail( &(msg->params) ) ) && msg->trailing )
+        {
+            /* add colon */
+            vec->iov_base = &COLON;
+            vec->iov_len = 1;
+            vec++;
+        }
 
         /* add param */
-        vec->iov_base = msg->parameters[ i ];
-        vec->iov_len = strnlen( msg->parameters[i], IRC_MSG_SIZE );
-        vec++;
-    }
-
-    if ( msg->trailing != NULL )
-    {
-        /* add space */
-        vec->iov_base = &SPACE;
-        vec->iov_len = 1;
-        vec++;
-
-        /* add colon */
-        vec->iov_base = &COLON;
-        vec->iov_len = 1;
-        vec++;
-
-        /* add trailing */
-        vec->iov_base = msg->trailing;
-        vec->iov_len = strnlen( msg->trailing, IRC_MSG_SIZE );
+        s = (irc_str_ref_t*)list_get( &(msg->params), itr );
+        vec->iov_base = STR_PTR_P(s);
+        vec->iov_len = strnlen( vec->iov_base, IRC_MSG_SIZE );
         vec++;
     }
 
@@ -514,26 +653,39 @@ irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
     return IRC_OK;
 }
 
-/* set the command */
-irc_ret_t irc_msg_set_command(irc_msg_t* const msg, irc_command_t const cmd)
+irc_ret_t irc_msg_flatten( irc_msg_t * const msg, uint8_t ** s )
 {
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    CHECK_RET(IS_VALID_COMMAND(cmd), IRC_BADPARAM);
-    
-    if((cmd != NOCMD) && IS_COMMAND(cmd))
+    size_t i, len = 0;
+    uint8_t * p, * buf;
+    CHECK_PTR_RET( msg, IRC_BADPARAM );
+    CHECK_PTR_RET( msg->out.iov, IRC_BADPARAM );
+    CHECK_PTR_RET( s, IRC_BADPARAM );
+
+    /* add up the total data size */
+    for ( i = 0; i < msg->out.nvec; i++ )
     {
-        /* store the command */
-        msg->cmd = cmd;
-
-        /* we can just copy the pointer because these are statically allocated strings */
-        msg->command = (uint8_t*)irc_cmd_get_string( cmd );
-
-        return IRC_OK;
+        len += msg->out.iov[i].iov_len;
     }
-    
-    return IRC_ERR;
+    ++len;
+
+    CHECK_RET( len <= IRC_MSG_SIZE, IRC_ERR );
+
+    buf = CALLOC( len, sizeof(uint8_t) );
+
+    /* copy the data into the string */
+    p = buf;
+    for ( i = 0; i < msg->out.nvec; i++ )
+    {
+        MEMCPY( p, msg->out.iov[i].iov_base, msg->out.iov[i].iov_len );
+        p += msg->out.iov[i].iov_len;
+    }
+
+    /* pass back the string pointer */
+    (*s) = buf;
+
+    return IRC_OK;
 }
-#endif
+
 
 
 /*****************************************************************************/
@@ -844,6 +996,7 @@ static int_t parse_hostaddr( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const
  */
 static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end )
 {
+    uint8_t * p = NULL;
     CHECK_PTR_RET( host, FALSE );
     CHECK_PTR_RET( ptr, FALSE );
     CHECK_PTR_RET( *ptr, FALSE );
@@ -853,13 +1006,18 @@ static int_t parse_host( irc_msg_h_t * host, uint8_t ** ptr, uint8_t * const end
     /* first try to parse a hostaddr */
     if ( parse_hostaddr( host, ptr, end ) )
     {
+        /* store the raw string in the hostname */
+        STR_PTR_SET( host->hostname, *ptr );
+
         /* we assume that the hostaddr goes from *ptr to end */
         *ptr = end;
+
         return TRUE;
     }
 
     /* if that didn't work, then it must be a hostname */
-    CHECK_RET( parse_hostname( &(host->hostname), ptr, end ), FALSE );
+    CHECK_RET( parse_hostname( &p, ptr, end ), FALSE );
+    STR_PTR_SET( host->hostname, p );
 
     /* remember that it is a hostname */
     host->kind = HOSTNAME;
@@ -877,6 +1035,8 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
 {
     uint8_t * p = NULL;
     uint8_t * pend = NULL;
+    uint8_t * nick = NULL;
+    uint8_t * user = NULL;
     CHECK_PTR_RET( nuh, FALSE );
     CHECK_PTR_RET( ptr, FALSE );
     CHECK_PTR_RET( *ptr, FALSE );
@@ -887,7 +1047,8 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
     for ( pend = p; (pend < end) && (*pend != '!') && (*pend != '@'); ++pend ) {}
 
     /* there is always at least a nickname */
-    CHECK_RET( parse_nickname( &(nuh->nickname), &p, pend ), FALSE );
+    CHECK_RET( parse_nickname( &nick, &p, pend ), FALSE );
+    STR_PTR_SET( nuh->nickname, nick );
 
     if ( *p == BANG ) /* user if we're at a '!' */
     {
@@ -901,7 +1062,8 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
         CHECK_RET( (*pend == '@'), FALSE );
 
         /* parse user */
-        CHECK_RET( parse_user( &(nuh->user), &p, pend ), FALSE );
+        CHECK_RET( parse_user( &user, &p, pend ), FALSE );
+        STR_PTR_SET( nuh->user, user );
     }
     
     if ( *p == AT ) /* host if we're at a '@' */
@@ -932,12 +1094,13 @@ static int_t parse_nuh( irc_msg_nuh_t * nuh, uint8_t ** ptr, uint8_t * const end
  * with no user or host parts.  when parsing an ambiguous message, it
  * assumes the prefix specifies a server name.
  */
-static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint8_t * const end )
+static int_t parse_prefix( irc_msg_prefix_t * const prefix, uint8_t ** ptr, uint8_t * const end )
 {
     uint8_t * p = NULL;
     uint8_t * space = NULL;
+    uint8_t * server = NULL;
 
-    CHECK_PTR_RET( origin, FALSE );
+    CHECK_PTR_RET( prefix, FALSE );
     CHECK_PTR_RET( ptr, FALSE );
     CHECK_PTR_RET( *ptr, FALSE );
     CHECK_PTR_RET( end, FALSE );
@@ -954,15 +1117,18 @@ static int_t parse_prefix( irc_msg_origin_t * const origin, uint8_t ** ptr, uint
     /* terminate the prefix */
     *space = '\0';
 
-    if ( parse_servername( &(origin->servername), &p, space ) )
+    if ( parse_servername( &server, &p, space ) )
     {
-        /* origin was a server name */
-        origin->kind = SERVERNAME_ORIGIN;
+        /* store the pointer */
+        STR_PTR_SET( prefix->servername, server );
+
+        /* prefix was a server name */
+        prefix->kind = SERVERNAME_PREFIX;
     }
-    else if ( parse_nuh( &(origin->nuh), &p, space ) )
+    else if ( parse_nuh( &(prefix->nuh), &p, space ) )
     {
-        /* origin was an nuh */
-        origin->kind = NUH_ORIGIN;
+        /* prefix was an nuh */
+        prefix->kind = NUH_PREFIX;
     }
     else
     {
@@ -1014,7 +1180,7 @@ static int_t parse_command( irc_command_t * const cmd, uint8_t ** ptr, uint8_t *
     /* make sure we got a valid command */
     CHECK_RET( ((*cmd) != NOCMD), FALSE );
 
-    /* reset the string to original state */
+    /* reset the string to prefixal state */
     if ( space )
         *p = SPACE;
 
@@ -1039,6 +1205,7 @@ static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * cons
     uint8_t * pstart = NULL;
     int nparams = 0;
     int state = 0;
+    irc_str_ref_t *s = NULL;
 
     CHECK_PTR_RET( params, FALSE );
     CHECK_PTR_RET( ptr, FALSE );
@@ -1100,8 +1267,13 @@ static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * cons
                     /* end of param */
                     nparams++;
 
+                    /* create str ref to the param */
+                    CHECK_GOTO( s = CALLOC( 1, sizeof( irc_str_ref_t ) ), _irc_str_ref_new_fail );
+                    STR_PTR_P_SET( s, pstart );
+                    s->dyn = FALSE;
+
                     /* add pointer to param start to list */
-                    CHECK_RET( list_push_tail( params, pstart ), FALSE );
+                    CHECK_RET( list_push_tail( params, s ), FALSE );
                     pstart = NULL;
 
                     state = 0; /* space between params */
@@ -1135,14 +1307,23 @@ static int_t parse_params( list_t * const params, uint8_t ** ptr, uint8_t * cons
 
     if ( pstart != NULL )
     {
+        /* create str ref to the param */
+        CHECK_GOTO( s = CALLOC( 1, sizeof( irc_str_ref_t ) ), _irc_str_ref_new_fail );
+        STR_PTR_P_SET( s, pstart );
+        s->dyn = FALSE;
+
         /* add the pointer to the start of the last param to the list */
-        CHECK_RET( list_push_tail( params, pstart ), FALSE );
+        CHECK_RET( list_push_tail( params, s ), FALSE );
     }
 
     /* move ptr to first octet after params */
     *ptr = p;
 
     return TRUE;
+
+_irc_str_ref_new_fail:
+    WARN("%s\n", check_err_str_);
+    return FALSE;
 }
 
 
@@ -1664,13 +1845,14 @@ static void test_msg_parse_nuh( void )
 #define NUM_MSG_PARSE_PREFIX_CASES (19)
 static void test_msg_parse_prefix( void )
 {
-    static irc_msg_origin_t pfx;
+    static irc_msg_prefix_t pfx;
     static uint8_t * p = NULL;
     static uint8_t * ptr_0 = NULL;
     static uint8_t * ptr_1 = "nick";
 
     static int_t i, j;
-    static uint8_t buf[32];
+    static ssize_t k;
+    static uint8_t buf[32], actual[IRC_MSG_SIZE];
     static uint8_t const * const pfxs[NUM_MSG_PARSE_PREFIX_CASES] =
     {
         "::1 ",
@@ -1738,7 +1920,7 @@ static void test_msg_parse_prefix( void )
         TRUE
     };
 
-    MEMSET( &pfx, 0, sizeof( irc_msg_origin_t ) );
+    MEMSET( &pfx, 0, sizeof( irc_msg_prefix_t ) );
 
     /* test the pre-conditions */
     CU_ASSERT_FALSE( parse_prefix( NULL, NULL, NULL ) );
@@ -1754,12 +1936,19 @@ static void test_msg_parse_prefix( void )
 
     for ( i = 0; i < NUM_MSG_PARSE_PREFIX_CASES; ++i )
     {
-        MEMSET( &pfx, 0, sizeof( irc_msg_origin_t ) );
+        MEMSET( actual, 0, IRC_MSG_SIZE );
+        MEMSET( &pfx, 0, sizeof( irc_msg_prefix_t ) );
         MEMSET( buf, 0, 32 );
         MEMCPY( buf, pfxs[i], sizes[i] );
         p = &(buf[0]);
         j = parse_prefix( &pfx, &p, &(p[sizes[i] - 1]) );
         CU_ASSERT_EQUAL( j, expected[i] );
+        if ( expected[i] == TRUE )
+        {
+            k = irc_msg_prefix_r( &pfx, actual, IRC_MSG_SIZE );
+            CU_ASSERT_TRUE( k >= 0 );
+            CU_ASSERT_TRUE( strncmp( actual, pfxs[i], strlen(actual) ) == 0 );
+        }
     }
 }
 
@@ -1896,6 +2085,51 @@ static void test_msg_parse_params( void )
     }
 }
 
+#define NUM_STATIC_STR (5)
+void test_dyn_str_list( void )
+{
+    int_t i;
+    list_t t;
+    irc_str_ref_t *sref = NULL;
+    static uint8_t const * const strs[NUM_STATIC_STR] = 
+    {
+        "blah1",
+        "blah2",
+        "blah3",
+        "blah4",
+        "blah5"
+    };
+
+    list_initialize( &t, 0, &param_delete_fn );
+
+    for ( i = 0; i < NUM_STATIC_STR; i++ )
+    {
+        sref = CALLOC( 1, sizeof(irc_str_ref_t) );
+        STR_PTR_P_SET( sref, (uint8_t*)strs[i] );
+        STR_LEN_P_SET( sref, strlen( strs[i] ) );
+        list_push_tail( &t, (void*)sref );
+    }
+
+    CU_ASSERT_EQUAL( NUM_STATIC_STR, list_count( &t ) );
+    list_deinitialize( &t );
+    CU_ASSERT_EQUAL( 0, list_count( &t ) );
+
+    list_initialize( &t, 0, &param_delete_fn );
+
+    for ( i = 0; i < NUM_STATIC_STR; i++ )
+    {
+        sref = CALLOC( 1, sizeof(irc_str_ref_t) );
+        STR_PTR_P_SET( sref, strdup(strs[i]) );
+        STR_LEN_P_SET( sref, strlen( strs[i] ) );
+        sref->dyn = TRUE;
+        list_push_tail( &t, (void*)sref );
+    }
+
+    CU_ASSERT_EQUAL( NUM_STATIC_STR, list_count( &t ) );
+    list_deinitialize( &t );
+    CU_ASSERT_EQUAL( 0, list_count( &t ) );
+}
+
 void test_msg_private_functions( void )
 {
     test_msg_is_letter();
@@ -1919,659 +2153,9 @@ void test_msg_private_functions( void )
     test_msg_parse_prefix();
     test_msg_parse_cmd();
     test_msg_parse_params();
+
+    test_dyn_str_list();
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#if 0
-
-/* functions for appending a string to a message */
-irc_ret_t irc_msg_vappend(irc_msg_t * const msg, char const * const format, va_list va)
-{
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    CHECK_PTR_RET(format, IRC_BADPARAM);
-    
-    /* append the string */
-    msg->buffer.data_size += vsprintf((char * const)&msg->buffer.data[msg->buffer.data_size], 
-                                      format, va);
-
-    return IRC_OK;
-}
-
-irc_ret_t irc_msg_append(irc_msg_t * const msg, char const * const format, ...)
-{
-    irc_ret_t ret = IRC_OK;
-    va_list va;
-
-    va_start(va, format);
-    ret = irc_msg_vappend(msg, format, va);
-    va_end(va);
-
-    return ret;
-}
-
-
-void irc_msg_copy(irc_msg_t * const lhs, irc_msg_t const * const rhs)
-{
-    int32_t i;
-    
-    CHECK_PTR(lhs);
-    CHECK_PTR(rhs);
-
-    /* clean up any internal memory in the lhs */
-    irc_msg_deinitialize(lhs);
-
-    /* copy the message data */
-    lhs->cmd = rhs->cmd;
-    if(rhs->prefix != NULL)
-        lhs->prefix = T(strndup(C(rhs->prefix), IRC_MSG_SIZE));
-    if(rhs->nick != NULL)
-        lhs->nick = T(strndup(C(rhs->nick), IRC_MSG_SIZE));
-    if(rhs->user != NULL)
-        lhs->user = T(strndup(C(rhs->nick), IRC_MSG_SIZE));
-    if(rhs->host != NULL)
-        lhs->host = T(strndup(C(rhs->host), IRC_MSG_SIZE));
-    for(i = 0; i < IRC_NUM_PARAMS; i++)
-    {
-        if(rhs->parameters[i] != NULL)
-            lhs->parameters[i] = T(strndup(C(rhs->parameters[i]), IRC_MSG_SIZE));
-    }
-    lhs->num_params = rhs->num_params;
-
-    /* copy the buffer and set the r/n pointer correctly */
-    MEMCPY(lhs->buffer.data, rhs->buffer.data, IRC_MSG_SIZE);
-    lhs->buffer.data_size = rhs->buffer.data_size;
-    if(rhs->buffer.r != NULL)
-        lhs->buffer.r = &lhs->buffer.data[0] + (rhs->buffer.r - &rhs->buffer.data[0]);
-    if(rhs->buffer.n != NULL)
-        lhs->buffer.n = &lhs->buffer.data[0] + (rhs->buffer.n - &rhs->buffer.data[0]);
-}
-
-
-
-/* deinitialize the message */
-irc_ret_t irc_msg_deinitialize(irc_msg_t* const msg)
-{
-    int32_t i = 0;
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    
-    if (msg->out != NULL)
-    {
-        /* free up the internal memory */
-        if(msg->prefix != NULL)
-        {
-            FREE(msg->prefix);
-            msg->prefix = NULL;
-        }
-        if(msg->nick != NULL)
-        {
-            FREE(msg->nick);
-            msg->nick = NULL;
-        }
-        if(msg->user != NULL)
-        {
-            FREE(msg->user);
-            msg->user = NULL;
-        }
-        if(msg->host != NULL)
-        {
-            FREE(msg->host);
-            msg->host = NULL;
-        }
-        for(i = 0; i < IRC_NUM_PARAMS; i++)
-        {
-            if(msg->parameters[i] != NULL)
-                FREE(msg->parameters[i]);
-            
-            msg->parameters[i] = NULL;
-        }
-        msg->num_params = 0;
-        
-    /* clean up the buffer too */
-    msg->buffer.r = NULL;
-    msg->buffer.n = NULL;
-    msg->buffer.data_size = 0;
-    MEMSET(msg->buffer.data, 0, IRC_MSG_SIZE);
-    
-    return IRC_OK;
-}
-
-
-/* compile the message into a string buffer for sending */
-irc_ret_t irc_msg_compile(irc_msg_t* const msg)
-{
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    
-    DEBUG("irc_msg_compile(%s)\n", irc_cmd_get_string(msg->cmd));
-    
-    /* we need to clear out the compile buffer so that this can be called 
-     * multiple times on a message without bad effects */
-    MEMSET(&msg->buffer, 0, sizeof(irc_msg_buf_t));
-    
-    /* check for prefix */
-    if(msg->prefix != NULL)
-    {
-        /* copy it into the buffer with the leading : */
-        irc_msg_append(msg, ":%s ", msg->prefix);
-    }
-
-    /* write in the command string and adjust the write pointer */
-    irc_msg_append(msg, "%s ", irc_cmd_get_string(msg->cmd));
-
-    /* write in the parameters for the message */
-    switch(msg->cmd)
-    {
-        case PASS:
-        {
-            /* RFC 2812, Section 3.1.1 -- PASS command
-             * Format: PASS <password>
-             * Parameters:
-             *  <password> -- the connection password
-             *
-             * Numeric Replies:
-             *  ERR_NEEDMOREPARAMS      = 461
-             *  ERR_ALREADYREGISTERED   = 462
-             */
-
-            /* add the parameter */
-            CHECK_RET((msg->num_params == 1), IRC_BAD_MESSAGE);
-            irc_msg_append(msg, "%s", msg->parameters[0]);
-            break;
-        }
-        case NICK:
-        {
-            /* RFC 2812, Section 3.1.2 -- NICK command
-             * Format: NICK <nickname>
-             * Parameters:
-             *  <nickname> -- the new nick for the user
-             *
-             * Numeric Replies:
-             *  ERR_NONICKNAMEGIVEN     = 431,
-             *  ERR_ERRONEUSNCKNAME     = 432,
-             *  ERR_NICKNAMEINUSE       = 433,
-             *  ERR_NICKCOLLISION       = 436,
-             *  ERR_UNAVAILRESOURCE     = 437,
-             *  ERR_RESTRICTED          = 484
-             */
-        
-            /* add the parameter */
-            CHECK_RET((msg->num_params == 1), IRC_BAD_MESSAGE);
-            irc_msg_append(msg, "%s", msg->parameters[0]);
-            break;
-        }
-        case USER:
-        {
-            /* RFC 2812, Section 3.1.3 -- USER command
-             * Format: USER <username> <mode> <unused> <real name>
-             * Parameters:
-             *  <username> -- the username of the account the client is running on
-             *  <mode> -- The <mode> parameter should be a numeric, and can be used
-             *            to automatically set user modes when registering with the
-             *            server.  This parameter is a bitmask, with only 2 bits 
-             *            having any signification: if the bit 2 is set, the user 
-             *            mode 'w' will be set and if the bit 3 is set, the user 
-             *            mode 'i' will be set.  (See Section 3.1.5 "User Modes").
-             *  <unused> -- parameter not used, should be "*"
-             *  <real name> -- the real name of the user, must be prefixed with a ':' 
-             *                 because it can contain spaces
-             */
-            
-            CHECK_RET((msg->num_params == 2), IRC_BAD_MESSAGE);
-            
-            /* add the username provided by the caller */
-            irc_msg_append(msg, "%s ", msg->parameters[0]);
-            
-            /* add the user modes */
-            /* TODO: add support for user mode calculation */
-            irc_msg_append(msg, "0 ");
-
-            /* add the unused parameter */
-            irc_msg_append(msg, "* ");
-                        
-            /* add the real name */
-            irc_msg_append(msg, ":%s", msg->parameters[1]);
-            
-            break;
-        }
-        case OPER:
-        {
-            break;
-        }
-        case MODE:
-        {
-            break;
-        }
-        case SERVICE:
-        {
-            break;
-        }
-        case QUIT:
-        {
-            /* RFC 2812, Section 3.1.7 -- QUIT command
-             * Format: QUIT [<quit message>]
-             * Parameters:
-             *  <quit message> -- optional parameter must be prefixed with ":"
-             *                    because it can contain spaces.
-             */
-
-            /* add the parameter */
-            DEBUG("QUIT nparams: %d\n", msg->num_params);
-            CHECK_RET((msg->num_params == 1), IRC_BAD_MESSAGE);
-            irc_msg_append(msg, ":%s", msg->parameters[0]);
-            break;
-        }
-        case SQUIT:
-        {
-            break;
-        }
-        case JOIN:
-        {
-            int32_t params = 0;
-            int32_t chans = 0;
-            int32_t keys = 0;
-            uint8_t* param = NULL;
-            /* RFC 2812, Section 3.2.1 -- JOIN command
-             * Format: JOIN ( <channel> *("," <channel> ) [ <key> *("," <key>) ] ) / "0"
-             * Parameters:
-             *  <channel> --
-             *  <key> --
-             */
-                        
-            /* the channel list */
-            while(params < msg->num_params)
-            {
-                /* get the next param */
-                param = msg->parameters[params];
-                
-                /* check to see if the param is a channel name */
-                if((param[0] == '&') ||
-                   (param[0] == '#') ||
-                   (param[0] == '+') ||
-                   (param[0] == '!'))
-                {
-                    if(chans > 0)
-                        irc_msg_append(msg, ",");
-
-                    irc_msg_append(msg, "%s", param);
-                    params++;
-                    chans++;
-                }
-                else
-                    break; /* move to handling the keys */
-            }
-            
-            
-            /* add a space */
-            irc_msg_append(msg, " ");
-            
-            while(params < msg->num_params)
-            {
-                if(keys > 0)
-                    irc_msg_append(msg, ",");
-                
-                /* add the key */
-                irc_msg_append(msg, "%s", param);
-                params++;
-                keys++;
-                
-                /* get the next param */
-                param = msg->parameters[params];
-            }
-            break;
-        }
-        case PART:
-        {
-            int32_t params = 0;
-            int32_t chans = 0;
-            uint8_t* param = NULL;
-            /* RFC 2812, Section 3.2.1 -- PART command 
-             * Format: PART <channel> *( "," <channel> ) [ <Part Message> ]
-             * Parameters: 
-             *  <channel> --
-             *  <Part Message> --
-             * Replies:
-             *  ERR_NEEDMOREPARAMS
-             *  ERR_NOSUCHCHANNEL
-             *  ERR_NOTONCHANNEL
-             */
-
-            /* the channel list */
-            while(params < msg->num_params)
-            {
-                /* get the next param */
-                param = msg->parameters[params];
-                
-                /* check to see if the param is a channel name */
-                if((param[0] == '&') ||
-                   (param[0] == '#') ||
-                   (param[0] == '+') ||
-                   (param[0] == '!'))
-                {
-                    if(chans > 0)
-                        irc_msg_append(msg, ",");
-
-                    irc_msg_append(msg, "%s", param);
-                    params++;
-                    chans++;
-                }
-                else
-                    break; /* move to handling the part message */
-            }
-            
-            /* check for and add part message */
-            if(params == (msg->num_params - 1))
-            {
-                irc_msg_append(msg, " :%s", param);
-            }
-            break;
-        }
-        case TOPIC:
-        {
-            break;
-        }
-        case NAMES:
-        {
-            break;
-        }
-        case LIST:
-        {
-            break;
-        }
-        case INVITE:
-        {
-            break;
-        }
-        case KICK:
-        {
-            break;
-        }
-        case PRIVMSG:
-        {
-            int32_t j = 0;
-            /* RFC 2812, Section 3.2.1 -- PRIVMSG command 
-             * Format: PRIVMSG <msgtarget> <text to be sent>
-             * Parameters: 
-             *  <msgtarget> -- message recipient
-             *  <text to be sent> -- message body
-             * Replies:
-             *  ERR_NORECIPIENT
-             *  ERR_NOTEXTTOSEND
-             *  ERR_CANNOTSENDTOCHAN
-             *  ERR_NOTOPLEVEL
-             *  ERR_WILDTOPLEVEL
-             *  ERR_TOOMANYTARGETS
-             *  ERR_NOSUCHNICK
-             *  RPL_AWAY
-             */
-            DEBUG("PRIVMSG compile\n");
-            DEBUG("num params: %d\n", msg->num_params);
-            for(j = 0; j < msg->num_params; j++)
-            {
-                DEBUG("param[%d] = %s\n", j, msg->parameters[j]);
-            }
-            
-            CHECK_RET((msg->num_params == 2), IRC_BAD_MESSAGE);
-            DEBUG("adding params\n");
-            
-            /* add in the msgtarget */
-            irc_msg_append(msg, "%s ", msg->parameters[0]);
-            
-            /* add in the message */
-            irc_msg_append(msg, ":%s", msg->parameters[1]);
-
-            break;
-        }
-        case NOTICE:
-        {
-            break;
-        }
-        case MOTD:
-        {
-            break;
-        }
-        case LUSERS:
-        {
-            break;
-        }
-        case VERSION:
-        {
-            break;
-        }
-        case STATS:
-        {
-            break;
-        }
-        case LINKS:
-        {
-            break;
-        }
-        case TIME:
-        {
-            break;
-        }
-        case CONNECT:
-        {
-            break;
-        }
-        case TRACE:
-        {
-            break;
-        }
-        case ADMIN:
-        {
-            break;
-        }
-        case INFO:
-        {
-            break;
-        }
-        case SERVLIST:
-        {
-            break;
-        }
-        case SQUERY:
-        {
-            break;
-        }
-        case WHO:
-        {
-            break;
-        }
-        case WHOIS:
-        {
-            break;
-        }
-        case WHOWAS:
-        {
-            break;
-        }
-        case KILL:
-        {
-            break;
-        }
-        case PING:
-        {
-            break;
-        }
-        case PONG:
-        {
-            int32_t params = 0;
-            
-            /* RFC 2812, Section 3.7.3 -- PONG command
-             * Format: PONG <server> [<server2>]
-             * Parameters:
-             *  <server> -- the originator of the PING command this is a response to
-             * Replies:
-             *  ERR_NOORIGIN
-             *  ERR_NOSUCHSERVERIRC_NUM_PARAMS
-             */
-
-            while(params < msg->num_params)
-            {
-                /* add a space */
-                if(params > 0)
-                    irc_msg_append(msg, " ");
-                
-                /* add the server */
-                irc_msg_append(msg, "%s", msg->parameters[params]);
-                
-                params++;                
-            }
-            break;
-        }
-        case ERROR:
-        {
-            break;
-        }
-        case AWAY:
-        {
-            break;
-        }
-        case REHASH:
-        {
-            break;
-        }
-        case DIE:
-        {
-            break;
-        }
-        case RESTART:
-        {
-            break;
-        }
-        case SUMMON:
-        {
-            break;
-        }
-        case USERS:
-        {
-            break;
-        }
-        case WALLOPS:
-        {
-            break;
-        }
-        case USERHOST:
-        {
-            break;
-        }
-        case ISON:
-        {
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
-    
-    /* add the \r\n to the end */
-    irc_msg_append(msg, "\r\n");
-    
-    return IRC_OK;
-}
-
-
-/* clear the parameters */
-irc_ret_t irc_msg_clear_parameters(irc_msg_t* const msg)
-{
-    int32_t i = 0;
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    
-    /* free the params */
-    for(i = 0; i < msg->num_params; i++)
-    {
-        if(msg->parameters[i] != NULL)
-        {
-            FREE(msg->parameters[i]);
-            msg->parameters[i] = NULL;
-        }
-    }
-    
-    /* reset the number of parameters */
-    msg->num_params = 0;
-    
-    return IRC_OK;
-}
-
-/* set a parameter */
-irc_ret_t irc_msg_set_parameter(irc_msg_t* const msg, int32_t const index, uint8_t const * const param)
-{
-    CHECK_PTR_RET(msg, IRC_BADPARAM);
-    CHECK_RET(((index >= 0) && (index < IRC_NUM_PARAMS)), IRC_BADPARAM);
-    CHECK_PTR_RET(param, IRC_BADPARAM);
-    
-    if(index < msg->num_params)
-    {
-        /* replace the current param at that index with the new param */
-        if(msg->parameters[index] != NULL)
-            FREE(msg->parameters[index]);
-        
-        /* dup the parameter into the array */
-        msg->parameters[index] = T(strndup(C(param), IRC_MSG_SIZE));
-    }
-    else if(index == msg->num_params)
-    {
-        /* this is the special case where we can just append the value to the end */
-        return irc_msg_add_parameter(msg, param);
-    }
-    else
-    {
-        /* dup the parameter into the array */
-        msg->parameters[index] = T(strndup(C(param), IRC_MSG_SIZE));
-        
-        /* adjust the num_params accordingly */
-        msg->num_params = index + 1;
-    }
-    
-    return IRC_OK;
-}
-
-#endif
-
 
