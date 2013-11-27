@@ -154,6 +154,9 @@ irc_ret_t irc_msg_add_parameter( irc_msg_t * const msg,
 irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg,
                                 uint8_t const * const param );
 
+/* returns a pointer to the trailing parameter if it exists */
+uint8_t * irc_msg_get_trailing( irc_msg_t * const msg );
+
 /* "closes" a message and prepares it to be sent */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg );
 

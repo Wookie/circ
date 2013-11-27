@@ -539,6 +539,15 @@ irc_ret_t irc_msg_set_trailing( irc_msg_t * const msg, uint8_t const * const par
     return IRC_OK;
 }
 
+/* returns a pointer to the trailing parameter if it exists */
+uint8_t * irc_msg_get_trailing( irc_msg_t * const msg )
+{
+    CHECK_PTR_RET( msg, NULL );
+    CHECK_RET( msg->trailing, NULL );
+    CHECK_RET( list_count( &(msg->params) ) > 0, NULL );
+    return STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), list_itr_tail( &(msg->params) ) ));
+}
+
 /* this compiles the msg into a buffer than can be sent over the socket */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 {

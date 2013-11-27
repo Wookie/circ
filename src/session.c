@@ -575,7 +575,7 @@ static HANDLER_FN( session, PING )
     CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
 
     /* get a pointer to the last part of the PING message */
-    dest = STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), list_itr_tail( &(msg->params) ) ));
+    dest = irc_msg_get_trailing( msg );
     DEBUG("received PING from %s\n", dest);
 
     /* send PONG */
