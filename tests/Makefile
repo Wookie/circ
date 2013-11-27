@@ -7,7 +7,7 @@ CUTIL_TESTS_ROOT?=../cutil/tests
 EXTRA_LIBS_ROOT?=/usr/local
 
 SHELL=/bin/sh
-SRC=test_all.c test_flags.c test_conn.c test_msg.c $(CUTIL_TESTS_ROOT)/test_flags.c
+SRC=test_all.c test_flags.c test_conn.c test_msg.c test_session.c $(CUTIL_TESTS_ROOT)/test_flags.c
 OBJ=$(SRC:.c=.o)
 GCDA=$(SRC:.c=.gcda)
 GCNO=$(SRC:.c=.gcno)

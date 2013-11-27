@@ -24,8 +24,6 @@
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 
-#define  DEBUG_ON
-
 #include <cutil/debug.h>
 #include <cutil/macros.h>
 #include <cutil/list.h>
@@ -539,13 +537,11 @@ irc_ret_t irc_conn_send_msg( irc_conn_t* const conn,
 
     DEBUG("irc_conn_send_msg()\n");
 
-    /*
     if(IRC_OK != irc_msg_finalize(msg))
     {
         WARN("failed to finalize message before sending\n");
         return IRC_ERR;
     }
-    */
 
     /* remember the message being queued up to write */
     list_push_tail( &(conn->wmsgs), (void*)msg );

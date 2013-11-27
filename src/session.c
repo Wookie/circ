@@ -66,449 +66,461 @@ static uint_t setting_hash_fn( void const * const key );
 static int_t setting_match_fn( void const * const l, void const * const r );
 static void setting_delete_fn( void * p );
 
+/* function for calling event callbacks */
+extern irc_ret_t irc_event_cb_call_fn( irc_event_cb_t * const cb, irc_msg_t * const msg );
+
 /* handles calling the handlers associated with the cmd */
 static irc_ret_t irc_session_call_handler( irc_session_t * const session, 
-                       irc_msg_t * const msg,
-                       irc_command_t const cmd )
+                                           irc_msg_t * const msg,
+                                           irc_command_t const cmd )
 {
-  ht_itr_t itr, end;
-  irc_event_cb_t * cb = NULL;
-  
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
+    ht_itr_t itr, end;
+    irc_event_cb_t * cb = NULL;
 
-  itr = ht_itr_begin( session->handlers );
-  end = ht_itr_end( session->handlers );
-  for ( ; !ITR_EQ( itr, end ); itr = ht_itr_next( session->handlers, itr ) )
-  {
-    /* get the next handler */
-    cb = (irc_event_cb_t*)ht_get( session->handlers, itr );
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( session->handlers, IRC_BADPARAM );
 
-    if ( cb == NULL )
-      continue;
+    itr = ht_itr_begin( session->handlers );
+    end = ht_itr_end( session->handlers );
+    for ( ; !ITR_EQ( itr, end ); itr = ht_itr_next( session->handlers, itr ) )
+    {
+        /* get the next handler */
+        cb = (irc_event_cb_t*)ht_get( session->handlers, itr );
 
-    if ( irc_event_cb_get_cmd( cb ) != cmd )
-      continue;
+        if ( cb == NULL )
+            continue;
 
-    /* call the callback */
-    irc_event_cb_call_fn( cb, msg );
-  }
+        if ( irc_event_cb_get_cmd( cb ) != cmd )
+            continue;
 
-  return IRC_OK;
+        /* call the callback */
+        irc_event_cb_call_fn( cb, msg );
+    }
+
+    return IRC_OK;
 }
 
 static void send_pass( irc_session_t * const session )
 {
-  irc_msg_t * pass = NULL;
-  int8_t * server_pass = NULL;
-  CHECK_PTR( session );
+    irc_msg_t * pass = NULL;
+    int8_t * server_pass = NULL;
+    CHECK_PTR( session );
 
-  server_pass = irc_session_get( session, SERVER_PASS );
+    server_pass = irc_session_get( session, SERVER_PASS );
 
-  /* send the PASS command */
-  pass = irc_msg_new();
-  irc_msg_set_all( pass, PASS, NULL, 1, server_pass );
+    /* send the PASS command */
+    pass = irc_msg_new();
+    irc_msg_set_all( pass, PASS, NULL, 1, server_pass );
 
-  /* send the PASS command */
-  irc_conn_send_msg( session->conn, pass );
+    /* send the PASS command */
+    irc_conn_send_msg( session->conn, pass );
 }
 
 static void send_nick( irc_session_t * const session )
 {
-  irc_msg_t * nick = NULL;
-  int8_t * nick_name = NULL;
-  CHECK_PTR( session );
+    irc_msg_t * nick = NULL;
+    int8_t * nick_name = NULL;
+    CHECK_PTR( session );
 
-  nick_name = irc_session_get( session, NICK_NAME );
+    nick_name = irc_session_get( session, NICK_NAME );
 
-  /* send the NICK command */
-  nick = irc_msg_new();
-  irc_msg_set_all( nick, NICK, NULL, 1, nick_name );
+    /* send the NICK command */
+    nick = irc_msg_new();
+    irc_msg_set_all( nick, NICK, NULL, 1, nick_name );
 
-  /* send the NICk command */
-  irc_conn_send_msg( session->conn, nick );
+    /* send the NICk command */
+    irc_conn_send_msg( session->conn, nick );
 }
 
 static void send_user( irc_session_t * const session )
 {
-  irc_msg_t * user = NULL;
-  int8_t * user_name = NULL;
-  CHECK_PTR( session );
+    irc_msg_t * user = NULL;
+    int8_t * user_name = NULL;
+    CHECK_PTR( session );
 
-  user_name = irc_session_get( session, USER_NAME );
+    user_name = irc_session_get( session, USER_NAME );
 
-  /* send the USER command */
-  user = irc_msg_new();
-  irc_msg_set_all( user, USER, NULL, 3, user_name, "0", "*" );
-  irc_msg_set_trailing( user, user_name );
+    /* send the USER command */
+    user = irc_msg_new();
+    irc_msg_set_all( user, USER, NULL, 3, user_name, "0", "*" );
+    irc_msg_set_trailing( user, user_name );
 
-  /* send the USER command */
-  irc_conn_send_msg( session->conn, user );
+    /* send the USER command */
+    irc_conn_send_msg( session->conn, user );
 }
 
 static void send_quit( irc_session_t * const session )
 {
-  irc_msg_t * quit = NULL;
-  int8_t * quit_msg = NULL;
-  CHECK_PTR( session );
+    irc_msg_t * quit = NULL;
+    int8_t * quit_msg = NULL;
+    CHECK_PTR( session );
 
-  quit_msg = irc_session_get( session, QUIT_MSG );
+    quit_msg = irc_session_get( session, QUIT_MSG );
 
-  /* send QUIT */
-  quit = irc_msg_new();
-  irc_msg_set_all( quit, QUIT, NULL, 0 );
-  irc_msg_set_trailing( quit, quit_msg );
+    /* send QUIT */
+    quit = irc_msg_new();
+    irc_msg_set_all( quit, QUIT, NULL, 0 );
+    irc_msg_set_trailing( quit, quit_msg );
 
-  /* send the QUIT command */
-  irc_conn_send_msg( session->conn, quit );
+    /* send the QUIT command */
+    irc_conn_send_msg( session->conn, quit );
 }
 
 
 static irc_ret_t irc_conn_message_in( irc_conn_t * const conn, 
-                    irc_msg_t * const msg, 
-                    void * user_data  )
+                                      irc_msg_t * const msg, 
+                                      void * user_data  )
 {
-  irc_session_t * session = (irc_session_t*)user_data;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( msg, IRC_BADPARAM );
+    irc_session_t * session = (irc_session_t*)user_data;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( msg, IRC_BADPARAM );
 
-  /* call registered handlers */
-  irc_session_call_handler( session, msg, msg->cmd );
+    /* call registered handlers */
+    irc_session_call_handler( session, msg, msg->cmd );
 
-  /* call the catch-all handlers */
-  irc_session_call_handler( session, msg, ANYCMD );
+    /* call the catch-all handlers */
+    irc_session_call_handler( session, msg, ANYCMD );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 static irc_ret_t irc_conn_message_out( irc_conn_t * const conn,
-                     irc_msg_t * const msg,
-                     void * user_data )
+                                       irc_msg_t * const msg,
+                                       void * user_data )
 {
-  irc_session_t * session = (irc_session_t*)user_data;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
+    irc_session_t * session = (irc_session_t*)user_data;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
 
-  if ( session->state == IRC_SESSION_QUIT )
-  {
-    /* our QUIT command has been sent, now we're pending disconnect */
-    session->state = IRC_SESSION_PENDING_DISCONNECT;
-  }
+    if ( session->state == IRC_SESSION_QUIT )
+    {
+        /* our QUIT command has been sent, now we're pending disconnect */
+        session->state = IRC_SESSION_PENDING_DISCONNECT;
+    }
 
-  /* free the message */
-  irc_msg_delete( msg );
+    /* free the message */
+    irc_msg_delete( msg );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 static irc_ret_t irc_conn_connected( irc_conn_t * const conn, 
-                   void * user_data )
+                                     void * user_data )
 {
-  irc_session_t * session = (irc_session_t*)user_data;
-  int8_t * password = NULL;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
+    irc_session_t * session = (irc_session_t*)user_data;
+    int8_t * password = NULL;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
 
-  /* should only receive these when disconnected */
-  ASSERT( session->state == IRC_SESSION_DISCONNECTED );
+    /* should only receive these when disconnected */
+    ASSERT( session->state == IRC_SESSION_DISCONNECTED );
 
-  /* we have a connection to the server, now we must register it */
-  session->state = IRC_SESSION_CONNECTED;
+    /* we have a connection to the server, now we must register it */
+    session->state = IRC_SESSION_CONNECTED;
 
-  /* kick off the IRC connection registration */
-  if ( irc_session_get( session, SERVER_PASS ) != NULL )
-  {
-    /* send the PASS command */
-    send_pass( session );
-  }
-  else
-  {
-    /* send the NICK command */
-    send_nick( session );
-  }
+    /* kick off the IRC connection registration */
+    if ( irc_session_get( session, SERVER_PASS ) != NULL )
+    {
+        /* send the PASS command */
+        send_pass( session );
+    }
+    else
+    {
+        /* send the NICK command */
+        send_nick( session );
+    }
 
-  /* send the USER command */
-  send_user( session );
+    /* send the USER command */
+    send_user( session );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn, 
                     void * user_data )
 {
-  irc_session_t * session = (irc_session_t*)user_data;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
+    irc_session_t * session = (irc_session_t*)user_data;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
 
-  if ( session->state != IRC_SESSION_PENDING_DISCONNECT )
-  {
-    WARN("got disconnected unexpectedly\n");
-  }
+    if ( session->state != IRC_SESSION_PENDING_DISCONNECT )
+    {
+        WARN("got disconnected unexpectedly\n");
+    }
 
-  session->state = IRC_SESSION_DISCONNECTED;
+    session->state = IRC_SESSION_DISCONNECTED;
 
-  DEBUG("session has been taken down completely\n");
+    DEBUG("session has been taken down completely\n");
 
-  /* call "disconnected" handler */
-  irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );
+    /* call "disconnected" handler */
+    irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 /* send the specified IRC command to the server */
 irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg )
 {
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( msg, IRC_BADPARAM );
-  return irc_conn_send_msg( session->conn, msg );
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( msg, IRC_BADPARAM );
+    return irc_conn_send_msg( session->conn, msg );
 }
 
-static int irc_session_initialize( irc_session_t * const session,
-                                   uint8_t const * const host,
-                                   uint8_t const * const port,
-                   evt_loop_t * const el,
-                   void * user_data )
+static int_t irc_session_initialize( irc_session_t * const session,
+                                     uint8_t const * const host,
+                                     uint8_t const * const port,
+                                     evt_loop_t * const el,
+                                     void * user_data )
 {
-  irc_ret_t ret = IRC_OK;
-  irc_event_cb_t * ping_cb = NULL;
-  irc_event_cb_t * rpl_welcome_cb = NULL;
-  irc_event_cb_t * nick_cb = NULL;
-  irc_event_cb_t * privmsg_cb = NULL;
-  static irc_conn_ops_t conn_ops = 
-  {
-    &irc_conn_message_in,
-    &irc_conn_message_out,
-    &irc_conn_connected,
-    &irc_conn_disconnected
-  };
+    irc_ret_t ret = IRC_OK;
+    irc_event_cb_t * ping_cb = NULL;
+    irc_event_cb_t * rpl_welcome_cb = NULL;
+    irc_event_cb_t * nick_cb = NULL;
+    irc_event_cb_t * privmsg_cb = NULL;
+    static irc_conn_ops_t conn_ops = 
+    {
+        &irc_conn_message_in,
+        &irc_conn_message_out,
+        &irc_conn_connected,
+        &irc_conn_disconnected
+    };
 
-  CHECK_PTR_RET( session, FALSE );
-  CHECK_PTR_RET( el, FALSE );
+    CHECK_PTR_RET( session, FALSE );
+    CHECK_PTR_RET( el, FALSE );
 
-  /* zero everything out */
-  MEMSET( (void*)session, 0, sizeof( irc_session_t ) );
+    /* zero everything out */
+    MEMSET( (void*)session, 0, sizeof( irc_session_t ) );
 
-  /* store the session state */
-  session->state = IRC_SESSION_DISCONNECTED;
+    /* store the session state */
+    session->state = IRC_SESSION_DISCONNECTED;
 
-  /* store the event loop handle */
-  session->el = el;
+    /* store the event loop handle */
+    session->el = el;
 
-  /* create the irc connection */
-  session->conn = irc_conn_new( host, port, &conn_ops, el, (void*)session );
-  CHECK_PTR_RET( session->conn, FALSE );
+    /* create the irc connection */
+    session->conn = irc_conn_new( host, port, &conn_ops, el, (void*)session );
+    CHECK_PTR_RET( session->conn, FALSE );
 
-  /* create the settings hashtable */
-  session->settings = ht_new( 64, &setting_hash_fn, &setting_match_fn, &setting_delete_fn );
-  CHECK_PTR_RET( session->settings, FALSE );
+    /* create the settings hashtable */
+    session->settings = ht_new( 64, &setting_hash_fn, &setting_match_fn, &setting_delete_fn );
+    CHECK_PTR_RET( session->settings, FALSE );
 
-  /* create the handlers hashtable */
-  session->handlers = ht_new( 8, &irc_event_cb_hash, &irc_event_cb_match, &irc_event_cb_delete );
-  CHECK_PTR_RET( session->handlers, FALSE );
+    /* create the handlers hashtable */
+    session->handlers = ht_new( 8, &irc_event_cb_hash, &irc_event_cb_match, &irc_event_cb_delete );
+    CHECK_PTR_RET( session->handlers, FALSE );
 
-  /* store the handler context */
-  session->user_data = user_data;
+    /* store the handler context */
+    session->user_data = user_data;
 
-  /* register PING handler */
-  ping_cb = NEW_HANDLER( PING, session, session );
-  CHECK_RET( (IRC_OK == irc_session_set_handler( session, ping_cb )), FALSE );
+    /* register PING handler */
+    ping_cb = NEW_HANDLER( PING, session, session );
+    CHECK_RET( (IRC_OK == irc_session_set_handler( session, ping_cb )), FALSE );
 
-  /* register RPL_WELCOME handler */
-  rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, session );
-  CHECK_RET( (IRC_OK == irc_session_set_handler( session, rpl_welcome_cb )), FALSE );
+    /* register RPL_WELCOME handler */
+    rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, session );
+    CHECK_RET( (IRC_OK == irc_session_set_handler( session, rpl_welcome_cb )), FALSE );
 
-  /* register NICK handler */
-  nick_cb = NEW_HANDLER( NICK, session, session );
-  CHECK_RET( (IRC_OK == irc_session_set_handler( session, nick_cb)), FALSE );
+    /* register NICK handler */
+    nick_cb = NEW_HANDLER( NICK, session, session );
+    CHECK_RET( (IRC_OK == irc_session_set_handler( session, nick_cb)), FALSE );
 
-  /* register PRIVMSG handler */
-  privmsg_cb = NEW_HANDLER( PRIVMSG, session, session );
-  CHECK_RET( (IRC_OK == irc_session_set_handler( session, privmsg_cb)), FALSE );
+    /* register PRIVMSG handler */
+    privmsg_cb = NEW_HANDLER( PRIVMSG, session, session );
+    CHECK_RET( (IRC_OK == irc_session_set_handler( session, privmsg_cb)), FALSE );
 
     /* store the host/port */
     CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_HOST, host )), FALSE );
     CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_PORT, port )), FALSE );
 
-  return TRUE;
+    return TRUE;
 }
 
 
 irc_session_t * irc_session_new( uint8_t const * const host,
                                  uint8_t const * const port,
                                  evt_loop_t * const el,
-                 void * user_data )
+                                 void * user_data )
 {
-  irc_session_t * session = NULL;
+    irc_session_t * session = NULL;
 
-  CHECK_PTR_RET( el, NULL );
+    CHECK_PTR_RET( el, NULL );
 
-  /* allocate the session struct */
-  session = CALLOC( 1, sizeof(irc_session_t) );
-  CHECK_PTR_RET_MSG( session, NULL, "failed to allocate session struct\n" );
+    /* allocate the session struct */
+    session = CALLOC( 1, sizeof(irc_session_t) );
+    CHECK_PTR_RET_MSG( session, NULL, "failed to allocate session struct\n" );
 
-  if ( !irc_session_initialize( session, host, port, el, user_data ) )
-  {
+    /* initialize the session */
+    CHECK_GOTO( irc_session_initialize( session, host, port, el, user_data ), _irc_session_new_fail );
+
+    return session;
+
+_irc_session_new_fail:
     FREE( session );
     return NULL;
-  }
-
-  return session;
 }
 
 
 static void irc_session_deinitialize( irc_session_t * const session )
 {
-  CHECK_PTR( session );
-  CHECK_MSG( session->state == IRC_SESSION_DISCONNECTED, "deinitializing active session\n" );
+    CHECK_PTR( session );
+    CHECK_MSG( session->state == IRC_SESSION_DISCONNECTED, "deinitializing active session\n" );
 
-  DEBUG("deinitializing session\n");
+    DEBUG("deinitializing session\n");
 
-  /* must be disconnected to deinitialize everything */
-  irc_conn_delete( (void*)session->conn );
+    /* must be disconnected to deinitialize everything */
+    irc_conn_delete( (void*)session->conn );
 
-  /* clean up hash tables */
-  ht_delete( session->settings );
-  ht_delete( session->handlers );
+    /* clean up hash tables */
+    ht_delete( session->settings );
+    ht_delete( session->handlers );
 
-  /* drop pointer to context */
-  session->user_data = NULL;
+    /* drop pointer to context */
+    session->user_data = NULL;
 }
 
 
 void irc_session_delete( void * s )
 {
-  irc_session_t * session = (irc_session_t*)s;
-  CHECK_PTR( session );
-  CHECK_MSG( session->state == IRC_SESSION_DISCONNECTED, "deleting active session\n" );
+    irc_session_t * session = (irc_session_t*)s;
+    CHECK_PTR( session );
+    CHECK_MSG( session->state == IRC_SESSION_DISCONNECTED, "deleting active session\n" );
 
-  /* deinit the session, don't sent the QUIT */
-  irc_session_deinitialize( session );
+    /* deinit the session, don't sent the QUIT */
+    irc_session_deinitialize( session );
 
-  FREE( session );
+    FREE( session );
 }
 
 irc_ret_t irc_session_set( irc_session_t * const session,
                irc_session_setting_t const setting,
                void const * const value )
 {
-  pair_t * p, * r = NULL;
-  ht_itr_t itr;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( value, IRC_BADPARAM );
-  p = pair_new( (void*)setting, (void*)value );
-  itr = ht_find( session->settings, (void*)p );
-  r = (pair_t*)ht_get( session->settings, itr );
-  ht_remove( session->settings, itr );
-  setting_delete_fn( r );
-  ht_insert( session->settings, p );
-  return IRC_OK;
+    pair_t * p, * r = NULL;
+    ht_itr_t itr;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( value, IRC_BADPARAM );
+
+    /* dup the value and take ownership of it */
+    p = pair_new( (void*)setting, (void*)strdup(value) );
+    itr = ht_find( session->settings, (void*)p );
+
+    r = (pair_t*)ht_get( session->settings, itr );
+    ht_remove( session->settings, itr );
+    
+    setting_delete_fn( r );
+
+    ht_insert( session->settings, p );
+
+    return IRC_OK;
 }
 
 
 void * irc_session_get( irc_session_t * const session,
-              irc_session_setting_t const setting )
+                        irc_session_setting_t const setting )
 {
-  pair_t * p = NULL;
-  ht_itr_t itr;
-  CHECK_PTR_RET( session, NULL );
-  p = pair_new( (void*)setting, NULL );
-  itr = ht_find( session->settings, (void*)p );
-  pair_delete( p );
-  p = ht_get( session->settings, itr );
-  return (void*)pair_second( p );
+    pair_t * p = NULL;
+    ht_itr_t itr;
+    CHECK_PTR_RET( session, NULL );
+
+    p = pair_new( (void*)setting, NULL );
+    itr = ht_find( session->settings, (void*)p );
+    pair_delete( p );
+
+    p = ht_get( session->settings, itr );
+
+    return (void*)pair_second( p );
 }
 
 
 irc_ret_t irc_session_set_handler( irc_session_t * const session,
-                   irc_event_cb_t * const cb )
+                                   irc_event_cb_t * const cb )
 {
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( cb, IRC_BADPARAM );
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( cb, IRC_BADPARAM );
 
-  CHECK_RET( ht_insert( session->handlers, (void*)cb ), IRC_ERR );
+    CHECK_RET( ht_insert( session->handlers, (void*)cb ), IRC_ERR );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 irc_ret_t irc_session_clear_handler( irc_session_t * const session,
-                   uint8_t const * const name )
+                                     uint8_t const * const name )
 {
-  ht_itr_t itr;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
-  CHECK_PTR_RET( name, IRC_BADPARAM );
+    ht_itr_t itr;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( name, IRC_BADPARAM );
 
-  /* look up the event cb struct */
-  itr = irc_event_cb_ht_find( session->handlers, name );
+    /* look up the event cb struct */
+    itr = irc_event_cb_ht_find( session->handlers, name );
 
-  /* try to call the callback */
-  CHECK_RET( ht_remove( session->handlers, itr ), IRC_ERR );
+    /* try to call the callback */
+    CHECK_RET( ht_remove( session->handlers, itr ), IRC_ERR );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 irc_ret_t irc_session_connect( irc_session_t * const session )
 {
-  int8_t * host, * port;
-  CHECK_PTR_RET( session, IRC_BADPARAM );
+    int8_t * host, * port;
+    CHECK_PTR_RET( session, IRC_BADPARAM );
 
-  host = UT(irc_session_get( session, SERVER_HOST ));
-  port = UT(irc_session_get( session, SERVER_PORT ));
+    host = UT(irc_session_get( session, SERVER_HOST ));
+    port = UT(irc_session_get( session, SERVER_PORT ));
 
-  /* try to initiate an irc connection */
-  DEBUG( "attempting connection to: %s:%s\n", host, port );
-  if ( irc_conn_connect( session->conn ) != IRC_OK )
-  {
-    WARN(" failed to create session connection\n" );
-    return IRC_ERR;
-  }
+    /* try to initiate an irc connection */
+    DEBUG( "attempting connection to: %s:%s\n", host, port );
+    if ( irc_conn_connect( session->conn ) != IRC_OK )
+    {
+        WARN(" failed to create session connection\n" );
+        return IRC_ERR;
+    }
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
-irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
+irc_ret_t irc_session_disconnect( irc_session_t * const session, int_t do_quit )
 {
-  CHECK_PTR_RET( session, IRC_BADPARAM );
+    CHECK_PTR_RET( session, IRC_BADPARAM );
 
-  if ( session->state >= IRC_SESSION_CONNECTED )
-  {
-    if ( do_quit && ( session->state == IRC_SESSION_ACTIVE ) )
+    if ( session->state >= IRC_SESSION_CONNECTED )
     {
-      DEBUG("sending QUIT to kick off orderly disconnect\n");
+        if ( do_quit && ( session->state == IRC_SESSION_ACTIVE ) )
+        {
+            DEBUG("sending QUIT to kick off orderly disconnect\n");
 
-      /* set out state before sending the command */
-      session->state = IRC_SESSION_QUIT;
-      send_quit( session );
+            /* set out state before sending the command */
+            session->state = IRC_SESSION_QUIT;
+            send_quit( session );
 
-      /* disconnect, wait for all messages to be transmitted */
-      irc_conn_disconnect( session->conn, TRUE );
+            /* disconnect, wait for all messages to be transmitted */
+            irc_conn_disconnect( session->conn, TRUE );
 
-      return IRC_OK;
+            return IRC_OK;
+        }
     }
-  }
-  
-  DEBUG("don't have registered connection so tear down immediately\n");
 
-  if ( session->state == IRC_SESSION_PENDING_DISCONNECT )
-  {
-    /* have already tried to disconnect... */
-    session->state = IRC_SESSION_DISCONNECTED;
+    DEBUG("don't have registered connection so tear down immediately\n");
 
-    DEBUG("forcing session takedown\n");
+    if ( session->state == IRC_SESSION_PENDING_DISCONNECT )
+    {
+        /* have already tried to disconnect... */
+        session->state = IRC_SESSION_DISCONNECTED;
 
-    /* call "disconnected" handler */
-    irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );
+        DEBUG("forcing session takedown\n");
 
-  }
-  else
-  {
-    /* haven't tried to disconnect yet... */
-    DEBUG("beginning connection disconnect\n");
+        /* call "disconnected" handler */
+        irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );
+    }
+    else
+    {
+        /* haven't tried to disconnect yet... */
+        DEBUG("beginning connection disconnect\n");
 
-    /* move to pending disconnect state */
-    session->state = IRC_SESSION_PENDING_DISCONNECT;
+        /* move to pending disconnect state */
+        session->state = IRC_SESSION_PENDING_DISCONNECT;
 
-    /* disconnect, DON'T wait for all messages to be transmitted */
-    irc_conn_disconnect( session->conn, FALSE );
-  }
+        /* disconnect, DON'T wait for all messages to be transmitted */
+        irc_conn_disconnect( session->conn, FALSE );
+    }
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 /*************************************************/
@@ -517,101 +529,99 @@ irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit )
 
 static int_t string_eq( void const * const l, void const * const r )
 {
-  return ( 0 == strcmp(C(l), C(r)) );
+    return ( 0 == strcmp(C(l), C(r)) );
 }
 
 static int_t int_less( void * l, void * r )
 {
-  int_t li = (int_t)l;
-  int_t ri = (int_t)r;
+    int_t li = (int_t)l;
+    int_t ri = (int_t)r;
 
-  if ( li < ri )
-    return -1;
-  else if ( li > ri )
-    return 1;
-  return 0;
+    if ( li < ri )
+        return -1;
+    else if ( li > ri )
+        return 1;
+    return 0;
 }
 
 static uint_t setting_hash_fn( void const * const key )
 {
-  CHECK_PTR_RET( key, 0 );
-  return (uint_t)pair_first((pair_t*)key);
+    CHECK_PTR_RET( key, 0 );
+    return (uint_t)pair_first((pair_t*)key);
 }
 
 static int_t setting_match_fn( void const * const l, void const * const r )
 {
-  CHECK_PTR_RET( l, FALSE );
-  CHECK_PTR_RET( r, FALSE );
-  return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
+    CHECK_PTR_RET( l, FALSE );
+    CHECK_PTR_RET( r, FALSE );
+    return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));
 }
 
 static void setting_delete_fn( void * p )
 {
-  pair_t * pair = (pair_t*)p;
-  CHECK_PTR( pair );
+    pair_t * pair = (pair_t*)p;
+    CHECK_PTR( pair );
 
-  FREE( pair_second( p ) );
-  pair_delete( p );
+    FREE( pair_second( p ) );
+    pair_delete( p );
 }
 
 /* this gets called when we receive a PING message from the server */
 static HANDLER_FN( session, PING )
 {
-  int8_t const * dest;
-  irc_msg_t * pong = NULL;
+    int8_t const * dest;
+    irc_msg_t * pong = NULL;
 
-  CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
+    CHECK_RET( (msg->cmd == PING), IRC_BADPARAM );
 
-#if 0
-  /* get a pointer to the last part of the PING message */
-  dest = (msg->trailing != NULL) ? msg->trailing : msg->parameters[msg->num_params-1];
-  DEBUG("received PING from %s\n", dest);
+    /* get a pointer to the last part of the PING message */
+    dest = STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), list_itr_tail( &(msg->params) ) ));
+    DEBUG("received PING from %s\n", dest);
 
-  /* send PONG */
-  pong = irc_msg_new();
-  irc_msg_set_all( pong, PONG, NULL, 1, dest );
+    /* send PONG */
+    pong = irc_msg_new();
+    irc_msg_set_all( pong, PONG, NULL, 1, dest );
 
-  /* send the PONG command */
-  irc_conn_send_msg( session->conn, pong );
-#endif
+    /* send the PONG command */
+    irc_conn_send_msg( session->conn, pong );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 /* this gets called when the connection is fully registered */
 static HANDLER_FN( session, RPL_WELCOME )
 {
-  CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
+    CHECK_RET( (msg->cmd == RPL_WELCOME), IRC_BADPARAM );
 
-  /* call the "connected" event handler */
-  irc_session_call_handler( session, msg, SESSION_CONNECTED );
+    /* call the "connected" event handler */
+    irc_session_call_handler( session, msg, SESSION_CONNECTED );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 /* this gets called when a user changes their nick */
 static HANDLER_FN( session, NICK )
 {
-  CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
+    CHECK_RET( (msg->cmd == NICK), IRC_BADPARAM );
 
-  /* call the "on_nick" event handler */
-  irc_session_call_handler( session, msg, SESSION_ON_NICK );
+    /* call the "on_nick" event handler */
+    irc_session_call_handler( session, msg, SESSION_ON_NICK );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 /* this gets called whenever a PRIVMSG comes to us */
 static HANDLER_FN( session, PRIVMSG )
 {
-  uint8_t * p = NULL;
-  CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
+    uint8_t * p = NULL;
+    CHECK_RET( (msg->cmd == PRIVMSG), IRC_BADPARAM );
 
-  /* we need to figure out if this is a private or public message.  if first
-   * parameter is equal to our current nick, then it is a private message to
-   * us, otherwise it is public. */
-  CHECK_RET( (list_size( msg->params ) > 0), IRC_BADPARAM );
+    /* we need to figure out if this is a private or public message.  if first
+     * parameter is equal to our current nick, then it is a private message to
+     * us, otherwise it is public. */
+    CHECK_RET( (list_count( &(msg->params) ) > 0), IRC_BADPARAM );
 
-  return IRC_OK;
+    return IRC_OK;
 }
 
 

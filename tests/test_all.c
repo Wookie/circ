@@ -31,8 +31,9 @@
 
 #include "test_flags.h"
 
-/*SUITE( conn );*/
+SUITE( conn );
 SUITE( msg );
+SUITE( session );
 
 evt_loop_t * el = NULL;
 
@@ -43,8 +44,9 @@ int main()
 		return CU_get_error();
 
 	/* add each suite of tests */
-    /*ADD_SUITE( conn );*/
+    ADD_SUITE( conn );
 	ADD_SUITE( msg );
+    ADD_SUITE( session );
 
 	/* set up the event loop */
 	el = evt_new();

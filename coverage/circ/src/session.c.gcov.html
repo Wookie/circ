@@ -1,0 +1,722 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - circ test coverage - circ/src/session.c</title>
+  <link rel="stylesheet" type="text/css" href="../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../index.html">top level</a> - <a href="index.html">circ/src</a> - session.c<span style="font-size: 80%;"> (source / <a href="session.c.func.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">circ test coverage</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">103</td>
+            <td class="headerCovTableEntry">241</td>
+            <td class="headerCovTableEntryLo">42.7 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2013-11-26</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">12</td>
+            <td class="headerCovTableEntry">30</td>
+            <td class="headerCovTableEntryLo">40.0 %</td>
+          </tr>
+          <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td class="headerItem">Branches:</td>
+            <td class="headerCovTableEntry">41</td>
+            <td class="headerCovTableEntry">134</td>
+            <td class="headerCovTableEntryLo">30.6 %</td>
+          </tr>
+          <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">           Branch data     Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>                :            : /*</a>
+<span class="lineNum">       2 </span>                :            :  * This program is free software; you can redistribute it and/or
+<span class="lineNum">       3 </span>                :            :  * modify it under the terms of the GNU Lesser General Public
+<span class="lineNum">       4 </span>                :            :  * License as published by the Free Software Foundation; either
+<span class="lineNum">       5 </span>                :            :  * version 2.1 of the License, or (at your option) any later version.
+<span class="lineNum">       6 </span>                :            :  * 
+<span class="lineNum">       7 </span>                :            :  * This program is distributed in the hope that it will be useful,
+<span class="lineNum">       8 </span>                :            :  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+<span class="lineNum">       9 </span>                :            :  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+<span class="lineNum">      10 </span>                :            :  * Lesser General Public License for more details.
+<span class="lineNum">      11 </span>                :            :  * 
+<span class="lineNum">      12 </span>                :            :  * You should have received a copy of the GNU Lesser General Public
+<span class="lineNum">      13 </span>                :            :  * License along with main.c; if not, write to the Free Software
+<span class="lineNum">      14 </span>                :            :  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
+<span class="lineNum">      15 </span>                :            :  */
+<span class="lineNum">      16 </span>                :            : 
+<span class="lineNum">      17 </span>                :            : #include &lt;stdio.h&gt;
+<span class="lineNum">      18 </span>                :            : #include &lt;stdlib.h&gt;
+<span class="lineNum">      19 </span>                :            : #include &lt;stdint.h&gt;
+<span class="lineNum">      20 </span>                :            : #include &lt;string.h&gt;
+<span class="lineNum">      21 </span>                :            : #include &lt;unistd.h&gt;
+<span class="lineNum">      22 </span>                :            : #include &lt;assert.h&gt;
+<span class="lineNum">      23 </span>                :            : #include &lt;netdb.h&gt;
+<span class="lineNum">      24 </span>                :            : #include &lt;arpa/inet.h&gt;
+<span class="lineNum">      25 </span>                :            : #include &lt;netinet/in.h&gt;
+<span class="lineNum">      26 </span>                :            : #include &lt;sys/ioctl.h&gt;
+<span class="lineNum">      27 </span>                :            : 
+<span class="lineNum">      28 </span>                :            : #define DEBUG_ON
+<span class="lineNum">      29 </span>                :            : 
+<span class="lineNum">      30 </span>                :            : #include &lt;cutil/debug.h&gt;
+<span class="lineNum">      31 </span>                :            : #include &lt;cutil/macros.h&gt;
+<span class="lineNum">      32 </span>                :            : #include &lt;cutil/events.h&gt;
+<span class="lineNum">      33 </span>                :            : #include &lt;cutil/btree.h&gt;
+<span class="lineNum">      34 </span>                :            : #include &lt;cutil/pair.h&gt;
+<span class="lineNum">      35 </span>                :            : 
+<span class="lineNum">      36 </span>                :            : #include &quot;commands.h&quot;
+<span class="lineNum">      37 </span>                :            : #include &quot;msg.h&quot;
+<span class="lineNum">      38 </span>                :            : #include &quot;conn.h&quot;
+<span class="lineNum">      39 </span>                :            : #include &quot;session.h&quot;
+<span class="lineNum">      40 </span>                :            : #include &quot;event_cb.h&quot;
+<span class="lineNum">      41 </span>                :            : 
+<span class="lineNum">      42 </span>                :            : #define CHECK_HANDLER_PRAMS CHECK_PTR_RET( session, IRC_BADPARAM ); \
+<span class="lineNum">      43 </span>                :            :               CHECK_PTR_RET( msg, IRC_BADPARAM );
+<span class="lineNum">      44 </span>                :            : 
+<span class="lineNum">      45 </span>                :            : struct irc_session_s
+<span class="lineNum">      46 </span>                :            : {
+<span class="lineNum">      47 </span>                :            :   irc_session_state_t   state;          /* session state */
+<span class="lineNum">      48 </span>                :            :   evt_loop_t*           el;             /* event loop */
+<span class="lineNum">      49 </span>                :            :   irc_conn_t*           conn;           /* irc connection */
+<span class="lineNum">      50 </span>                :            :   ht_t*                 settings;       /* hashtable of settings */
+<span class="lineNum">      51 </span>                :            :   ht_t*                 servers;        /* hashtable of servers in the network */
+<span class="lineNum">      52 </span>                :            :   ht_t*                 handlers;       /* hashtable of event handlers */
+<span class="lineNum">      53 </span>                :            :   void *                user_data;      /* handler context */
+<span class="lineNum">      54 </span>                :            : };
+<span class="lineNum">      55 </span>                :            : 
+<span class="lineNum">      56 </span>                :            : /* forward declare the PING handler */
+<span class="lineNum">      57 </span>                :            : static HANDLER_FN( session, PING );
+<span class="lineNum">      58 </span>                :            : static HANDLER_FN( session, RPL_WELCOME );
+<span class="lineNum">      59 </span>                :            : static HANDLER_FN( session, NICK );
+<span class="lineNum">      60 </span>                :            : static HANDLER_FN( session, PRIVMSG );
+<span class="lineNum">      61 </span>                :            : 
+<span class="lineNum">      62 </span>                :            : /* forward declare the helper functions */
+<span class="lineNum">      63 </span>                :            : static int_t string_eq( void const * const l, void const * const r );
+<span class="lineNum">      64 </span>                :            : static int_t int_less( void * l, void * r );
+<span class="lineNum">      65 </span>                :            : static uint_t setting_hash_fn( void const * const key );
+<span class="lineNum">      66 </span>                :            : static int_t setting_match_fn( void const * const l, void const * const r );
+<span class="lineNum">      67 </span>                :            : static void setting_delete_fn( void * p );
+<span class="lineNum">      68 </span>                :            : 
+<span class="lineNum">      69 </span>                :            : /* function for calling event callbacks */
+<span class="lineNum">      70 </span>                :            : extern irc_ret_t irc_event_cb_call_fn( irc_event_cb_t * const cb, irc_msg_t * const msg );
+<a name="71"><span class="lineNum">      71 </span>                :            : </a>
+<span class="lineNum">      72 </span>                :            : /* handles calling the handlers associated with the cmd */
+<span class="lineNum">      73 </span>                :<span class="lineCov">          1 : static irc_ret_t irc_session_call_handler( irc_session_t * const session, </span>
+<span class="lineNum">      74 </span>                :            :                                            irc_msg_t * const msg,
+<span class="lineNum">      75 </span>                :            :                                            irc_command_t const cmd )
+<span class="lineNum">      76 </span>                :            : {
+<span class="lineNum">      77 </span>                :            :     ht_itr_t itr, end;
+<span class="lineNum">      78 </span>                :<span class="lineCov">          1 :     irc_event_cb_t * cb = NULL;</span>
+<span class="lineNum">      79 </span>                :            : 
+<span class="lineNum">      80 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">      81 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR_RET( session-&gt;handlers, IRC_BADPARAM );</span>
+<span class="lineNum">      82 </span>                :            : 
+<span class="lineNum">      83 </span>                :<span class="lineCov">          1 :     itr = ht_itr_begin( session-&gt;handlers );</span>
+<span class="lineNum">      84 </span>                :<span class="lineCov">          1 :     end = ht_itr_end( session-&gt;handlers );</span>
+<span class="lineNum">      85 </span>[<span class="branchCov" title="Branch 1 was taken 4 times"> + </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>][<span class="branchNoCov" title="Branch 3 was not taken"> - </span><span class="branchCov" title="Branch 4 was taken 1 time"> + </span>]:<span class="lineCov">          5 :     for ( ; !ITR_EQ( itr, end ); itr = ht_itr_next( session-&gt;handlers, itr ) )</span>
+<span class="lineNum">      86 </span>                :            :     {
+<span class="lineNum">      87 </span>                :            :         /* get the next handler */
+<span class="lineNum">      88 </span>                :<span class="lineCov">          4 :         cb = (irc_event_cb_t*)ht_get( session-&gt;handlers, itr );</span>
+<span class="lineNum">      89 </span>                :            : 
+<span class="lineNum">      90 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 4 times"> + </span>]:<span class="lineCov">          4 :         if ( cb == NULL )</span>
+<span class="lineNum">      91 </span>                :<span class="lineNoCov">          0 :             continue;</span>
+<span class="lineNum">      92 </span>                :            : 
+<span class="lineNum">      93 </span>        [<span class="branchCov" title="Branch 1 was taken 4 times"> + </span><span class="branchNoCov" title="Branch 2 was not taken"> - </span>]:<span class="lineCov">          4 :         if ( irc_event_cb_get_cmd( cb ) != cmd )</span>
+<span class="lineNum">      94 </span>                :<span class="lineCov">          4 :             continue;</span>
+<span class="lineNum">      95 </span>                :            : 
+<span class="lineNum">      96 </span>                :            :         /* call the callback */
+<span class="lineNum">      97 </span>                :<span class="lineNoCov">          0 :         irc_event_cb_call_fn( cb, msg );</span>
+<span class="lineNum">      98 </span>                :            :     }
+<span class="lineNum">      99 </span>                :            : 
+<span class="lineNum">     100 </span>                :<span class="lineCov">          1 :     return IRC_OK;</span>
+<a name="101"><span class="lineNum">     101 </span>                :            : }</a>
+<span class="lineNum">     102 </span>                :            : 
+<span class="lineNum">     103 </span>                :<span class="lineNoCov">          0 : static void send_pass( irc_session_t * const session )</span>
+<span class="lineNum">     104 </span>                :            : {
+<span class="lineNum">     105 </span>                :<span class="lineNoCov">          0 :     irc_msg_t * pass = NULL;</span>
+<span class="lineNum">     106 </span>                :<span class="lineNoCov">          0 :     int8_t * server_pass = NULL;</span>
+<span class="lineNum">     107 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR( session );</span>
+<span class="lineNum">     108 </span>                :            : 
+<span class="lineNum">     109 </span>                :<span class="lineNoCov">          0 :     server_pass = irc_session_get( session, SERVER_PASS );</span>
+<span class="lineNum">     110 </span>                :            : 
+<span class="lineNum">     111 </span>                :            :     /* send the PASS command */
+<span class="lineNum">     112 </span>                :<span class="lineNoCov">          0 :     pass = irc_msg_new();</span>
+<span class="lineNum">     113 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_all( pass, PASS, NULL, 1, server_pass );</span>
+<span class="lineNum">     114 </span>                :            : 
+<span class="lineNum">     115 </span>                :            :     /* send the PASS command */
+<span class="lineNum">     116 </span>                :<span class="lineNoCov">          0 :     irc_conn_send_msg( session-&gt;conn, pass );</span>
+<a name="117"><span class="lineNum">     117 </span>                :            : }</a>
+<span class="lineNum">     118 </span>                :            : 
+<span class="lineNum">     119 </span>                :<span class="lineNoCov">          0 : static void send_nick( irc_session_t * const session )</span>
+<span class="lineNum">     120 </span>                :            : {
+<span class="lineNum">     121 </span>                :<span class="lineNoCov">          0 :     irc_msg_t * nick = NULL;</span>
+<span class="lineNum">     122 </span>                :<span class="lineNoCov">          0 :     int8_t * nick_name = NULL;</span>
+<span class="lineNum">     123 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR( session );</span>
+<span class="lineNum">     124 </span>                :            : 
+<span class="lineNum">     125 </span>                :<span class="lineNoCov">          0 :     nick_name = irc_session_get( session, NICK_NAME );</span>
+<span class="lineNum">     126 </span>                :            : 
+<span class="lineNum">     127 </span>                :            :     /* send the NICK command */
+<span class="lineNum">     128 </span>                :<span class="lineNoCov">          0 :     nick = irc_msg_new();</span>
+<span class="lineNum">     129 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_all( nick, NICK, NULL, 1, nick_name );</span>
+<span class="lineNum">     130 </span>                :            : 
+<span class="lineNum">     131 </span>                :            :     /* send the NICk command */
+<span class="lineNum">     132 </span>                :<span class="lineNoCov">          0 :     irc_conn_send_msg( session-&gt;conn, nick );</span>
+<a name="133"><span class="lineNum">     133 </span>                :            : }</a>
+<span class="lineNum">     134 </span>                :            : 
+<span class="lineNum">     135 </span>                :<span class="lineNoCov">          0 : static void send_user( irc_session_t * const session )</span>
+<span class="lineNum">     136 </span>                :            : {
+<span class="lineNum">     137 </span>                :<span class="lineNoCov">          0 :     irc_msg_t * user = NULL;</span>
+<span class="lineNum">     138 </span>                :<span class="lineNoCov">          0 :     int8_t * user_name = NULL;</span>
+<span class="lineNum">     139 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR( session );</span>
+<span class="lineNum">     140 </span>                :            : 
+<span class="lineNum">     141 </span>                :<span class="lineNoCov">          0 :     user_name = irc_session_get( session, USER_NAME );</span>
+<span class="lineNum">     142 </span>                :            : 
+<span class="lineNum">     143 </span>                :            :     /* send the USER command */
+<span class="lineNum">     144 </span>                :<span class="lineNoCov">          0 :     user = irc_msg_new();</span>
+<span class="lineNum">     145 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_all( user, USER, NULL, 3, user_name, &quot;0&quot;, &quot;*&quot; );</span>
+<span class="lineNum">     146 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_trailing( user, user_name );</span>
+<span class="lineNum">     147 </span>                :            : 
+<span class="lineNum">     148 </span>                :            :     /* send the USER command */
+<span class="lineNum">     149 </span>                :<span class="lineNoCov">          0 :     irc_conn_send_msg( session-&gt;conn, user );</span>
+<a name="150"><span class="lineNum">     150 </span>                :            : }</a>
+<span class="lineNum">     151 </span>                :            : 
+<span class="lineNum">     152 </span>                :<span class="lineNoCov">          0 : static void send_quit( irc_session_t * const session )</span>
+<span class="lineNum">     153 </span>                :            : {
+<span class="lineNum">     154 </span>                :<span class="lineNoCov">          0 :     irc_msg_t * quit = NULL;</span>
+<span class="lineNum">     155 </span>                :<span class="lineNoCov">          0 :     int8_t * quit_msg = NULL;</span>
+<span class="lineNum">     156 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR( session );</span>
+<span class="lineNum">     157 </span>                :            : 
+<span class="lineNum">     158 </span>                :<span class="lineNoCov">          0 :     quit_msg = irc_session_get( session, QUIT_MSG );</span>
+<span class="lineNum">     159 </span>                :            : 
+<span class="lineNum">     160 </span>                :            :     /* send QUIT */
+<span class="lineNum">     161 </span>                :<span class="lineNoCov">          0 :     quit = irc_msg_new();</span>
+<span class="lineNum">     162 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_all( quit, QUIT, NULL, 0 );</span>
+<span class="lineNum">     163 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_trailing( quit, quit_msg );</span>
+<span class="lineNum">     164 </span>                :            : 
+<span class="lineNum">     165 </span>                :            :     /* send the QUIT command */
+<span class="lineNum">     166 </span>                :<span class="lineNoCov">          0 :     irc_conn_send_msg( session-&gt;conn, quit );</span>
+<span class="lineNum">     167 </span>                :            : }
+<a name="168"><span class="lineNum">     168 </span>                :            : </a>
+<span class="lineNum">     169 </span>                :            : 
+<span class="lineNum">     170 </span>                :<span class="lineNoCov">          0 : static irc_ret_t irc_conn_message_in( irc_conn_t * const conn, </span>
+<span class="lineNum">     171 </span>                :            :                                       irc_msg_t * const msg, 
+<span class="lineNum">     172 </span>                :            :                                       void * user_data  )
+<span class="lineNum">     173 </span>                :            : {
+<span class="lineNum">     174 </span>                :<span class="lineNoCov">          0 :     irc_session_t * session = (irc_session_t*)user_data;</span>
+<span class="lineNum">     175 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     176 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( msg, IRC_BADPARAM );</span>
+<span class="lineNum">     177 </span>                :            : 
+<span class="lineNum">     178 </span>                :            :     /* call registered handlers */
+<span class="lineNum">     179 </span>                :<span class="lineNoCov">          0 :     irc_session_call_handler( session, msg, msg-&gt;cmd );</span>
+<span class="lineNum">     180 </span>                :            : 
+<span class="lineNum">     181 </span>                :            :     /* call the catch-all handlers */
+<span class="lineNum">     182 </span>                :<span class="lineNoCov">          0 :     irc_session_call_handler( session, msg, ANYCMD );</span>
+<span class="lineNum">     183 </span>                :            : 
+<span class="lineNum">     184 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<a name="185"><span class="lineNum">     185 </span>                :            : }</a>
+<span class="lineNum">     186 </span>                :            : 
+<span class="lineNum">     187 </span>                :<span class="lineNoCov">          0 : static irc_ret_t irc_conn_message_out( irc_conn_t * const conn,</span>
+<span class="lineNum">     188 </span>                :            :                                        irc_msg_t * const msg,
+<span class="lineNum">     189 </span>                :            :                                        void * user_data )
+<span class="lineNum">     190 </span>                :            : {
+<span class="lineNum">     191 </span>                :<span class="lineNoCov">          0 :     irc_session_t * session = (irc_session_t*)user_data;</span>
+<span class="lineNum">     192 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     193 </span>                :            : 
+<span class="lineNum">     194 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( session-&gt;state == IRC_SESSION_QUIT )</span>
+<span class="lineNum">     195 </span>                :            :     {
+<span class="lineNum">     196 </span>                :            :         /* our QUIT command has been sent, now we're pending disconnect */
+<span class="lineNum">     197 </span>                :<span class="lineNoCov">          0 :         session-&gt;state = IRC_SESSION_PENDING_DISCONNECT;</span>
+<span class="lineNum">     198 </span>                :            :     }
+<span class="lineNum">     199 </span>                :            : 
+<span class="lineNum">     200 </span>                :            :     /* free the message */
+<span class="lineNum">     201 </span>                :<span class="lineNoCov">          0 :     irc_msg_delete( msg );</span>
+<span class="lineNum">     202 </span>                :            : 
+<span class="lineNum">     203 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<a name="204"><span class="lineNum">     204 </span>                :            : }</a>
+<span class="lineNum">     205 </span>                :            : 
+<span class="lineNum">     206 </span>                :<span class="lineNoCov">          0 : static irc_ret_t irc_conn_connected( irc_conn_t * const conn, </span>
+<span class="lineNum">     207 </span>                :            :                                      void * user_data )
+<span class="lineNum">     208 </span>                :            : {
+<span class="lineNum">     209 </span>                :<span class="lineNoCov">          0 :     irc_session_t * session = (irc_session_t*)user_data;</span>
+<span class="lineNum">     210 </span>                :<span class="lineNoCov">          0 :     int8_t * password = NULL;</span>
+<span class="lineNum">     211 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     212 </span>                :            : 
+<span class="lineNum">     213 </span>                :            :     /* should only receive these when disconnected */
+<span class="lineNum">     214 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     ASSERT( session-&gt;state == IRC_SESSION_DISCONNECTED );</span>
+<span class="lineNum">     215 </span>                :            : 
+<span class="lineNum">     216 </span>                :            :     /* we have a connection to the server, now we must register it */
+<span class="lineNum">     217 </span>                :<span class="lineNoCov">          0 :     session-&gt;state = IRC_SESSION_CONNECTED;</span>
+<span class="lineNum">     218 </span>                :            : 
+<span class="lineNum">     219 </span>                :            :     /* kick off the IRC connection registration */
+<span class="lineNum">     220 </span>        [<span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( irc_session_get( session, SERVER_PASS ) != NULL )</span>
+<span class="lineNum">     221 </span>                :            :     {
+<span class="lineNum">     222 </span>                :            :         /* send the PASS command */
+<span class="lineNum">     223 </span>                :<span class="lineNoCov">          0 :         send_pass( session );</span>
+<span class="lineNum">     224 </span>                :            :     }
+<span class="lineNum">     225 </span>                :            :     else
+<span class="lineNum">     226 </span>                :            :     {
+<span class="lineNum">     227 </span>                :            :         /* send the NICK command */
+<span class="lineNum">     228 </span>                :<span class="lineNoCov">          0 :         send_nick( session );</span>
+<span class="lineNum">     229 </span>                :            :     }
+<span class="lineNum">     230 </span>                :            : 
+<span class="lineNum">     231 </span>                :            :     /* send the USER command */
+<span class="lineNum">     232 </span>                :<span class="lineNoCov">          0 :     send_user( session );</span>
+<span class="lineNum">     233 </span>                :            : 
+<span class="lineNum">     234 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<a name="235"><span class="lineNum">     235 </span>                :            : }</a>
+<span class="lineNum">     236 </span>                :            : 
+<span class="lineNum">     237 </span>                :<span class="lineCov">          1 : static irc_ret_t irc_conn_disconnected( irc_conn_t * const conn, </span>
+<span class="lineNum">     238 </span>                :            :                     void * user_data )
+<span class="lineNum">     239 </span>                :            : {
+<span class="lineNum">     240 </span>                :<span class="lineCov">          1 :     irc_session_t * session = (irc_session_t*)user_data;</span>
+<span class="lineNum">     241 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     242 </span>                :            : 
+<span class="lineNum">     243 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>]:<span class="lineCov">          1 :     if ( session-&gt;state != IRC_SESSION_PENDING_DISCONNECT )</span>
+<span class="lineNum">     244 </span>                :            :     {
+<span class="lineNum">     245 </span>                :<span class="lineCov">          1 :         WARN(&quot;got disconnected unexpectedly\n&quot;);</span>
+<span class="lineNum">     246 </span>                :            :     }
+<span class="lineNum">     247 </span>                :            : 
+<span class="lineNum">     248 </span>                :<span class="lineCov">          1 :     session-&gt;state = IRC_SESSION_DISCONNECTED;</span>
+<span class="lineNum">     249 </span>                :            : 
+<span class="lineNum">     250 </span>                :<span class="lineCov">          1 :     DEBUG(&quot;session has been taken down completely\n&quot;);</span>
+<span class="lineNum">     251 </span>                :            : 
+<span class="lineNum">     252 </span>                :            :     /* call &quot;disconnected&quot; handler */
+<span class="lineNum">     253 </span>                :<span class="lineCov">          1 :     irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );</span>
+<span class="lineNum">     254 </span>                :            : 
+<span class="lineNum">     255 </span>                :<span class="lineCov">          1 :     return IRC_OK;</span>
+<span class="lineNum">     256 </span>                :            : }
+<a name="257"><span class="lineNum">     257 </span>                :            : </a>
+<span class="lineNum">     258 </span>                :            : /* send the specified IRC command to the server */
+<span class="lineNum">     259 </span>                :<span class="lineNoCov">          0 : irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg )</span>
+<span class="lineNum">     260 </span>                :            : {
+<span class="lineNum">     261 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     262 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( msg, IRC_BADPARAM );</span>
+<span class="lineNum">     263 </span>                :<span class="lineNoCov">          0 :     return irc_conn_send_msg( session-&gt;conn, msg );</span>
+<a name="264"><span class="lineNum">     264 </span>                :            : }</a>
+<span class="lineNum">     265 </span>                :            : 
+<span class="lineNum">     266 </span>                :<span class="lineCov">          3 : static int_t irc_session_initialize( irc_session_t * const session,</span>
+<span class="lineNum">     267 </span>                :            :                                      uint8_t const * const host,
+<span class="lineNum">     268 </span>                :            :                                      uint8_t const * const port,
+<span class="lineNum">     269 </span>                :            :                                      evt_loop_t * const el,
+<span class="lineNum">     270 </span>                :            :                                      void * user_data )
+<span class="lineNum">     271 </span>                :            : {
+<span class="lineNum">     272 </span>                :<span class="lineCov">          3 :     irc_ret_t ret = IRC_OK;</span>
+<span class="lineNum">     273 </span>                :<span class="lineCov">          3 :     irc_event_cb_t * ping_cb = NULL;</span>
+<span class="lineNum">     274 </span>                :<span class="lineCov">          3 :     irc_event_cb_t * rpl_welcome_cb = NULL;</span>
+<span class="lineNum">     275 </span>                :<span class="lineCov">          3 :     irc_event_cb_t * nick_cb = NULL;</span>
+<span class="lineNum">     276 </span>                :<span class="lineCov">          3 :     irc_event_cb_t * privmsg_cb = NULL;</span>
+<span class="lineNum">     277 </span>                :            :     static irc_conn_ops_t conn_ops = 
+<span class="lineNum">     278 </span>                :            :     {
+<span class="lineNum">     279 </span>                :            :         &amp;irc_conn_message_in,
+<span class="lineNum">     280 </span>                :            :         &amp;irc_conn_message_out,
+<span class="lineNum">     281 </span>                :            :         &amp;irc_conn_connected,
+<span class="lineNum">     282 </span>                :            :         &amp;irc_conn_disconnected
+<span class="lineNum">     283 </span>                :            :     };
+<span class="lineNum">     284 </span>                :            : 
+<span class="lineNum">     285 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET( session, FALSE );</span>
+<span class="lineNum">     286 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET( el, FALSE );</span>
+<span class="lineNum">     287 </span>                :            : 
+<span class="lineNum">     288 </span>                :            :     /* zero everything out */
+<span class="lineNum">     289 </span>                :<span class="lineCov">          3 :     MEMSET( (void*)session, 0, sizeof( irc_session_t ) );</span>
+<span class="lineNum">     290 </span>                :            : 
+<span class="lineNum">     291 </span>                :            :     /* store the session state */
+<span class="lineNum">     292 </span>                :<span class="lineCov">          3 :     session-&gt;state = IRC_SESSION_DISCONNECTED;</span>
+<span class="lineNum">     293 </span>                :            : 
+<span class="lineNum">     294 </span>                :            :     /* store the event loop handle */
+<span class="lineNum">     295 </span>                :<span class="lineCov">          3 :     session-&gt;el = el;</span>
+<span class="lineNum">     296 </span>                :            : 
+<span class="lineNum">     297 </span>                :            :     /* create the irc connection */
+<span class="lineNum">     298 </span>                :<span class="lineCov">          3 :     session-&gt;conn = irc_conn_new( host, port, &amp;conn_ops, el, (void*)session );</span>
+<span class="lineNum">     299 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET( session-&gt;conn, FALSE );</span>
+<span class="lineNum">     300 </span>                :            : 
+<span class="lineNum">     301 </span>                :            :     /* create the settings hashtable */
+<span class="lineNum">     302 </span>                :<span class="lineCov">          1 :     session-&gt;settings = ht_new( 64, &amp;setting_hash_fn, &amp;setting_match_fn, &amp;setting_delete_fn );</span>
+<span class="lineNum">     303 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR_RET( session-&gt;settings, FALSE );</span>
+<span class="lineNum">     304 </span>                :            : 
+<span class="lineNum">     305 </span>                :            :     /* create the handlers hashtable */
+<span class="lineNum">     306 </span>                :<span class="lineCov">          1 :     session-&gt;handlers = ht_new( 8, &amp;irc_event_cb_hash, &amp;irc_event_cb_match, &amp;irc_event_cb_delete );</span>
+<span class="lineNum">     307 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR_RET( session-&gt;handlers, FALSE );</span>
+<span class="lineNum">     308 </span>                :            : 
+<span class="lineNum">     309 </span>                :            :     /* store the handler context */
+<span class="lineNum">     310 </span>                :<span class="lineCov">          1 :     session-&gt;user_data = user_data;</span>
+<span class="lineNum">     311 </span>                :            : 
+<span class="lineNum">     312 </span>                :            :     /* register PING handler */
+<span class="lineNum">     313 </span>                :<span class="lineCov">          1 :     ping_cb = NEW_HANDLER( PING, session, session );</span>
+<span class="lineNum">     314 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set_handler( session, ping_cb )), FALSE );</span>
+<span class="lineNum">     315 </span>                :            : 
+<span class="lineNum">     316 </span>                :            :     /* register RPL_WELCOME handler */
+<span class="lineNum">     317 </span>                :<span class="lineCov">          1 :     rpl_welcome_cb = NEW_HANDLER( RPL_WELCOME, session, session );</span>
+<span class="lineNum">     318 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set_handler( session, rpl_welcome_cb )), FALSE );</span>
+<span class="lineNum">     319 </span>                :            : 
+<span class="lineNum">     320 </span>                :            :     /* register NICK handler */
+<span class="lineNum">     321 </span>                :<span class="lineCov">          1 :     nick_cb = NEW_HANDLER( NICK, session, session );</span>
+<span class="lineNum">     322 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set_handler( session, nick_cb)), FALSE );</span>
+<span class="lineNum">     323 </span>                :            : 
+<span class="lineNum">     324 </span>                :            :     /* register PRIVMSG handler */
+<span class="lineNum">     325 </span>                :<span class="lineCov">          1 :     privmsg_cb = NEW_HANDLER( PRIVMSG, session, session );</span>
+<span class="lineNum">     326 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set_handler( session, privmsg_cb)), FALSE );</span>
+<span class="lineNum">     327 </span>                :            : 
+<span class="lineNum">     328 </span>                :            :     /* store the host/port */
+<span class="lineNum">     329 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_HOST, host )), FALSE );</span>
+<span class="lineNum">     330 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_RET( (IRC_OK == irc_session_set( session, SERVER_PORT, port )), FALSE );</span>
+<span class="lineNum">     331 </span>                :            : 
+<span class="lineNum">     332 </span>                :<span class="lineCov">          3 :     return TRUE;</span>
+<span class="lineNum">     333 </span>                :            : }
+<a name="334"><span class="lineNum">     334 </span>                :            : </a>
+<span class="lineNum">     335 </span>                :            : 
+<span class="lineNum">     336 </span>                :<span class="lineCov">          4 : irc_session_t * irc_session_new( uint8_t const * const host,</span>
+<span class="lineNum">     337 </span>                :            :                                  uint8_t const * const port,
+<span class="lineNum">     338 </span>                :            :                                  evt_loop_t * const el,
+<span class="lineNum">     339 </span>                :            :                                  void * user_data )
+<span class="lineNum">     340 </span>                :            : {
+<span class="lineNum">     341 </span>                :<span class="lineCov">          4 :     irc_session_t * session = NULL;</span>
+<span class="lineNum">     342 </span>                :            : 
+<span class="lineNum">     343 </span>        [<span class="branchCov" title="Branch 0 was taken 1 time"> + </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          4 :     CHECK_PTR_RET( el, NULL );</span>
+<span class="lineNum">     344 </span>                :            : 
+<span class="lineNum">     345 </span>                :            :     /* allocate the session struct */
+<span class="lineNum">     346 </span>        [<span class="branchCov" title="Branch 0 was taken 3 times"> + </span><span class="branchNoCov" title="Branch 1 was not taken"> - </span>]:<span class="lineCov">          3 :     session = CALLOC( 1, sizeof(irc_session_t) );</span>
+<span class="lineNum">     347 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET_MSG( session, NULL, &quot;failed to allocate session struct\n&quot; );</span>
+<span class="lineNum">     348 </span>                :            : 
+<span class="lineNum">     349 </span>                :            :     /* initialize the session */
+<span class="lineNum">     350 </span>        [<span class="branchCov" title="Branch 1 was taken 2 times"> + </span><span class="branchCov" title="Branch 2 was taken 1 time"> + </span>]:<span class="lineCov">          3 :     CHECK_GOTO( irc_session_initialize( session, host, port, el, user_data ), _irc_session_new_fail );</span>
+<span class="lineNum">     351 </span>                :            : 
+<span class="lineNum">     352 </span>                :<span class="lineCov">          1 :     return session;</span>
+<span class="lineNum">     353 </span>                :            : 
+<span class="lineNum">     354 </span>                :            : _irc_session_new_fail:
+<span class="lineNum">     355 </span>                :<span class="lineCov">          2 :     FREE( session );</span>
+<span class="lineNum">     356 </span>                :<span class="lineCov">          4 :     return NULL;</span>
+<span class="lineNum">     357 </span>                :            : }
+<a name="358"><span class="lineNum">     358 </span>                :            : </a>
+<span class="lineNum">     359 </span>                :            : 
+<span class="lineNum">     360 </span>                :<span class="lineCov">          1 : static void irc_session_deinitialize( irc_session_t * const session )</span>
+<span class="lineNum">     361 </span>                :            : {
+<span class="lineNum">     362 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR( session );</span>
+<span class="lineNum">     363 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_MSG( session-&gt;state == IRC_SESSION_DISCONNECTED, &quot;deinitializing active session\n&quot; );</span>
+<span class="lineNum">     364 </span>                :            : 
+<span class="lineNum">     365 </span>                :<span class="lineCov">          1 :     DEBUG(&quot;deinitializing session\n&quot;);</span>
+<span class="lineNum">     366 </span>                :            : 
+<span class="lineNum">     367 </span>                :            :     /* must be disconnected to deinitialize everything */
+<span class="lineNum">     368 </span>                :<span class="lineCov">          1 :     irc_conn_delete( (void*)session-&gt;conn );</span>
+<span class="lineNum">     369 </span>                :            : 
+<span class="lineNum">     370 </span>                :            :     /* clean up hash tables */
+<span class="lineNum">     371 </span>                :<span class="lineCov">          1 :     ht_delete( session-&gt;settings );</span>
+<span class="lineNum">     372 </span>                :<span class="lineCov">          1 :     ht_delete( session-&gt;handlers );</span>
+<span class="lineNum">     373 </span>                :            : 
+<span class="lineNum">     374 </span>                :            :     /* drop pointer to context */
+<span class="lineNum">     375 </span>                :<span class="lineCov">          1 :     session-&gt;user_data = NULL;</span>
+<span class="lineNum">     376 </span>                :            : }
+<a name="377"><span class="lineNum">     377 </span>                :            : </a>
+<span class="lineNum">     378 </span>                :            : 
+<span class="lineNum">     379 </span>                :<span class="lineCov">          1 : void irc_session_delete( void * s )</span>
+<span class="lineNum">     380 </span>                :            : {
+<span class="lineNum">     381 </span>                :<span class="lineCov">          1 :     irc_session_t * session = (irc_session_t*)s;</span>
+<span class="lineNum">     382 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_PTR( session );</span>
+<span class="lineNum">     383 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 1 time"> + </span>]:<span class="lineCov">          1 :     CHECK_MSG( session-&gt;state == IRC_SESSION_DISCONNECTED, &quot;deleting active session\n&quot; );</span>
+<span class="lineNum">     384 </span>                :            : 
+<span class="lineNum">     385 </span>                :            :     /* deinit the session, don't sent the QUIT */
+<span class="lineNum">     386 </span>                :<span class="lineCov">          1 :     irc_session_deinitialize( session );</span>
+<span class="lineNum">     387 </span>                :            : 
+<span class="lineNum">     388 </span>                :<span class="lineCov">          1 :     FREE( session );</span>
+<a name="389"><span class="lineNum">     389 </span>                :            : }</a>
+<span class="lineNum">     390 </span>                :            : 
+<span class="lineNum">     391 </span>                :<span class="lineCov">          2 : irc_ret_t irc_session_set( irc_session_t * const session,</span>
+<span class="lineNum">     392 </span>                :            :                irc_session_setting_t const setting,
+<span class="lineNum">     393 </span>                :            :                void const * const value )
+<span class="lineNum">     394 </span>                :            : {
+<span class="lineNum">     395 </span>                :<span class="lineCov">          2 :     pair_t * p, * r = NULL;</span>
+<span class="lineNum">     396 </span>                :            :     ht_itr_t itr;
+<span class="lineNum">     397 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          2 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     398 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          2 :     CHECK_PTR_RET( value, IRC_BADPARAM );</span>
+<span class="lineNum">     399 </span>                :            : 
+<span class="lineNum">     400 </span>                :            :     /* dup the value and take ownership of it */
+<span class="lineNum">     401 </span>                :<span class="lineCov">          2 :     p = pair_new( (void*)setting, (void*)strdup(value) );</span>
+<span class="lineNum">     402 </span>                :<span class="lineCov">          2 :     itr = ht_find( session-&gt;settings, (void*)p );</span>
+<span class="lineNum">     403 </span>                :            : 
+<span class="lineNum">     404 </span>                :<span class="lineCov">          2 :     r = (pair_t*)ht_get( session-&gt;settings, itr );</span>
+<span class="lineNum">     405 </span>                :<span class="lineCov">          2 :     ht_remove( session-&gt;settings, itr );</span>
+<span class="lineNum">     406 </span>                :            :     
+<span class="lineNum">     407 </span>                :<span class="lineCov">          2 :     setting_delete_fn( r );</span>
+<span class="lineNum">     408 </span>                :            : 
+<span class="lineNum">     409 </span>                :<span class="lineCov">          2 :     ht_insert( session-&gt;settings, p );</span>
+<span class="lineNum">     410 </span>                :            : 
+<span class="lineNum">     411 </span>                :<span class="lineCov">          2 :     return IRC_OK;</span>
+<span class="lineNum">     412 </span>                :            : }
+<a name="413"><span class="lineNum">     413 </span>                :            : </a>
+<span class="lineNum">     414 </span>                :            : 
+<span class="lineNum">     415 </span>                :<span class="lineNoCov">          0 : void * irc_session_get( irc_session_t * const session,</span>
+<span class="lineNum">     416 </span>                :            :                         irc_session_setting_t const setting )
+<span class="lineNum">     417 </span>                :            : {
+<span class="lineNum">     418 </span>                :<span class="lineNoCov">          0 :     pair_t * p = NULL;</span>
+<span class="lineNum">     419 </span>                :            :     ht_itr_t itr;
+<span class="lineNum">     420 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, NULL );</span>
+<span class="lineNum">     421 </span>                :            : 
+<span class="lineNum">     422 </span>                :<span class="lineNoCov">          0 :     p = pair_new( (void*)setting, NULL );</span>
+<span class="lineNum">     423 </span>                :<span class="lineNoCov">          0 :     itr = ht_find( session-&gt;settings, (void*)p );</span>
+<span class="lineNum">     424 </span>                :<span class="lineNoCov">          0 :     pair_delete( p );</span>
+<span class="lineNum">     425 </span>                :            : 
+<span class="lineNum">     426 </span>                :<span class="lineNoCov">          0 :     p = ht_get( session-&gt;settings, itr );</span>
+<span class="lineNum">     427 </span>                :            : 
+<span class="lineNum">     428 </span>                :<span class="lineNoCov">          0 :     return (void*)pair_second( p );</span>
+<span class="lineNum">     429 </span>                :            : }
+<a name="430"><span class="lineNum">     430 </span>                :            : </a>
+<span class="lineNum">     431 </span>                :            : 
+<span class="lineNum">     432 </span>                :<span class="lineCov">          4 : irc_ret_t irc_session_set_handler( irc_session_t * const session,</span>
+<span class="lineNum">     433 </span>                :            :                                    irc_event_cb_t * const cb )
+<span class="lineNum">     434 </span>                :            : {
+<span class="lineNum">     435 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 4 times"> + </span>]:<span class="lineCov">          4 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     436 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 4 times"> + </span>]:<span class="lineCov">          4 :     CHECK_PTR_RET( cb, IRC_BADPARAM );</span>
+<span class="lineNum">     437 </span>                :            : 
+<span class="lineNum">     438 </span>        [<span class="branchNoCov" title="Branch 1 was not taken"> - </span><span class="branchCov" title="Branch 2 was taken 4 times"> + </span>]:<span class="lineCov">          4 :     CHECK_RET( ht_insert( session-&gt;handlers, (void*)cb ), IRC_ERR );</span>
+<span class="lineNum">     439 </span>                :            : 
+<span class="lineNum">     440 </span>                :<span class="lineCov">          4 :     return IRC_OK;</span>
+<a name="441"><span class="lineNum">     441 </span>                :            : }</a>
+<span class="lineNum">     442 </span>                :            : 
+<span class="lineNum">     443 </span>                :<span class="lineNoCov">          0 : irc_ret_t irc_session_clear_handler( irc_session_t * const session,</span>
+<span class="lineNum">     444 </span>                :            :                                      uint8_t const * const name )
+<span class="lineNum">     445 </span>                :            : {
+<span class="lineNum">     446 </span>                :            :     ht_itr_t itr;
+<span class="lineNum">     447 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     448 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( name, IRC_BADPARAM );</span>
+<span class="lineNum">     449 </span>                :            : 
+<span class="lineNum">     450 </span>                :            :     /* look up the event cb struct */
+<span class="lineNum">     451 </span>                :<span class="lineNoCov">          0 :     itr = irc_event_cb_ht_find( session-&gt;handlers, name );</span>
+<span class="lineNum">     452 </span>                :            : 
+<span class="lineNum">     453 </span>                :            :     /* try to call the callback */
+<span class="lineNum">     454 </span>        [<span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( ht_remove( session-&gt;handlers, itr ), IRC_ERR );</span>
+<span class="lineNum">     455 </span>                :            : 
+<span class="lineNum">     456 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<a name="457"><span class="lineNum">     457 </span>                :            : }</a>
+<span class="lineNum">     458 </span>                :            : 
+<span class="lineNum">     459 </span>                :<span class="lineNoCov">          0 : irc_ret_t irc_session_connect( irc_session_t * const session )</span>
+<span class="lineNum">     460 </span>                :            : {
+<span class="lineNum">     461 </span>                :            :     int8_t * host, * port;
+<span class="lineNum">     462 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     463 </span>                :            : 
+<span class="lineNum">     464 </span>                :<span class="lineNoCov">          0 :     host = UT(irc_session_get( session, SERVER_HOST ));</span>
+<span class="lineNum">     465 </span>                :<span class="lineNoCov">          0 :     port = UT(irc_session_get( session, SERVER_PORT ));</span>
+<span class="lineNum">     466 </span>                :            : 
+<span class="lineNum">     467 </span>                :            :     /* try to initiate an irc connection */
+<span class="lineNum">     468 </span>                :<span class="lineNoCov">          0 :     DEBUG( &quot;attempting connection to: %s:%s\n&quot;, host, port );</span>
+<span class="lineNum">     469 </span>        [<span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( irc_conn_connect( session-&gt;conn ) != IRC_OK )</span>
+<span class="lineNum">     470 </span>                :            :     {
+<span class="lineNum">     471 </span>                :<span class="lineNoCov">          0 :         WARN(&quot; failed to create session connection\n&quot; );</span>
+<span class="lineNum">     472 </span>                :<span class="lineNoCov">          0 :         return IRC_ERR;</span>
+<span class="lineNum">     473 </span>                :            :     }
+<span class="lineNum">     474 </span>                :            : 
+<span class="lineNum">     475 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<a name="476"><span class="lineNum">     476 </span>                :            : }</a>
+<span class="lineNum">     477 </span>                :            : 
+<span class="lineNum">     478 </span>                :<span class="lineNoCov">          0 : irc_ret_t irc_session_disconnect( irc_session_t * const session, int_t do_quit )</span>
+<span class="lineNum">     479 </span>                :            : {
+<span class="lineNum">     480 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_PTR_RET( session, IRC_BADPARAM );</span>
+<span class="lineNum">     481 </span>                :            : 
+<span class="lineNum">     482 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( session-&gt;state &gt;= IRC_SESSION_CONNECTED )</span>
+<span class="lineNum">     483 </span>                :            :     {
+<span class="lineNum">     484 </span>[<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>][<span class="branchNoExec" title="Branch 2 was not executed"> # </span><span class="branchNoExec" title="Branch 3 was not executed"> # </span>]:<span class="lineNoCov">          0 :         if ( do_quit &amp;&amp; ( session-&gt;state == IRC_SESSION_ACTIVE ) )</span>
+<span class="lineNum">     485 </span>                :            :         {
+<span class="lineNum">     486 </span>                :<span class="lineNoCov">          0 :             DEBUG(&quot;sending QUIT to kick off orderly disconnect\n&quot;);</span>
+<span class="lineNum">     487 </span>                :            : 
+<span class="lineNum">     488 </span>                :            :             /* set out state before sending the command */
+<span class="lineNum">     489 </span>                :<span class="lineNoCov">          0 :             session-&gt;state = IRC_SESSION_QUIT;</span>
+<span class="lineNum">     490 </span>                :<span class="lineNoCov">          0 :             send_quit( session );</span>
+<span class="lineNum">     491 </span>                :            : 
+<span class="lineNum">     492 </span>                :            :             /* disconnect, wait for all messages to be transmitted */
+<span class="lineNum">     493 </span>                :<span class="lineNoCov">          0 :             irc_conn_disconnect( session-&gt;conn, TRUE );</span>
+<span class="lineNum">     494 </span>                :            : 
+<span class="lineNum">     495 </span>                :<span class="lineNoCov">          0 :             return IRC_OK;</span>
+<span class="lineNum">     496 </span>                :            :         }
+<span class="lineNum">     497 </span>                :            :     }
+<span class="lineNum">     498 </span>                :            : 
+<span class="lineNum">     499 </span>                :<span class="lineNoCov">          0 :     DEBUG(&quot;don't have registered connection so tear down immediately\n&quot;);</span>
+<span class="lineNum">     500 </span>                :            : 
+<span class="lineNum">     501 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( session-&gt;state == IRC_SESSION_PENDING_DISCONNECT )</span>
+<span class="lineNum">     502 </span>                :            :     {
+<span class="lineNum">     503 </span>                :            :         /* have already tried to disconnect... */
+<span class="lineNum">     504 </span>                :<span class="lineNoCov">          0 :         session-&gt;state = IRC_SESSION_DISCONNECTED;</span>
+<span class="lineNum">     505 </span>                :            : 
+<span class="lineNum">     506 </span>                :<span class="lineNoCov">          0 :         DEBUG(&quot;forcing session takedown\n&quot;);</span>
+<span class="lineNum">     507 </span>                :            : 
+<span class="lineNum">     508 </span>                :            :         /* call &quot;disconnected&quot; handler */
+<span class="lineNum">     509 </span>                :<span class="lineNoCov">          0 :         irc_session_call_handler( session, NULL, SESSION_DISCONNECTED );</span>
+<span class="lineNum">     510 </span>                :            :     }
+<span class="lineNum">     511 </span>                :            :     else
+<span class="lineNum">     512 </span>                :            :     {
+<span class="lineNum">     513 </span>                :            :         /* haven't tried to disconnect yet... */
+<span class="lineNum">     514 </span>                :<span class="lineNoCov">          0 :         DEBUG(&quot;beginning connection disconnect\n&quot;);</span>
+<span class="lineNum">     515 </span>                :            : 
+<span class="lineNum">     516 </span>                :            :         /* move to pending disconnect state */
+<span class="lineNum">     517 </span>                :<span class="lineNoCov">          0 :         session-&gt;state = IRC_SESSION_PENDING_DISCONNECT;</span>
+<span class="lineNum">     518 </span>                :            : 
+<span class="lineNum">     519 </span>                :            :         /* disconnect, DON'T wait for all messages to be transmitted */
+<span class="lineNum">     520 </span>                :<span class="lineNoCov">          0 :         irc_conn_disconnect( session-&gt;conn, FALSE );</span>
+<span class="lineNum">     521 </span>                :            :     }
+<span class="lineNum">     522 </span>                :            : 
+<span class="lineNum">     523 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<span class="lineNum">     524 </span>                :            : }
+<span class="lineNum">     525 </span>                :            : 
+<span class="lineNum">     526 </span>                :            : /*************************************************/
+<span class="lineNum">     527 </span>                :            : /********************** static helper functions **/
+<a name="528"><span class="lineNum">     528 </span>                :            : /*************************************************/</a>
+<span class="lineNum">     529 </span>                :            : 
+<span class="lineNum">     530 </span>                :<span class="lineNoCov">          0 : static int_t string_eq( void const * const l, void const * const r )</span>
+<span class="lineNum">     531 </span>                :            : {
+<span class="lineNum">     532 </span>                :<span class="lineNoCov">          0 :     return ( 0 == strcmp(C(l), C(r)) );</span>
+<a name="533"><span class="lineNum">     533 </span>                :            : }</a>
+<span class="lineNum">     534 </span>                :            : 
+<span class="lineNum">     535 </span>                :<span class="lineNoCov">          0 : static int_t int_less( void * l, void * r )</span>
+<span class="lineNum">     536 </span>                :            : {
+<span class="lineNum">     537 </span>                :<span class="lineNoCov">          0 :     int_t li = (int_t)l;</span>
+<span class="lineNum">     538 </span>                :<span class="lineNoCov">          0 :     int_t ri = (int_t)r;</span>
+<span class="lineNum">     539 </span>                :            : 
+<span class="lineNum">     540 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     if ( li &lt; ri )</span>
+<span class="lineNum">     541 </span>                :<span class="lineNoCov">          0 :         return -1;</span>
+<span class="lineNum">     542 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     else if ( li &gt; ri )</span>
+<span class="lineNum">     543 </span>                :<span class="lineNoCov">          0 :         return 1;</span>
+<span class="lineNum">     544 </span>                :<span class="lineNoCov">          0 :     return 0;</span>
+<a name="545"><span class="lineNum">     545 </span>                :            : }</a>
+<span class="lineNum">     546 </span>                :            : 
+<span class="lineNum">     547 </span>                :<span class="lineCov">          8 : static uint_t setting_hash_fn( void const * const key )</span>
+<span class="lineNum">     548 </span>                :            : {
+<span class="lineNum">     549 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 8 times"> + </span>]:<span class="lineCov">          8 :     CHECK_PTR_RET( key, 0 );</span>
+<span class="lineNum">     550 </span>                :<span class="lineCov">          8 :     return (uint_t)pair_first((pair_t*)key);</span>
+<a name="551"><span class="lineNum">     551 </span>                :            : }</a>
+<span class="lineNum">     552 </span>                :            : 
+<span class="lineNum">     553 </span>                :<span class="lineCov">          3 : static int_t setting_match_fn( void const * const l, void const * const r )</span>
+<span class="lineNum">     554 </span>                :            : {
+<span class="lineNum">     555 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET( l, FALSE );</span>
+<span class="lineNum">     556 </span>        [<span class="branchNoCov" title="Branch 0 was not taken"> - </span><span class="branchCov" title="Branch 1 was taken 3 times"> + </span>]:<span class="lineCov">          3 :     CHECK_PTR_RET( r, FALSE );</span>
+<span class="lineNum">     557 </span>                :<span class="lineCov">          3 :     return ((uint_t)pair_first((pair_t*)l) == (uint_t)pair_first((pair_t*)r));</span>
+<a name="558"><span class="lineNum">     558 </span>                :            : }</a>
+<span class="lineNum">     559 </span>                :            : 
+<span class="lineNum">     560 </span>                :<span class="lineCov">          4 : static void setting_delete_fn( void * p )</span>
+<span class="lineNum">     561 </span>                :            : {
+<span class="lineNum">     562 </span>                :<span class="lineCov">          4 :     pair_t * pair = (pair_t*)p;</span>
+<span class="lineNum">     563 </span>        [<span class="branchCov" title="Branch 0 was taken 2 times"> + </span><span class="branchCov" title="Branch 1 was taken 2 times"> + </span>]:<span class="lineCov">          6 :     CHECK_PTR( pair );</span>
+<span class="lineNum">     564 </span>                :            : 
+<span class="lineNum">     565 </span>                :<span class="lineCov">          2 :     FREE( pair_second( p ) );</span>
+<span class="lineNum">     566 </span>                :<span class="lineCov">          2 :     pair_delete( p );</span>
+<span class="lineNum">     567 </span>                :            : }
+<a name="568"><span class="lineNum">     568 </span>                :            : </a>
+<span class="lineNum">     569 </span>                :            : /* this gets called when we receive a PING message from the server */
+<span class="lineNum">     570 </span>                :<span class="lineNoCov">          0 : static HANDLER_FN( session, PING )</span>
+<span class="lineNum">     571 </span>                :            : {
+<span class="lineNum">     572 </span>                :            :     int8_t const * dest;
+<span class="lineNum">     573 </span>                :<span class="lineNoCov">          0 :     irc_msg_t * pong = NULL;</span>
+<span class="lineNum">     574 </span>                :            : 
+<span class="lineNum">     575 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( (msg-&gt;cmd == PING), IRC_BADPARAM );</span>
+<span class="lineNum">     576 </span>                :            : 
+<span class="lineNum">     577 </span>                :            :     /* get a pointer to the last part of the PING message */
+<span class="lineNum">     578 </span>                :<span class="lineNoCov">          0 :     dest = STR_PTR_P((irc_str_ref_t*)list_get( &amp;(msg-&gt;params), list_itr_tail( &amp;(msg-&gt;params) ) ));</span>
+<span class="lineNum">     579 </span>                :<span class="lineNoCov">          0 :     DEBUG(&quot;received PING from %s\n&quot;, dest);</span>
+<span class="lineNum">     580 </span>                :            : 
+<span class="lineNum">     581 </span>                :            :     /* send PONG */
+<span class="lineNum">     582 </span>                :<span class="lineNoCov">          0 :     pong = irc_msg_new();</span>
+<span class="lineNum">     583 </span>                :<span class="lineNoCov">          0 :     irc_msg_set_all( pong, PONG, NULL, 1, dest );</span>
+<span class="lineNum">     584 </span>                :            : 
+<span class="lineNum">     585 </span>                :            :     /* send the PONG command */
+<span class="lineNum">     586 </span>                :<span class="lineNoCov">          0 :     irc_conn_send_msg( session-&gt;conn, pong );</span>
+<span class="lineNum">     587 </span>                :            : 
+<span class="lineNum">     588 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<span class="lineNum">     589 </span>                :            : }
+<a name="590"><span class="lineNum">     590 </span>                :            : </a>
+<span class="lineNum">     591 </span>                :            : /* this gets called when the connection is fully registered */
+<span class="lineNum">     592 </span>                :<span class="lineNoCov">          0 : static HANDLER_FN( session, RPL_WELCOME )</span>
+<span class="lineNum">     593 </span>                :            : {
+<span class="lineNum">     594 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( (msg-&gt;cmd == RPL_WELCOME), IRC_BADPARAM );</span>
+<span class="lineNum">     595 </span>                :            : 
+<span class="lineNum">     596 </span>                :            :     /* call the &quot;connected&quot; event handler */
+<span class="lineNum">     597 </span>                :<span class="lineNoCov">          0 :     irc_session_call_handler( session, msg, SESSION_CONNECTED );</span>
+<span class="lineNum">     598 </span>                :            : 
+<span class="lineNum">     599 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<span class="lineNum">     600 </span>                :            : }
+<a name="601"><span class="lineNum">     601 </span>                :            : </a>
+<span class="lineNum">     602 </span>                :            : /* this gets called when a user changes their nick */
+<span class="lineNum">     603 </span>                :<span class="lineNoCov">          0 : static HANDLER_FN( session, NICK )</span>
+<span class="lineNum">     604 </span>                :            : {
+<span class="lineNum">     605 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( (msg-&gt;cmd == NICK), IRC_BADPARAM );</span>
+<span class="lineNum">     606 </span>                :            : 
+<span class="lineNum">     607 </span>                :            :     /* call the &quot;on_nick&quot; event handler */
+<span class="lineNum">     608 </span>                :<span class="lineNoCov">          0 :     irc_session_call_handler( session, msg, SESSION_ON_NICK );</span>
+<span class="lineNum">     609 </span>                :            : 
+<span class="lineNum">     610 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<span class="lineNum">     611 </span>                :            : }
+<a name="612"><span class="lineNum">     612 </span>                :            : </a>
+<span class="lineNum">     613 </span>                :            : /* this gets called whenever a PRIVMSG comes to us */
+<span class="lineNum">     614 </span>                :<span class="lineNoCov">          0 : static HANDLER_FN( session, PRIVMSG )</span>
+<span class="lineNum">     615 </span>                :            : {
+<span class="lineNum">     616 </span>                :<span class="lineNoCov">          0 :     uint8_t * p = NULL;</span>
+<span class="lineNum">     617 </span>        [<span class="branchNoExec" title="Branch 0 was not executed"> # </span><span class="branchNoExec" title="Branch 1 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( (msg-&gt;cmd == PRIVMSG), IRC_BADPARAM );</span>
+<span class="lineNum">     618 </span>                :            : 
+<span class="lineNum">     619 </span>                :            :     /* we need to figure out if this is a private or public message.  if first
+<span class="lineNum">     620 </span>                :            :      * parameter is equal to our current nick, then it is a private message to
+<span class="lineNum">     621 </span>                :            :      * us, otherwise it is public. */
+<span class="lineNum">     622 </span>        [<span class="branchNoExec" title="Branch 1 was not executed"> # </span><span class="branchNoExec" title="Branch 2 was not executed"> # </span>]:<span class="lineNoCov">          0 :     CHECK_RET( (list_count( &amp;(msg-&gt;params) ) &gt; 0), IRC_BADPARAM );</span>
+<span class="lineNum">     623 </span>                :            : 
+<span class="lineNum">     624 </span>                :<span class="lineNoCov">          0 :     return IRC_OK;</span>
+<span class="lineNum">     625 </span>                :            : }
+<span class="lineNum">     626 </span>                :            : 
+<span class="lineNum">     627 </span>                :            : 
+<span class="lineNum">     628 </span>                :            : #ifdef UNIT_TESTING
+<span class="lineNum">     629 </span>                :            : 
+<a name="630"><span class="lineNum">     630 </span>                :            : #include &lt;CUnit/Basic.h&gt;</a>
+<span class="lineNum">     631 </span>                :            : 
+<span class="lineNum">     632 </span>                :<span class="lineCov">          1 : void test_session_private_functions( void )</span>
+<span class="lineNum">     633 </span>                :            : {
+<span class="lineNum">     634 </span>                :<span class="lineCov">          1 : }</span>
+<span class="lineNum">     635 </span>                :            : 
+<span class="lineNum">     636 </span>                :            : #endif
+<span class="lineNum">     637 </span>                :            : 
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.9</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>

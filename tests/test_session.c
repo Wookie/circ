@@ -30,10 +30,10 @@ static void test_session_newdel( void )
 {
     irc_session_t * s = NULL;
 
-    CU_ASSERT_PTR_NULL( irc_session_new( NULL, NULL ) );
-    s = irc_session_new( el, NULL );
-    CU_ASSERT_PTR_NOT_NULL( s );
-    irc_session_delete( NULL );
+    CU_ASSERT_PTR_NULL( irc_session_new( NULL, NULL, NULL, NULL ) );
+    CU_ASSERT_PTR_NULL( irc_session_new( NULL, NULL, el, NULL ) );
+    CU_ASSERT_PTR_NULL( irc_session_new( "localhost", NULL, el, NULL ) );
+    CU_ASSERT_PTR_NOT_NULL( s = irc_session_new( "localhost", "6667", el, NULL ) );
     irc_session_delete( s );
 }
 

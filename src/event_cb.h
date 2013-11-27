@@ -43,9 +43,6 @@ void irc_event_cb_delete( void * c );
 /* get the command for the event cb */
 irc_command_t irc_event_cb_get_cmd( irc_event_cb_t * const cb );
 
-/* used to call the callback function */
-irc_ret_t irc_event_cb_call_fn( irc_event_cb_t * const cb, irc_msg_t * const msg );
-
 /* helpers for storing irc_event_cb_t structs in a hash table */
 ht_itr_t irc_event_cb_ht_find( ht_t * const ht, uint8_t const * const name );
 uint_t irc_event_cb_hash( void const * const key );

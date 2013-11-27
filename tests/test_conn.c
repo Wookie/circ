@@ -22,6 +22,7 @@
 #include <cutil/macros.h>
 #include <cutil/events.h>
 #include <cutil/tests/test_macros.h>
+
 #include <circ/commands.h>
 #include <circ/msg.h>
 #include <circ/conn.h>
@@ -69,7 +70,7 @@ static void test_conn_newdel( void )
         &conn_disconnected
     };
 
-    for ( i = 0; i < 1024; i++ )
+    for ( i = 0; i < 32; i++ )
     {
         c = irc_conn_new( "foo.com", "7001", &conn_ops, el, NULL);
 

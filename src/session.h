@@ -19,6 +19,7 @@
 
 #include <limits.h>
 
+#include <cutil/macros.h>
 #include <cutil/events.h>
 #include <cutil/hashtable.h>
 
@@ -76,7 +77,7 @@ irc_ret_t irc_session_clear_handler( irc_session_t * const session,
 
 /* connect/disconnect from the server */
 irc_ret_t irc_session_connect( irc_session_t * const session );
-irc_ret_t irc_session_disconnect( irc_session_t * const session, int do_quit );
+irc_ret_t irc_session_disconnect( irc_session_t * const session, int_t do_quit );
 
 /* send the specified IRC command to the server */
 irc_ret_t irc_session_send_msg( irc_session_t * const session, irc_msg_t * const msg );
