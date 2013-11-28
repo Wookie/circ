@@ -796,6 +796,7 @@ NAME	src/Makefile	/^NAME=circ$/;"	m
 NAMES	src/commands.h	/^    NAMES,$/;"	e	enum:irc_command_e
 NEW_HANDLER	src/event_cb.h	33;"	d
 NICK	src/commands.h	/^    NICK,$/;"	e	enum:irc_command_e
+NICKSERV_PASS	src/session.h	/^  NICKSERV_PASS = 0xe186fd70$/;"	e	enum:irc_session_setting_e
 NICK_NAME	src/session.h	/^  NICK_NAME     = 0x1606207d,$/;"	e	enum:irc_session_setting_e
 NOCMD	src/commands.h	/^    NOCMD = -1,$/;"	e	enum:irc_command_e
 NOTICE	cutil/src/macros.h	94;"	d

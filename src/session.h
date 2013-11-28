@@ -39,6 +39,7 @@ typedef enum irc_session_setting_e
   REAL_NAME     = 0x4215b8fe,
   SERVER_PASS   = 0x01026017,
   QUIT_MSG      = 0xcc785413,
+  NICKSERV_PASS = 0xe186fd70
 
 } irc_session_setting_t;
 
