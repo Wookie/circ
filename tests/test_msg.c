@@ -322,6 +322,27 @@ static void test_msg_set_all( void )
     s = NULL;
 }
 
+static void test_msg_get_param( void )
+{
+    static uint8_t const * const data = "QUIT one two three four :five six seven\r\n";
+    irc_msg_t * msg = NULL;
+    msg = irc_msg_new_from_data(data, strlen(data));
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_trailing(msg), "five six seven" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, 0), "one" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, 1), "two" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, 2), "three" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, 3), "four" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, 4), "five six seven" );
+    CU_ASSERT_PTR_NULL( irc_msg_get_param(msg, 5) );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, -1), "five six seven" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, -2), "four" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, -3), "three" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, -4), "two" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_param(msg, -5), "one" );
+    CU_ASSERT_PTR_NULL( irc_msg_get_param(msg, -6) );
+}
+
 static int init_msg_suite( void )
 {
     srand(0xDEADBEEF);
@@ -345,6 +366,7 @@ static CU_pSuite add_msg_tests( CU_pSuite pSuite )
     ADD_TEST( "msg log", test_msg_log );
     ADD_TEST( "msg finalize", test_msg_finalize );
     ADD_TEST( "msg set all", test_msg_set_all );
+    ADD_TEST( "msg get param", test_msg_get_param );
 
     ADD_TEST( "msg private functions", test_msg_private_functions );
     

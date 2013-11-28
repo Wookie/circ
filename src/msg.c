@@ -548,6 +548,29 @@ uint8_t * irc_msg_get_trailing( irc_msg_t * const msg )
     return STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), list_itr_tail( &(msg->params) ) ));
 }
 
+/* returns the parameter at the given index */
+uint8_t * irc_msg_get_param( irc_msg_t * const msg, int_t const idx )
+{
+    int_t i;
+    int_t end;
+    list_itr_t itr;
+    CHECK_PTR_RET( msg, NULL );
+
+    /* figure out how many from the head we need to go, this takes into
+     * account negative idx values too */
+    end = ((idx >= 0) ? idx : (idx + (int_t)list_count( &(msg->params) )));
+    
+    CHECK_RET( end < list_count( &(msg->params) ), NULL );
+
+    itr = list_itr_head( &(msg->params) );
+    for ( i = 0; i < end; i++ )
+    {
+        itr = list_itr_next( &(msg->params), itr );
+    }
+
+    return STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), itr ));
+}
+
 /* this compiles the msg into a buffer than can be sent over the socket */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 {
