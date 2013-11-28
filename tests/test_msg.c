@@ -343,6 +343,58 @@ static void test_msg_get_param( void )
     CU_ASSERT_PTR_NULL( irc_msg_get_param(msg, -6) );
 }
 
+static void test_msg_utility( void )
+{
+    static uint8_t const * const data0 = ":dude!dudeuser@server.example.com PRIVMSG #somechan :this is a message\r\n";
+    static uint8_t const * const data1 = ":dude!dudeuser@192.168.0.1 PRIVMSG #somechan :this is a message\r\n";
+    static uint8_t const * const data2 = ":dude!dudeuser@::1 PRIVMSG #somechan :this is a message\r\n";
+    static uint8_t const * const data3 = "PING LAG1370515089364389\r\n";
+    static uint8_t const * const data4 = ":server.example.com PONG 1 2 3 4 :trailing parameter\r\n";
+    irc_msg_t * msg = NULL;
+
+    msg = irc_msg_new_from_data( data0, strlen( data0 ) );
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_nick( msg ), "dude" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_user( msg ), "dudeuser" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_host( msg ), "server.example.com" );
+    irc_msg_delete( msg );
+    msg = NULL;
+
+    msg = irc_msg_new_from_data( data1, strlen( data1 ) );
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_nick( msg ), "dude" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_user( msg ), "dudeuser" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_host( msg ), "192.168.0.1" );
+    irc_msg_delete( msg );
+    msg = NULL;
+
+    msg = irc_msg_new_from_data( data2, strlen( data2 ) );
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_nick( msg ), "dude" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_user( msg ), "dudeuser" );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_host( msg ), "::1" );
+    irc_msg_delete( msg );
+    msg = NULL;
+
+    msg = irc_msg_new_from_data( data3, strlen( data3 ) );
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_PTR_NULL( irc_msg_get_nick( msg ) );
+    CU_ASSERT_PTR_NULL( irc_msg_get_user( msg ) );
+    CU_ASSERT_PTR_NULL( irc_msg_get_host( msg ) );
+    irc_msg_delete( msg );
+    msg = NULL;
+
+    msg = irc_msg_new_from_data( data4, strlen( data4 ) );
+    CU_ASSERT_PTR_NOT_NULL( msg );
+    CU_ASSERT_PTR_NULL( irc_msg_get_nick( msg ) );
+    CU_ASSERT_PTR_NULL( irc_msg_get_user( msg ) );
+    CU_ASSERT_STRING_EQUAL( irc_msg_get_host( msg ), "server.example.com" );
+    irc_msg_delete( msg );
+    msg = NULL;
+
+}
+
+
 static int init_msg_suite( void )
 {
     srand(0xDEADBEEF);
@@ -367,6 +419,7 @@ static CU_pSuite add_msg_tests( CU_pSuite pSuite )
     ADD_TEST( "msg finalize", test_msg_finalize );
     ADD_TEST( "msg set all", test_msg_set_all );
     ADD_TEST( "msg get param", test_msg_get_param );
+    ADD_TEST( "msg utility fns", test_msg_utility );
 
     ADD_TEST( "msg private functions", test_msg_private_functions );
     

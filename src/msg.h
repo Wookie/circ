@@ -160,6 +160,11 @@ uint8_t * irc_msg_get_trailing( irc_msg_t * const msg );
 /* returns the parameter at the given index */
 uint8_t * irc_msg_get_param( irc_msg_t * const msg, int_t const idx );
 
+/* convenience functions */
+uint8_t * irc_msg_get_nick( irc_msg_t * const msg );
+uint8_t * irc_msg_get_user( irc_msg_t * const msg );
+uint8_t * irc_msg_get_host( irc_msg_t * const msg );
+
 /* "closes" a message and prepares it to be sent */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg );
 

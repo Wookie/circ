@@ -571,6 +571,71 @@ uint8_t * irc_msg_get_param( irc_msg_t * const msg, int_t const idx )
     return STR_PTR_P((irc_str_ref_t*)list_get( &(msg->params), itr ));
 }
 
+/* convenience functions */
+uint8_t * irc_msg_get_nick( irc_msg_t * const msg )
+{
+    CHECK_PTR_RET( msg, NULL );
+    CHECK_RET( msg->prefix.kind == NUH_PREFIX, NULL );
+    return STR_PTR( msg->prefix.nuh.nickname );
+}
+
+uint8_t * irc_msg_get_user( irc_msg_t * const msg )
+{
+    CHECK_PTR_RET( msg, NULL );
+    CHECK_RET( msg->prefix.kind == NUH_PREFIX, NULL );
+    return STR_PTR( msg->prefix.nuh.user );
+}
+
+uint8_t * irc_msg_get_host( irc_msg_t * const msg )
+{
+    uint8_t * p;
+    static uint8_t tmp[IP_LOG_BUF_SIZE];
+
+    CHECK_PTR_RET( msg, NULL );
+    CHECK_RET( ((msg->prefix.kind == NUH_PREFIX) || (msg->prefix.kind == SERVERNAME_PREFIX)), NULL );
+
+    if ( msg->prefix.kind == SERVERNAME_PREFIX )
+    {
+        return STR_PTR( msg->prefix.servername );
+    }
+    else
+    {
+        switch ( msg->prefix.nuh.host.kind )
+        {
+            case NO_HOST:
+                return NULL;
+
+            case V4_HOSTADDR:
+                if ( STR_PTR( msg->prefix.nuh.host.hostname ) != NULL )
+                {
+                    return STR_PTR( msg->prefix.nuh.host.hostname );
+                }
+
+                /* convert IPv4 address to dotted quad string */
+                MEMSET( tmp, 0, IP_LOG_BUF_SIZE );
+                inet_ntop( AF_INET, socket_in_addr((sockaddr_t*)&(msg->prefix.nuh.host.addr)), 
+                           tmp, IP_LOG_BUF_SIZE );
+                return tmp;
+
+            case V6_HOSTADDR:
+                if ( STR_PTR( msg->prefix.nuh.host.hostname ) != NULL )
+                {
+                    return STR_PTR( msg->prefix.nuh.host.hostname );
+                }
+
+                /* convert IPv6 address to dotted quad string */
+                MEMSET( tmp, 0, IP_LOG_BUF_SIZE );
+                inet_ntop( AF_INET6, socket_in_addr((sockaddr_t*)&(msg->prefix.nuh.host.addr)), 
+                           tmp, IP_LOG_BUF_SIZE );
+                return tmp;
+
+            case HOSTNAME:
+                return STR_PTR( msg->prefix.nuh.host.hostname );
+        }
+    }
+    return NULL;
+}
+
 /* this compiles the msg into a buffer than can be sent over the socket */
 irc_ret_t irc_msg_finalize( irc_msg_t * const msg )
 {
