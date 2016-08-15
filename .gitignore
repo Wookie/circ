@@ -1,4 +1,3 @@
-syntax: glob
 src/circ
 src/lib
 src/include
